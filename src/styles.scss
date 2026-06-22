@@ -1,0 +1,320 @@
+/* ============================================================
+   9antra | The Bridge — Global Styles
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Custom Properties ─── */
+:root {
+  /* Brand Colors */
+  --bridge-crimson:     #C62761;
+  --bridge-gold:        #F5A623;
+  --bridge-crimson-dark:#9B1E4D;
+  --bridge-gold-light:  #FFD07A;
+  --bridge-bg:          #08081A;
+  --bridge-surface:     #10102A;
+  --bridge-card:        #171738;
+  --bridge-card-hover:  #1F1F48;
+  --bridge-border:      #2A2A5A;
+  --bridge-text:        #F0F0FF;
+  --bridge-text-muted:  #8888BB;
+  --bridge-text-sub:    #5555AA;
+
+  /* Gradients */
+  --grad-brand:     linear-gradient(135deg, #C62761 0%, #F5A623 100%);
+  --grad-brand-inv: linear-gradient(135deg, #F5A623 0%, #C62761 100%);
+  --grad-dark:      linear-gradient(180deg, #08081A 0%, #0F0F2E 100%);
+  --grad-glow-cr:   radial-gradient(ellipse at center, rgba(198,39,97,0.25) 0%, transparent 70%);
+  --grad-glow-go:   radial-gradient(ellipse at center, rgba(245,166,35,0.20) 0%, transparent 70%);
+
+  /* Animation */
+  --ease-smooth:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-cinematic: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-fast:       200ms;
+  --dur-normal:     400ms;
+  --dur-slow:       700ms;
+  --dur-cinematic:  1200ms;
+}
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  color: var(--bridge-text);
+  background: var(--bridge-bg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ─── Typography ─── */
+.font-syne   { font-family: 'Syne', sans-serif; }
+.font-inter  { font-family: 'Inter', sans-serif; }
+.font-mono   { font-family: 'Space Mono', monospace; }
+
+.text-gradient {
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-inv {
+  background: var(--grad-brand-inv);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Glassmorphism ─── */
+.glass-card {
+  background: rgba(23, 23, 56, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(198, 39, 97, 0.15);
+  border-radius: 20px;
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+}
+
+/* ─── Buttons ─── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--grad-brand);
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 600ms;
+}
+
+.btn-primary:hover::before { transform: translateX(100%); }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(198, 39, 97, 0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ─── Inputs (Dark theme) ─── */
+.input-dark {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(198, 39, 97, 0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: white;
+  font-size: 15px;
+  transition: all 300ms ease;
+}
+
+.input-dark::placeholder { color: var(--bridge-text-muted); }
+.input-dark:focus {
+  border-color: var(--bridge-crimson);
+  box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.15);
+}
+
+/* ─── Inputs (Light theme — auth cards) ─── */
+.input-light {
+  width: 100%;
+  background: #F4F4FB;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 16px 18px 16px 52px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #171738;
+  transition: all 300ms ease;
+}
+
+.input-light::placeholder { color: #8888BB; }
+.input-light:focus {
+  border-color: #C62761;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(198, 39, 97, 0.1);
+  outline: none;
+}
+.input-light.error {
+  border-color: #EF4444;
+  background: #FFF5F5;
+}
+
+/* ─── Status Chips ─── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chip-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.chip-warning {
+  background: rgba(245, 166, 35, 0.15);
+  color: #F5A623;
+}
+
+.chip-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+}
+
+.chip-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+/* ─── Skeleton Loading ─── */
+.skeleton {
+  background: linear-gradient(90deg, #171738 25%, #1F1F48 50%, #171738 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Scroll Reveal ─── */
+[appReveal] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 600ms var(--ease-smooth);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[appReveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Focus Accessibility ─── */
+*:focus-visible {
+  outline: 2px solid var(--bridge-crimson);
+  outline-offset: 3px;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bridge-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bridge-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bridge-crimson);
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
