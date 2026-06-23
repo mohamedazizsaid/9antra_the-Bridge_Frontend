@@ -1,1 +1,6 @@
 <router-outlet></router-outlet>
+
+<button type="button" class="theme-floating-toggle" (click)="toggleTheme()" [attr.aria-label]="theme === 'dark' ? 'Passer au mode lumineux' : 'Passer au mode sombre'">
+	<span *ngIf="theme === 'dark'">☾</span>
+	<span *ngIf="theme === 'light'">☀</span>
+</button>

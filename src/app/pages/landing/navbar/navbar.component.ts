@@ -23,10 +23,10 @@ import { RouterModule } from '@angular/router';
 
         <!-- Nav Links (Desktop) -->
         <div class="nav-links" [class.show]="mobileOpen">
-          <a href="#" class="nav-link active" (click)="scrollTo($event, 'top')">Accueil</a>
-          <a href="#apropos" class="nav-link" (click)="scrollTo($event, 'apropos')">À propos</a>
-          <a href="#fonctionnalites" class="nav-link" (click)="scrollTo($event, 'fonctionnalites')">Fonctionnalités</a>
-          <a href="#contact" class="nav-link" (click)="scrollTo($event, 'contact')">Contact</a>
+          <a href="#" class="nav-link" [class.active]="activeSection === 'top'" (click)="scrollTo($event, 'top')">Accueil</a>
+          <a href="#apropos" class="nav-link" [class.active]="activeSection === 'apropos'" (click)="scrollTo($event, 'apropos')">À propos</a>
+          <a href="#fonctionnalites" class="nav-link" [class.active]="activeSection === 'fonctionnalites'" (click)="scrollTo($event, 'fonctionnalites')">Fonctionnalités</a>
+          <a href="#contact" class="nav-link" [class.active]="activeSection === 'contact'" (click)="scrollTo($event, 'contact')">Contact</a>
         </div>
 
         <!-- Auth Buttons -->
@@ -46,10 +46,10 @@ import { RouterModule } from '@angular/router';
 
       <!-- Mobile Drawer -->
       <div class="mobile-drawer" *ngIf="mobileOpen">
-        <a href="#" class="nav-link" (click)="scrollTo($event, 'top'); mobileOpen = false">Accueil</a>
-        <a href="#apropos" class="nav-link" (click)="scrollTo($event, 'apropos'); mobileOpen = false">À propos</a>
-        <a href="#fonctionnalites" class="nav-link" (click)="scrollTo($event, 'fonctionnalites'); mobileOpen = false">Fonctionnalités</a>
-        <a href="#contact" class="nav-link" (click)="scrollTo($event, 'contact'); mobileOpen = false">Contact</a>
+        <a href="#" class="nav-link" [class.active]="activeSection === 'top'" (click)="scrollTo($event, 'top'); mobileOpen = false">Accueil</a>
+        <a href="#apropos" class="nav-link" [class.active]="activeSection === 'apropos'" (click)="scrollTo($event, 'apropos'); mobileOpen = false">À propos</a>
+        <a href="#fonctionnalites" class="nav-link" [class.active]="activeSection === 'fonctionnalites'" (click)="scrollTo($event, 'fonctionnalites'); mobileOpen = false">Fonctionnalités</a>
+        <a href="#contact" class="nav-link" [class.active]="activeSection === 'contact'" (click)="scrollTo($event, 'contact'); mobileOpen = false">Contact</a>
         <div class="mobile-auth">
           <a routerLink="/auth/login" class="btn-nav-ghost" (click)="mobileOpen = false">Se connecter</a>
           <a routerLink="/auth/register" class="btn-nav-primary" (click)="mobileOpen = false">Commencer →</a>
@@ -257,6 +257,7 @@ import { RouterModule } from '@angular/router';
 export class NavbarComponent {
   isScrolled = false;
   mobileOpen = false;
+  activeSection: 'top' | 'apropos' | 'fonctionnalites' | 'contact' = 'top';
 
   @HostListener('window:scroll')
   onScroll(): void {
@@ -265,6 +266,7 @@ export class NavbarComponent {
 
   scrollTo(event: Event, targetId: string): void {
     event.preventDefault();
+    this.activeSection = targetId as any;
     if (targetId === 'top') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;

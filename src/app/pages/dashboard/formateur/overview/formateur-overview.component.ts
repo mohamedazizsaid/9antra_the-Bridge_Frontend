@@ -282,7 +282,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user || this.user.role !== 'FORMATEUR') {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 

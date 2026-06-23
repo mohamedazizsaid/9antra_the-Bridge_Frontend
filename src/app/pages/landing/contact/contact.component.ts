@@ -81,7 +81,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 36px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       text-align: center;
       margin-bottom: 8px;
     }
@@ -89,7 +89,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .contact-subtitle {
       font-family: 'Inter', sans-serif;
       font-size: 16px;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       text-align: center;
       margin-bottom: 40px;
     }
@@ -135,8 +135,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     }
 
     select.input-dark option {
-      background: #171738;
-      color: #F0F0FF;
+      background: var(--bridge-surface);
+      color: var(--bridge-text);
     }
 
     /* Success State */
@@ -169,13 +169,13 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       font-family: 'Syne', sans-serif;
       font-weight: 700;
       font-size: 28px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       margin-bottom: 8px;
     }
 
     .success-text {
       font-size: 16px;
-      color: #F5A623;
+      color: var(--bridge-gold);
     }
 
     @media (max-width: 640px) {

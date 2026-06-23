@@ -90,17 +90,30 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
             <div class="form-item">
               <div class="flex justify-between items-center mb-2">
                 <label class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">Mot de passe</label>
-                <a class="text-xs text-[var(--bridge-text-muted)] hover:text-white hover:underline cursor-pointer">Oublié ?</a>
+                  <a routerLink="/auth/forgot-password" class="text-xs text-[var(--bridge-text-muted)] hover:text-white hover:underline cursor-pointer">Oublié ?</a>
               </div>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm">🔒</span>
                 <input 
-                  type="password" 
+                  [type]="showPassword ? 'text' : 'password'" 
                   formControlName="password"
                   placeholder="••••••••"
-                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none transition-all"
+                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 pl-12 pr-12 text-sm text-white focus:outline-none transition-all"
                   [ngClass]="{'border-rose-500/50': submitted && f['password'].errors}"
                 />
+                <button 
+                  type="button" 
+                  (click)="showPassword = !showPassword"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
+                >
+                  <svg *ngIf="showPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg *ngIf="!showPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.168-5.63m2.712-1.178A9.979 9.979 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.613m-9.354-9.614a3 3 0 104.243 4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
               </div>
               <div *ngIf="submitted && f['password'].errors" class="text-xs text-rose-400 mt-1">
                 <span *ngIf="f['password'].errors['required']">Le mot de passe est requis</span>
@@ -139,7 +152,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
 
           <!-- Social Logins -->
           <div class="form-item grid grid-cols-2 gap-4">
-            <button (click)="socialLogin('GOOGLE')" class="py-3 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <button (click)="socialLogin('GOOGLE')" class="py-3 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
               <!-- Official Google Icon -->
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -147,14 +160,14 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 6.53l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              Google
+              Continuer avec Google
             </button>
-            <button (click)="socialLogin('FACEBOOK')" class="py-3 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <button (click)="socialLogin('FACEBOOK')" class="py-3 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
               <!-- Official Facebook Icon -->
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
               </svg>
-              Facebook
+              Continuer avec Facebook
             </button>
           </div>
         </div>
@@ -214,6 +227,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   submitted = false;
   errorMessage = '';
   hasError = false;
+  showPassword = false;
 
   typedLine1 = '';
   typedLine2 = '';
@@ -294,20 +308,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   socialLogin(provider: string): void {
-    this.loading = true;
-    this.errorMessage = '';
-    // Request mock/dummy token for testing OAuth login flow.
-    const dummyToken = 'mock-oauth-token-' + Math.random().toString(36).substring(2);
-    this.authService.oauthLogin(provider, dummyToken).subscribe({
-      next: (res) => {
-        this.loading = false;
-        const redirectUrl = this.authService.getRedirectUrl(res.role);
-        this.router.navigateByUrl(redirectUrl);
-      },
-      error: (err: any) => {
-        this.loading = false;
-        this.errorMessage = `OAuth ${provider} nécessite une configuration réelle de client ID (code 400 retourné par le serveur car le jeton est fictif).`;
-      }
-    });
+    this.errorMessage = `La connexion ${provider} n'est pas encore reliée à un vrai client OAuth.`;
+    this.hasError = true;
+    setTimeout(() => this.hasError = false, 500);
   }
 }

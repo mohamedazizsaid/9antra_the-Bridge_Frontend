@@ -21,7 +21,7 @@ import gsap from 'gsap';
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: #08081A;
+      background: var(--bridge-bg);
       overflow: hidden;
       pointer-events: none;
     }
@@ -37,7 +37,7 @@ import gsap from 'gsap';
     .orb-1 {
       width: 600px;
       height: 600px;
-      background: #C62761;
+      background: var(--bridge-crimson);
       top: -200px;
       left: -100px;
     }
@@ -45,7 +45,7 @@ import gsap from 'gsap';
     .orb-2 {
       width: 500px;
       height: 500px;
-      background: #F5A623;
+      background: var(--bridge-gold);
       bottom: -150px;
       right: -100px;
     }
@@ -53,7 +53,7 @@ import gsap from 'gsap';
     .orb-3 {
       width: 400px;
       height: 400px;
-      background: #6B2FA0;
+      background: color-mix(in srgb, var(--bridge-crimson) 35%, var(--bridge-gold) 25%, #5A64FF 40%);
       top: 40%;
       left: 30%;
     }
@@ -69,8 +69,8 @@ import gsap from 'gsap';
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(rgba(198, 39, 97, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(198, 39, 97, 0.04) 1px, transparent 1px);
+        linear-gradient(color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px, transparent 1px);
       background-size: 60px 60px;
     }
 

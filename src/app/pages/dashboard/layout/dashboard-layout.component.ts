@@ -120,7 +120,7 @@ export class DashboardLayoutComponent implements OnInit {
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
@@ -169,6 +169,6 @@ export class DashboardLayoutComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 }

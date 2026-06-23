@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
-import { User, Role, LoginRequest, RegisterRequest, AuthResponse, VerifyEmailRequest, OAuthLoginRequest } from '../models/user.model';
+import { User, Role, LoginRequest, RegisterRequest, AuthResponse, VerifyEmailRequest, OAuthLoginRequest, ForgotPasswordRequest, ResetPasswordRequest } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -86,6 +86,15 @@ export class AuthService {
 
   resendCode(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/resend-code`, { email });
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    const request: ForgotPasswordRequest = { email };
+    return this.http.post(`${this.apiUrl}/forgot-password`, request);
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, request);
   }
 
   oauthLogin(provider: string, accessToken: string): Observable<AuthResponse> {

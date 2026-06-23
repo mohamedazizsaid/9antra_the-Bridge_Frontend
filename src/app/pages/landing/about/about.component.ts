@@ -91,7 +91,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 44px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       line-height: 1.15;
       margin-bottom: 28px;
     }
@@ -99,7 +99,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .about-text {
       font-family: 'Inter', sans-serif;
       font-size: 15px;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       line-height: 1.8;
       margin-bottom: 16px;
     }
@@ -107,8 +107,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .about-quote {
       margin-top: 32px;
       padding: 24px 28px;
-      background: rgba(23, 23, 56, 0.6);
-      border-left: 3px solid #C62761;
+      background: color-mix(in srgb, var(--bridge-surface) 84%, transparent);
+      border-left: 3px solid var(--bridge-crimson);
       border-radius: 0 12px 12px 0;
       display: flex;
       align-items: center;
@@ -117,7 +117,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
     .quote-mark {
       font-size: 32px;
-      color: #C62761;
+      color: var(--bridge-crimson);
       line-height: 1;
     }
 
@@ -125,7 +125,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       font-family: 'Inter', sans-serif;
       font-style: italic;
       font-size: 17px;
-      color: #F5A623;
+      color: var(--bridge-gold);
       line-height: 1.5;
     }
 
@@ -148,8 +148,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: rgba(23, 23, 56, 0.8);
-      border: 2px solid var(--color, #2A2A5A);
+      background: color-mix(in srgb, var(--bridge-surface) 86%, transparent);
+      border: 2px solid var(--color, var(--bridge-border));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -182,12 +182,12 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       font-family: 'Syne', sans-serif;
       font-weight: 700;
       font-size: 16px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
     }
 
     .step-desc {
       font-size: 13px;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       margin-top: 2px;
     }
 

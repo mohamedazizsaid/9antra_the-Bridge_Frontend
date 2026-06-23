@@ -40,6 +40,16 @@ export interface OAuthLoginRequest {
   accessToken: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   token?: string;
   id: number;

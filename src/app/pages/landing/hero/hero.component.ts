@@ -120,7 +120,6 @@ import gsap from 'gsap';
       font-size: 13px;
       font-weight: 500;
       margin-bottom: 28px;
-      opacity: 0;
     }
 
     .hero-title {
@@ -128,9 +127,8 @@ import gsap from 'gsap';
       font-weight: 800;
       font-size: 68px;
       line-height: 1.1;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       margin-bottom: 24px;
-      opacity: 0;
     }
 
     .text-gradient {
@@ -144,18 +142,16 @@ import gsap from 'gsap';
       font-family: 'Inter', sans-serif;
       font-size: 18px;
       font-weight: 400;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       line-height: 1.7;
       max-width: 540px;
       margin-bottom: 36px;
-      opacity: 0;
     }
 
     .cta-row {
       display: flex;
       gap: 16px;
       margin-bottom: 48px;
-      opacity: 0;
     }
 
     .btn-hero-primary {
@@ -183,7 +179,7 @@ import gsap from 'gsap';
       align-items: center;
       padding: 16px 36px;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #F0F0FF;
+      color: var(--bridge-text);
       font-family: 'Syne', sans-serif;
       font-weight: 600;
       font-size: 16px;
@@ -201,7 +197,6 @@ import gsap from 'gsap';
     .stats-row {
       display: flex;
       gap: 40px;
-      opacity: 0;
     }
 
     .stat-item {
@@ -221,16 +216,14 @@ import gsap from 'gsap';
       margin-top: 4px;
     }
 
-    /* Floating Preview Card */
     .hero-preview {
       flex: 0 0 380px;
-      opacity: 0;
     }
 
     .preview-card {
-      background: rgba(23, 23, 56, 0.7);
+      background: color-mix(in srgb, var(--bridge-card) 80%, transparent);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(198, 39, 97, 0.2);
+      border: 1px solid color-mix(in srgb, var(--bridge-border) 70%, transparent);
       border-radius: 20px;
       overflow: hidden;
       transform: rotate(3deg);
@@ -248,8 +241,8 @@ import gsap from 'gsap';
       align-items: center;
       gap: 10px;
       padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: color-mix(in srgb, var(--bridge-bg) 45%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
     }
 
     .preview-dots {

@@ -3,8 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { SplashComponent } from './pages/splash/splash.component';
 import { LandingComponent } from './pages/landing/landing.component';
 import { LoginComponent } from './pages/auth/login/login.component';
+import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { DashboardLayoutComponent } from './pages/dashboard/layout/dashboard-layout.component';
+import { AdminOverviewComponent } from './pages/dashboard/admin/overview/admin-overview.component';
 import { StagiaireOverviewComponent } from './pages/dashboard/stagiaire/overview/stagiaire-overview.component';
 import { FormateurOverviewComponent } from './pages/dashboard/formateur/overview/formateur-overview.component';
 import { AuthGuard } from './core/guards/auth.guard';
@@ -14,6 +17,8 @@ const routes: Routes = [
   { path: '', component: SplashComponent },
   { path: 'home', component: LandingComponent },
   { path: 'auth/login', component: LoginComponent },
+  { path: 'auth/forgot-password', component: ForgotPasswordComponent },
+  { path: 'auth/reset-password', component: ResetPasswordComponent },
   { path: 'auth/register', component: RegisterComponent },
   {
     path: 'dashboard',
@@ -27,10 +32,41 @@ const routes: Routes = [
         data: { roles: ['STAGIAIRE'] }
       },
       {
+        path: 'stagiaire/formations',
+        redirectTo: 'stagiaire',
+        pathMatch: 'full'
+      },
+      {
+        path: 'stagiaire/certificats',
+        redirectTo: 'stagiaire',
+        pathMatch: 'full'
+      },
+      {
+        path: 'stagiaire/paiements',
+        redirectTo: 'stagiaire',
+        pathMatch: 'full'
+      },
+      {
         path: 'formateur',
         component: FormateurOverviewComponent,
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] }
+      },
+      {
+        path: 'formateur/formations',
+        redirectTo: 'formateur',
+        pathMatch: 'full'
+      },
+      {
+        path: 'formateur/evaluations',
+        redirectTo: 'formateur',
+        pathMatch: 'full'
+      },
+      {
+        path: 'admin',
+        component: AdminOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
       },
       { path: '', redirectTo: 'stagiaire', pathMatch: 'full' }
     ]

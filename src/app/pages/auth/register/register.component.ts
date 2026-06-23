@@ -74,13 +74,13 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
               {{ currentStep > 1 ? '✓' : '1' }}
             </div>
             <div class="h-0.5 flex-1 bg-white/10 relative">
-              <div class="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)] transition-all duration-300" [style.width]="currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%'"></div>
+              <div class="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)] transition-all duration-300" [style.width]="currentStep > 1 ? '100%' : '0%'"></div>
             </div>
             <div class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs" [ngClass]="currentStep === 2 ? 'bg-[var(--bridge-crimson)] text-white' : currentStep > 2 ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/40'">
               {{ currentStep > 2 ? '✓' : '2' }}
             </div>
             <div class="h-0.5 flex-1 bg-white/10 relative">
-              <div class="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)] transition-all duration-300" [style.width]="currentStep === 3 ? '100%' : '0%'"></div>
+              <div class="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)] transition-all duration-300" [style.width]="currentStep > 2 ? '100%' : '0%'"></div>
             </div>
             <div class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs" [ngClass]="currentStep === 3 ? 'bg-[var(--bridge-crimson)] text-white' : 'bg-white/10 text-white/40'">
               3
@@ -206,13 +206,28 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
 
               <div>
                 <label class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2">Mot de passe</label>
-                <input 
-                  type="password" 
-                  formControlName="password"
-                  placeholder="••••••••"
-                  (input)="checkPasswordStrength($event)"
-                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                />
+                <div class="relative">
+                  <input 
+                    [type]="showPassword ? 'text' : 'password'" 
+                    formControlName="password"
+                    placeholder="••••••••"
+                    (input)="checkPasswordStrength($event)"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none transition-all"
+                  />
+                  <button 
+                    type="button" 
+                    (click)="showPassword = !showPassword"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
+                  >
+                    <svg *ngIf="showPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg *ngIf="!showPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.168-5.63m2.712-1.178A9.979 9.979 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.613m-9.354-9.614a3 3 0 104.243 4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
                 <div *ngIf="submitted && f['password'].errors" class="text-xs text-rose-400 mt-1">Le mot de passe est requis</div>
 
                 <!-- Password strength bar -->
@@ -231,12 +246,27 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
 
               <div>
                 <label class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2">Confirmer le mot de passe</label>
-                <input 
-                  type="password" 
-                  formControlName="confirmPassword"
-                  placeholder="••••••••"
-                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                />
+                <div class="relative">
+                  <input 
+                    [type]="showConfirmPassword ? 'text' : 'password'" 
+                    formControlName="confirmPassword"
+                    placeholder="••••••••"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none transition-all"
+                  />
+                  <button 
+                    type="button" 
+                    (click)="showConfirmPassword = !showConfirmPassword"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
+                  >
+                    <svg *ngIf="showConfirmPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg *ngIf="!showConfirmPassword" class="w-5 h-5 text-white/50 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.168-5.63m2.712-1.178A9.979 9.979 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.613m-9.354-9.614a3 3 0 104.243 4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
                 <div *ngIf="submitted && registerForm.hasError('mismatch')" class="text-xs text-rose-400 mt-1">Les mots de passe ne correspondent pas</div>
               </div>
 
@@ -254,62 +284,68 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
-                  <span>{{ loading ? 'Enregistrement...' : 'S\'inscrire' }}</span>
+                  <span>{{ loading ? 'Enregistrement...' : "S'inscrire" }}</span>
                 </button>
               </div>
             </div>
 
             <!-- STEP 3: OTP EMAIL VERIFICATION -->
-            <div *ngIf="currentStep === 3" class="space-y-6 animate-fadeIn text-center">
-              <p class="text-sm text-[var(--bridge-text-muted)]">
-                Entrez le code de vérification à 6 chiffres envoyé à <strong class="text-white">{{ f['email'].value }}</strong>
-              </p>
+            <div *ngIf="currentStep === 3" class="animate-fadeIn">
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 text-center space-y-6">
+                <div>
+                  <p class="text-[11px] uppercase tracking-[0.35em] text-[var(--bridge-gold)] font-bold">Vérification email</p>
+                  <p class="mt-3 text-sm text-[var(--bridge-text-muted)] leading-relaxed">
+                    Entrez le code de vérification à 6 chiffres envoyé à <strong class="text-white break-all">{{ f['email'].value }}</strong>
+                  </p>
+                </div>
 
-              <!-- OTP Inputs -->
-              <div class="flex gap-2 justify-center my-6">
-                <input *ngFor="let i of [0, 1, 2, 3, 4, 5]"
-                  #otpInput
-                  type="text"
-                  maxlength="1"
-                  pattern="[0-9]"
-                  class="w-12 h-12 text-center bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl text-xl font-bold text-white focus:outline-none transition-all"
-                  (keyup)="onOtpKeyUp($event, i)"
-                  (keydown)="onOtpKeyDown($event, i)"
-                />
-              </div>
+                <!-- OTP Inputs -->
+                <div class="flex flex-wrap gap-2 justify-center">
+                  <input *ngFor="let i of [0, 1, 2, 3, 4, 5]"
+                    #otpInput
+                    type="text"
+                    maxlength="1"
+                    inputmode="numeric"
+                    pattern="[0-9]"
+                    class="w-11 h-14 md:w-12 md:h-16 text-center bg-white/[0.04] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl text-xl font-bold text-white focus:outline-none transition-all"
+                    (keyup)="onOtpKeyUp($event, i)"
+                    (keydown)="onOtpKeyDown($event, i)"
+                  />
+                </div>
 
-              <!-- Timer and Resend -->
-              <div>
-                <p class="text-xs text-[var(--bridge-text-muted)]" *ngIf="otpTimer > 0">
-                  Renvoyer le code dans <span class="text-[var(--bridge-gold)] font-bold">{{ otpTimer }}s</span>
-                </p>
-                <button *ngIf="otpTimer === 0" 
-                  type="button" 
-                  (click)="resendCode()" 
-                  [disabled]="loading"
-                  class="text-xs text-[var(--bridge-gold)] hover:underline font-bold focus:outline-none"
-                >
-                  Renvoyer le code
-                </button>
-              </div>
+                <!-- Timer and Resend -->
+                <div>
+                  <p class="text-xs text-[var(--bridge-text-muted)]" *ngIf="otpTimer > 0">
+                    Renvoyer le code dans <span class="text-[var(--bridge-gold)] font-bold">{{ otpTimer }}s</span>
+                  </p>
+                  <button *ngIf="otpTimer === 0"
+                    type="button"
+                    (click)="resendCode()"
+                    [disabled]="loading"
+                    class="text-xs text-[var(--bridge-gold)] hover:underline font-bold focus:outline-none"
+                  >
+                    Renvoyer le code
+                  </button>
+                </div>
 
-              <div class="flex gap-4 pt-2">
-                <button 
-                  type="button" 
-                  (click)="prevStep()"
-                  class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10"
-                >
-                  Retour
-                </button>
-                <button 
-                  type="button"
-                  (click)="verifyOtp()"
-                  [disabled]="loading"
-                  class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
-                  <span>Vérifier & Connecter</span>
-                </button>
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                  <button
+                    type="button"
+                    (click)="prevStep()"
+                    class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10"
+                  >
+                    Retour
+                  </button>
+                  <button
+                    type="button"
+                    (click)="verifyOtp()"
+                    [disabled]="loading"
+                    class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+                    <span>Vérifier & Connecter</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -462,6 +498,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
   
   avatarFile: File | undefined;
   avatarPreview: string | undefined;
+
+  showPassword = false;
+  showConfirmPassword = false;
 
   otpCode: string[] = ['', '', '', '', '', ''];
   otpTimer = 60;

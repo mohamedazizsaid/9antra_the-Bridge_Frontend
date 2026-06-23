@@ -39,6 +39,89 @@
   --dur-cinematic:  1200ms;
 }
 
+:root[data-theme='light'] {
+  --bridge-bg:          #F3F0E8;
+  --bridge-surface:      #FFFDF8;
+  --bridge-card:         #FFFDF8;
+  --bridge-card-hover:   #F7F4EC;
+  --bridge-border:       #E2DDD1;
+  --bridge-text:         #1D2433;
+  --bridge-text-muted:   #5F6878;
+  --bridge-text-sub:     #7C8493;
+  --grad-dark:           linear-gradient(180deg, #F8F4EC 0%, #EFE8DB 100%);
+  --grad-glow-cr:        radial-gradient(ellipse at center, rgba(198,39,97,0.12) 0%, transparent 70%);
+  --grad-glow-go:        radial-gradient(ellipse at center, rgba(245,166,35,0.14) 0%, transparent 70%);
+}
+
+:root[data-theme='light'] body,
+:root[data-theme='light'] .animated-bg-root {
+  background: var(--bridge-bg);
+}
+
+:root[data-theme='light'] .text-white {
+  color: var(--bridge-text) !important;
+}
+
+:root[data-theme='light'] .text-white\/80,
+:root[data-theme='light'] .text-white\/60,
+:root[data-theme='light'] .text-white\/50,
+:root[data-theme='light'] .text-white\/40,
+:root[data-theme='light'] .text-white\/20 {
+  color: var(--bridge-text-muted) !important;
+}
+
+:root[data-theme='light'] .bg-white\/\[0\.03\],
+:root[data-theme='light'] .bg-white\/\[0\.04\],
+:root[data-theme='light'] .bg-white\/5,
+:root[data-theme='light'] .bg-white\/\[0\.02\] {
+  background-color: color-mix(in srgb, var(--bridge-surface) 86%, var(--bridge-bg) 14%) !important;
+}
+
+:root[data-theme='light'] .hover\:bg-white\/\[0\.08\]:hover,
+:root[data-theme='light'] .hover\:bg-white\/10:hover {
+  background-color: color-mix(in srgb, var(--bridge-surface) 78%, var(--bridge-bg) 22%) !important;
+}
+
+:root[data-theme='light'] .border-white\/10,
+:root[data-theme='light'] .border-white\/5,
+:root[data-theme='light'] .border-white\/20 {
+  border-color: color-mix(in srgb, var(--bridge-border) 80%, transparent) !important;
+}
+
+:root[data-theme='light'] .bg-\[\#08081A\],
+:root[data-theme='light'] .bg-\[\#0F0F2E\],
+:root[data-theme='light'] .bg-\[\#10102A\],
+:root[data-theme='light'] .bg-\[\#171738\] {
+  background-color: color-mix(in srgb, var(--bridge-surface) 88%, var(--bridge-bg) 12%) !important;
+}
+
+:root[data-theme='light'] .from-\[\#10102A\]\/80,
+:root[data-theme='light'] .from-\[\#10102A\] {
+  --tw-gradient-from: color-mix(in srgb, var(--bridge-surface) 88%, var(--bridge-bg) 12%) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--bridge-surface) 88%, var(--bridge-bg) 12%) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme='light'] .to-\[\#171738\]\/90,
+:root[data-theme='light'] .to-\[\#171738\] {
+  --tw-gradient-to: color-mix(in srgb, var(--bridge-bg) 82%, var(--bridge-surface) 18%) !important;
+}
+
+:root[data-theme='light'] .text-\[var\(--bridge-text-muted\)\],
+:root[data-theme='light'] .text-\[var\(--bridge-text-sub\)\] {
+  color: var(--bridge-text-muted) !important;
+}
+
+:root[data-theme='light'] .bg-rose-500\/10,
+:root[data-theme='light'] .bg-emerald-500\/10 {
+  background-color: color-mix(in srgb, var(--bridge-surface) 82%, var(--bridge-bg) 18%) !important;
+}
+
+:root[data-theme='light'] .bg-emerald-500,
+:root[data-theme='light'] .bg-rose-500 {
+  color: white !important;
+}
+
 /* ─── Reset & Base ─── */
 *, *::before, *::after {
   margin: 0;
@@ -59,6 +142,7 @@ body {
   background: var(--bridge-bg);
   line-height: 1.6;
   overflow-x: hidden;
+  transition: background-color 240ms ease, color 240ms ease;
 }
 
 a {
@@ -112,19 +196,42 @@ img {
 
 /* ─── Glassmorphism ─── */
 .glass-card {
-  background: rgba(23, 23, 56, 0.6);
+  background: color-mix(in srgb, var(--bridge-card) 78%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(198, 39, 97, 0.15);
+  border: 1px solid color-mix(in srgb, var(--bridge-border) 70%, transparent);
   border-radius: 20px;
 }
 
 .glass-card-light {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--bridge-surface) 70%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
   border-radius: 20px;
+}
+
+.theme-floating-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bridge-crimson), var(--bridge-gold));
+  color: white;
+  box-shadow: 0 12px 30px rgba(198, 39, 97, 0.28);
+  border: 1px solid rgba(255,255,255,0.18);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.theme-floating-toggle:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 16px 36px rgba(198, 39, 97, 0.35);
 }
 
 /* ─── Buttons ─── */

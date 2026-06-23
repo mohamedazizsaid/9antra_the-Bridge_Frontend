@@ -72,7 +72,7 @@ import { RouterModule } from '@angular/router';
 
     .footer-divider {
       height: 1px;
-      background: linear-gradient(90deg, #C62761, transparent 50%, #F5A623);
+      background: linear-gradient(90deg, var(--bridge-crimson), transparent 50%, var(--bridge-gold));
       margin-bottom: 60px;
     }
 
@@ -99,7 +99,7 @@ import { RouterModule } from '@angular/router';
       font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 18px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       line-height: 1.1;
     }
 
@@ -113,7 +113,7 @@ import { RouterModule } from '@angular/router';
 
     .footer-tagline {
       font-size: 13px;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       line-height: 1.6;
       margin-bottom: 20px;
     }
@@ -127,29 +127,29 @@ import { RouterModule } from '@angular/router';
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: color-mix(in srgb, var(--bridge-surface) 88%, transparent);
+      border: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
       font-weight: 700;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       text-decoration: none;
       transition: all 200ms;
     }
 
     .social-icon:hover {
-      background: rgba(198, 39, 97, 0.15);
-      border-color: rgba(198, 39, 97, 0.4);
-      color: #F0F0FF;
+      background: color-mix(in srgb, var(--bridge-crimson) 14%, transparent);
+      border-color: color-mix(in srgb, var(--bridge-crimson) 38%, transparent);
+      color: var(--bridge-text);
     }
 
     .footer-col-title {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
       font-size: 14px;
-      color: #F0F0FF;
+      color: var(--bridge-text);
       margin-bottom: 20px;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -158,14 +158,14 @@ import { RouterModule } from '@angular/router';
     .footer-link {
       display: block;
       font-size: 14px;
-      color: #8888BB;
+      color: var(--bridge-text-muted);
       text-decoration: none;
       margin-bottom: 12px;
       transition: color 200ms;
     }
 
     .footer-link:hover {
-      color: #F0F0FF;
+      color: var(--bridge-text);
     }
 
     .footer-info {
@@ -177,9 +177,9 @@ import { RouterModule } from '@angular/router';
     .footer-bottom {
       text-align: center;
       padding-top: 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
       font-size: 13px;
-      color: #5555AA;
+      color: var(--bridge-text-sub);
     }
 
     @media (max-width: 768px) {

@@ -262,7 +262,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user || this.user.role !== 'STAGIAIRE') {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
