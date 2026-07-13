@@ -1,40 +1,39 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Certificat } from '../models/certificat.model';
 
 @Injectable({ providedIn: 'root' })
 export class CertificatService {
+  private apiUrl = 'http://localhost:8080/api/certificates';
 
-  private mockCertificats: Certificat[] = [
-    {
-      id: 'cert1', stagiaireId: '3', formationId: 'f1',
-      formationNom: 'Développement Web Full-Stack', phaseNom: 'Fondamentaux Web',
-      dateObtention: new Date('2026-04-18'),
-      hashBlockchain: '0x7a3b9c2d8e1f4a5b6c7d8e9f0a1b2c3d4e5f6a7b',
-      qrCodeUrl: '', pdfUrl: '', verified: true
-    },
-    {
-      id: 'cert2', stagiaireId: '3', formationId: 'f2',
-      formationNom: 'Design UI/UX', phaseNom: 'Principes UX',
-      dateObtention: new Date('2026-05-20'),
-      hashBlockchain: '0x1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c',
-      qrCodeUrl: '', pdfUrl: '', verified: true
-    },
-    {
-      id: 'cert3', stagiaireId: '3', formationId: 'f1',
-      formationNom: 'Développement Web Full-Stack', phaseNom: 'Backend & APIs',
-      dateObtention: new Date('2026-06-10'),
-      hashBlockchain: '0x4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f',
-      qrCodeUrl: '', pdfUrl: '', verified: true
-    }
-  ];
+  constructor(private http: HttpClient) {}
+
+  private mapCertificateDTO(c: any): Certificat {
+    return {
+      id: c.id.toString(),
+      stagiaireId: c.studentId.toString(),
+      formationId: c.formationId ? c.formationId.toString() : '',
+      formationNom: c.formationTitle || 'Formation',
+      phaseNom: c.phaseTitle || 'Phase',
+      dateObtention: new Date(c.issueDate),
+      hashBlockchain: c.blockchainTransactionHash || c.hashValue || '',
+      qrCodeUrl: '',
+      pdfUrl: c.pdfUrl || '',
+      verified: true
+    };
+  }
 
   getCertificatsByStagiaire(stagiaireId: string): Observable<Certificat[]> {
-    return of(this.mockCertificats.filter(c => c.stagiaireId === stagiaireId)).pipe(delay(300));
+    return this.http.get<any[]>(`${this.apiUrl}/student/${stagiaireId}`).pipe(
+      map(list => list.map(c => this.mapCertificateDTO(c)))
+    );
   }
 
   verifyCertificat(hash: string): Observable<Certificat | undefined> {
-    return of(this.mockCertificats.find(c => c.hashBlockchain === hash)).pipe(delay(500));
+    return this.http.get<any>(`${this.apiUrl}/verify/${hash}`).pipe(
+      map(c => this.mapCertificateDTO(c))
+    );
   }
 }

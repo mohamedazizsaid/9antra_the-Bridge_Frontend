@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserService } from '../../../../core/services/user.service';
 import { User } from '../../../../core/models/user.model';
 
 @Component({
@@ -14,21 +15,21 @@ import { User } from '../../../../core/models/user.model';
         <p class="text-[11px] uppercase tracking-[0.35em] text-[var(--bridge-gold)] font-bold">Tableau Admin</p>
         <h1 class="mt-3 text-3xl md:text-4xl font-syne font-bold">Vue d'ensemble administrateur</h1>
         <p class="mt-4 text-sm md:text-base text-[var(--bridge-text-muted)] max-w-2xl leading-relaxed">
-          Cet espace est maintenant accessible pour les comptes ADMIN. Vous pouvez brancher ici vos indicateurs, la gestion des utilisateurs et les contrôles de plateforme.
+          Cet espace est maintenant connecté au backend Spring Boot. Vous pouvez visualiser en temps réel les indicateurs clés de la plateforme.
         </p>
 
         <div class="mt-8 grid gap-4 sm:grid-cols-3">
           <div class="rounded-2xl border border-white/10 bg-[#10102A] p-4">
             <p class="text-xs text-white/50 uppercase tracking-wider">Utilisateurs</p>
-            <p class="mt-2 text-2xl font-bold">--</p>
+            <p class="mt-2 text-2xl font-bold">{{ stats?.totalUsers ?? '--' }}</p>
           </div>
           <div class="rounded-2xl border border-white/10 bg-[#10102A] p-4">
             <p class="text-xs text-white/50 uppercase tracking-wider">Formations</p>
-            <p class="mt-2 text-2xl font-bold">--</p>
+            <p class="mt-2 text-2xl font-bold">{{ stats?.totalFormations ?? '--' }}</p>
           </div>
           <div class="rounded-2xl border border-white/10 bg-[#10102A] p-4">
-            <p class="text-xs text-white/50 uppercase tracking-wider">Alertes</p>
-            <p class="mt-2 text-2xl font-bold">--</p>
+            <p class="text-xs text-white/50 uppercase tracking-wider">Inscriptions</p>
+            <p class="mt-2 text-2xl font-bold">{{ stats?.totalEnrollments ?? '--' }}</p>
           </div>
         </div>
       </section>
@@ -48,13 +49,26 @@ import { User } from '../../../../core/models/user.model';
 })
 export class AdminOverviewComponent implements OnInit {
   user: User | null = null;
+  stats: any = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user || this.user.role !== 'ADMIN') {
       this.router.navigate(['/auth/login']);
+      return;
     }
+
+    this.userService.getAdminStats().subscribe({
+      next: (data) => {
+        this.stats = data;
+      },
+      error: () => {}
+    });
   }
 }

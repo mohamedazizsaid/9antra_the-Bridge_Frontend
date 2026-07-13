@@ -265,6 +265,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   selectedSeance: Seance | null = null;
   activePresences: Presence[] = [];
 
+  evaluations: any[] = [];
   mockEvaluations = [
     { name: 'Hamza Bouazizi', task: 'Rapport HTML/CSS', date: '21 Juin', score: 18 },
     { name: 'Yasmine Trabelsi', task: 'Quiz Javascript', date: '20 Juin', score: 16 },

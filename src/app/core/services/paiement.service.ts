@@ -1,45 +1,56 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { Paiement } from '../models/paiement.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Paiement, PaiementStatus } from '../models/paiement.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaiementService {
+  private apiUrl = 'http://localhost:8080/api/payments';
 
-  private mockPaiements: Paiement[] = [
-    {
-      id: 'pay1', stagiaireId: '3', formationId: 'f1', phaseNumero: 1,
-      montant: 300, devise: 'TND', status: 'PAYE',
-      datePaiement: new Date('2026-05-15'), dateEcheance: new Date('2026-05-15'),
-      methode: 'FLOUCI'
-    },
-    {
-      id: 'pay2', stagiaireId: '3', formationId: 'f1', phaseNumero: 2,
-      montant: 300, devise: 'TND', status: 'PAYE',
-      datePaiement: new Date('2026-06-15'), dateEcheance: new Date('2026-06-15'),
-      methode: 'PAYMEE'
-    },
-    {
-      id: 'pay3', stagiaireId: '3', formationId: 'f1', phaseNumero: 3,
-      montant: 300, devise: 'TND', status: 'EN_ATTENTE',
-      dateEcheance: new Date('2026-07-15')
-    },
-    {
-      id: 'pay4', stagiaireId: '3', formationId: 'f1', phaseNumero: 4,
-      montant: 300, devise: 'TND', status: 'EN_ATTENTE',
-      dateEcheance: new Date('2026-08-15')
+  constructor(private http: HttpClient) {}
+
+  private mapPaymentDTO(p: any): Paiement {
+    const today = new Date();
+    // Default mock dueDate as enrollmentDate + some months, or use paymentDate
+    const echeance = p.paymentDate ? new Date(p.paymentDate) : new Date();
+
+    let status: PaiementStatus = 'EN_ATTENTE';
+    if (p.status === 'COMPLETED') {
+      status = 'PAYE';
+    } else if (p.status === 'PENDING') {
+      status = today > echeance ? 'EN_RETARD' : 'EN_ATTENTE';
     }
-  ];
+
+    return {
+      id: p.id.toString(),
+      stagiaireId: p.studentId.toString(),
+      formationId: p.formationId ? p.formationId.toString() : '',
+      phaseNumero: p.phaseOrder || 1,
+      montant: p.amount || 0,
+      devise: 'TND',
+      status: status,
+      datePaiement: p.paymentDate ? new Date(p.paymentDate) : undefined,
+      dateEcheance: echeance,
+      methode: p.paymentMethod || 'ESPECES'
+    };
+  }
 
   getPaiementsByStagiaire(stagiaireId: string): Observable<Paiement[]> {
-    return of(this.mockPaiements.filter(p => p.stagiaireId === stagiaireId)).pipe(delay(300));
+    return this.http.get<any[]>(`${this.apiUrl}/student/${stagiaireId}`).pipe(
+      map(list => list.map(p => this.mapPaymentDTO(p)))
+    );
   }
 
   getPaiementsByFormation(formationId: string): Observable<Paiement[]> {
-    return of(this.mockPaiements.filter(p => p.formationId === formationId)).pipe(delay(300));
+    return this.http.get<any[]>(`${this.apiUrl}/formation/${formationId}`).pipe(
+      map(list => list.map(p => this.mapPaymentDTO(p)))
+    );
   }
 
   getRetardCount(stagiaireId: string): Observable<number> {
-    return of(this.mockPaiements.filter(p => p.stagiaireId === stagiaireId && p.status === 'EN_RETARD').length).pipe(delay(100));
+    return this.http.get<{ count: number }>(`${this.apiUrl}/student/${stagiaireId}/retard`).pipe(
+      map(res => res.count)
+    );
   }
 }

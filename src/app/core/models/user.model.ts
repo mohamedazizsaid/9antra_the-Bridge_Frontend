@@ -50,6 +50,11 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface OAuthConfigResponse {
+  googleClientId: string;
+  facebookAppId: string;
+}
+
 export interface AuthResponse {
   token?: string;
   id: number;

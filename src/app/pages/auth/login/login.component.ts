@@ -6,6 +6,14 @@ import { interval, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { AnimatedBgComponent } from '../../../shared/components/animated-bg/animated-bg.component';
+import { OAuthConfigResponse } from '../../../core/models/user.model';
+
+declare global {
+  interface Window {
+    google?: any;
+    FB?: any;
+  }
+}
 
 @Component({
   selector: 'app-login',
@@ -232,6 +240,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   typedLine1 = '';
   typedLine2 = '';
   private subscriptions: Subscription[] = [];
+  private oauthConfig: OAuthConfigResponse | null = null;
+  private googleScriptLoaded = false;
+  private facebookScriptLoaded = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -247,6 +258,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
 
     this.startTypewriter();
+    this.authService.getOAuthConfig().subscribe({
+      next: (config) => this.oauthConfig = config,
+      error: () => this.errorMessage = 'La configuration OAuth publique est indisponible.'
+    });
   }
 
   ngOnDestroy(): void {
@@ -308,8 +323,153 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   socialLogin(provider: string): void {
-    this.errorMessage = `La connexion ${provider} n'est pas encore reliée à un vrai client OAuth.`;
+    this.errorMessage = '';
+    this.hasError = false;
+
+    if (provider === 'GOOGLE') {
+      this.loginWithGoogle();
+      return;
+    }
+
+    if (provider === 'FACEBOOK') {
+      this.loginWithFacebook();
+      return;
+    }
+
+    this.errorMessage = `Fournisseur OAuth non supporté: ${provider}`;
     this.hasError = true;
     setTimeout(() => this.hasError = false, 500);
+  }
+
+  private async loginWithGoogle(): Promise<void> {
+    if (!this.oauthConfig?.googleClientId) {
+      this.errorMessage = 'Google OAuth est mal configuré: client ID manquant.';
+      this.hasError = true;
+      setTimeout(() => this.hasError = false, 500);
+      return;
+    }
+
+    try {
+      await this.ensureGoogleScript();
+      const google = window.google;
+      if (!google?.accounts?.oauth2) {
+        throw new Error('Google Identity Services indisponible');
+      }
+
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: this.oauthConfig.googleClientId,
+        scope: 'openid email profile',
+        callback: (response: any) => {
+          if (response.error) {
+            this.errorMessage = response.error_description || response.error;
+            this.hasError = true;
+            return;
+          }
+          this.exchangeOAuthToken('GOOGLE', response.access_token);
+        }
+      });
+
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    } catch (error: any) {
+      this.errorMessage = error?.message || 'Impossible d\'initialiser Google OAuth';
+      this.hasError = true;
+      setTimeout(() => this.hasError = false, 500);
+    }
+  }
+
+  private async loginWithFacebook(): Promise<void> {
+    if (!this.oauthConfig?.facebookAppId) {
+      this.errorMessage = 'Facebook OAuth est mal configuré: App ID manquant.';
+      this.hasError = true;
+      setTimeout(() => this.hasError = false, 500);
+      return;
+    }
+
+    try {
+      await this.ensureFacebookScript();
+      const fb = window.FB;
+      if (!fb) {
+        throw new Error('Facebook SDK indisponible');
+      }
+
+      fb.init({
+        appId: this.oauthConfig.facebookAppId,
+        cookie: true,
+        xfbml: false,
+        version: 'v21.0'
+      });
+
+      fb.login((response: any) => {
+        if (!response.authResponse?.accessToken) {
+          this.errorMessage = 'Connexion Facebook annulée ou refusée.';
+          this.hasError = true;
+          return;
+        }
+        this.exchangeOAuthToken('FACEBOOK', response.authResponse.accessToken);
+      }, { scope: 'email,public_profile' });
+    } catch (error: any) {
+      this.errorMessage = error?.message || 'Impossible d\'initialiser Facebook OAuth';
+      this.hasError = true;
+      setTimeout(() => this.hasError = false, 500);
+    }
+  }
+
+  private exchangeOAuthToken(provider: string, accessToken: string): void {
+    this.loading = true;
+    this.authService.oauthLogin(provider, accessToken).subscribe({
+      next: (res) => {
+        this.loading = false;
+        const redirectUrl = this.authService.getRedirectUrl(res.role);
+        this.router.navigateByUrl(redirectUrl);
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.errorMessage = err.error?.message || err.message || `Échec de connexion ${provider}`;
+        this.hasError = true;
+        setTimeout(() => this.hasError = false, 500);
+      }
+    });
+  }
+
+  private ensureGoogleScript(): Promise<void> {
+    if (this.googleScriptLoaded || window.google?.accounts?.oauth2) {
+      this.googleScriptLoaded = true;
+      return Promise.resolve();
+    }
+
+    return this.loadScript('https://accounts.google.com/gsi/client', 'google-identity-services')
+      .then(() => {
+        this.googleScriptLoaded = true;
+      });
+  }
+
+  private ensureFacebookScript(): Promise<void> {
+    if (this.facebookScriptLoaded || window.FB) {
+      this.facebookScriptLoaded = true;
+      return Promise.resolve();
+    }
+
+    return this.loadScript('https://connect.facebook.net/en_US/sdk.js', 'facebook-jssdk')
+      .then(() => {
+        this.facebookScriptLoaded = true;
+      });
+  }
+
+  private loadScript(src: string, id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (document.getElementById(id)) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = id;
+      script.src = src;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Impossible de charger ${src}`));
+      document.head.appendChild(script);
+    });
   }
 }

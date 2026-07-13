@@ -1,65 +1,91 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-
-  private mockNotifications: Notification[] = [
-    {
-      id: 'n1', type: 'PAIEMENT_CONFIRME', title: 'Paiement confirmé',
-      body: 'Votre paiement de 300 TND pour la Phase 2 a été confirmé.',
-      timestamp: new Date(Date.now() - 3600000 * 2), read: false, actionUrl: '/dashboard/stagiaire'
-    },
-    {
-      id: 'n2', type: 'SEANCE_PLANIFIEE', title: 'Nouvelle séance planifiée',
-      body: 'Séance "Backend & APIs" prévue le 23 juin à 09:00 en Salle 201.',
-      timestamp: new Date(Date.now() - 3600000 * 5), read: false, actionUrl: '/dashboard/stagiaire'
-    },
-    {
-      id: 'n3', type: 'CERTIFICAT_GENERE', title: 'Certificat disponible',
-      body: 'Votre certificat "Fondamentaux Web" est prêt. Vérifiable sur la blockchain.',
-      timestamp: new Date(Date.now() - 86400000), read: true
-    },
-    {
-      id: 'n4', type: 'PHASE_DEBLOQUEE', title: 'Phase débloquée',
-      body: 'La Phase 2 "Backend & APIs" est maintenant accessible.',
-      timestamp: new Date(Date.now() - 86400000 * 3), read: true
-    },
-    {
-      id: 'n5', type: 'EVALUATION_PUBLIEE', title: 'Évaluation publiée',
-      body: 'Votre note pour la Phase 1 a été publiée: 16/20.',
-      timestamp: new Date(Date.now() - 86400000 * 5), read: true
-    },
-    {
-      id: 'n6', type: 'ANNONCE', title: 'Annonce générale',
-      body: 'Les cours reprennent normalement lundi 23 juin. Bon courage à tous !',
-      timestamp: new Date(Date.now() - 86400000 * 2), read: false
-    }
-  ];
-
-  private notificationsSubject = new BehaviorSubject<Notification[]>(this.mockNotifications);
+  private apiUrl = 'http://localhost:8080/api/notifications';
+  private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   notifications$ = this.notificationsSubject.asObservable();
 
-  get unreadCount$(): Observable<number> {
-    return new BehaviorSubject(this.mockNotifications.filter(n => !n.read).length).asObservable();
+  private unreadCountSubject = new BehaviorSubject<number>(0);
+  unreadCount$ = this.unreadCountSubject.asObservable();
+
+  constructor(private http: HttpClient) {
+    this.refreshNotifications();
+  }
+
+  private mapNotification(n: any): Notification {
+    // Attempt to guess or parse category/type
+    let type: any = 'ANNONCE';
+    if (n.title.toLowerCase().includes('paiement') || n.title.toLowerCase().includes('facture')) {
+      type = 'PAIEMENT_CONFIRME';
+    } else if (n.title.toLowerCase().includes('séance') || n.title.toLowerCase().includes('cours')) {
+      type = 'SEANCE_PLANIFIEE';
+    } else if (n.title.toLowerCase().includes('certificat') || n.title.toLowerCase().includes('blockchain')) {
+      type = 'CERTIFICAT_GENERE';
+    } else if (n.title.toLowerCase().includes('phase') || n.title.toLowerCase().includes('débloqu')) {
+      type = 'PHASE_DEBLOQUEE';
+    } else if (n.title.toLowerCase().includes('note') || n.title.toLowerCase().includes('évaluation')) {
+      type = 'EVALUATION_PUBLIEE';
+    }
+
+    return {
+      id: n.id.toString(),
+      type: type,
+      title: n.title,
+      body: n.message,
+      timestamp: new Date(n.createdAt),
+      read: n.readStatus,
+      actionUrl: '/dashboard'
+    };
+  }
+
+  refreshNotifications(): void {
+    this.http.get<any[]>(`${this.apiUrl}/me`).subscribe({
+      next: (list) => {
+        const mapped = list.map(n => this.mapNotification(n));
+        this.notificationsSubject.next(mapped);
+        this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
+      },
+      error: () => {}
+    });
   }
 
   getNotifications(): Observable<Notification[]> {
-    return of(this.mockNotifications).pipe(delay(200));
+    return this.http.get<any[]>(`${this.apiUrl}/me`).pipe(
+      map(list => list.map(n => this.mapNotification(n))),
+      tap(mapped => {
+        this.notificationsSubject.next(mapped);
+        this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
+      })
+    );
   }
 
   markAsRead(id: string): void {
-    const notif = this.mockNotifications.find(n => n.id === id);
-    if (notif) {
-      notif.read = true;
-      this.notificationsSubject.next([...this.mockNotifications]);
-    }
+    this.http.put(`${this.apiUrl}/${id}/read`, {}).subscribe({
+      next: () => {
+        const current = this.notificationsSubject.value;
+        const found = current.find(n => n.id === id);
+        if (found) {
+          found.read = true;
+          this.notificationsSubject.next([...current]);
+          this.unreadCountSubject.next(current.filter(n => !n.read).length);
+        }
+      }
+    });
   }
 
   markAllAsRead(): void {
-    this.mockNotifications.forEach(n => n.read = true);
-    this.notificationsSubject.next([...this.mockNotifications]);
+    this.http.put(`${this.apiUrl}/read-all`, {}).subscribe({
+      next: () => {
+        const current = this.notificationsSubject.value;
+        current.forEach(n => n.read = true);
+        this.notificationsSubject.next([...current]);
+        this.unreadCountSubject.next(0);
+      }
+    });
   }
 }
