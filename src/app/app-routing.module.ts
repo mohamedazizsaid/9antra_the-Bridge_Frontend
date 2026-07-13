@@ -10,6 +10,8 @@ import { DashboardLayoutComponent } from './pages/dashboard/layout/dashboard-lay
 import { AdminOverviewComponent } from './pages/dashboard/admin/overview/admin-overview.component';
 import { StagiaireOverviewComponent } from './pages/dashboard/stagiaire/overview/stagiaire-overview.component';
 import { FormateurOverviewComponent } from './pages/dashboard/formateur/overview/formateur-overview.component';
+import { FormationsListComponent } from './pages/dashboard/formations/formations-list.component';
+import { FormationWizardComponent } from './pages/dashboard/formations/formation-wizard.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
@@ -33,18 +35,21 @@ const routes: Routes = [
       },
       {
         path: 'stagiaire/formations',
-        redirectTo: 'stagiaire',
-        pathMatch: 'full'
+        component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
       },
       {
         path: 'stagiaire/certificats',
-        redirectTo: 'stagiaire',
-        pathMatch: 'full'
+        component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
       },
       {
         path: 'stagiaire/paiements',
-        redirectTo: 'stagiaire',
-        pathMatch: 'full'
+        component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
       },
       {
         path: 'formateur',
@@ -54,8 +59,9 @@ const routes: Routes = [
       },
       {
         path: 'formateur/formations',
-        redirectTo: 'formateur',
-        pathMatch: 'full'
+        component: FormationsListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['FORMATEUR'] }
       },
       {
         path: 'formateur/evaluations',
@@ -68,6 +74,24 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] }
       },
+      {
+        path: 'admin/formations',
+        component: FormationsListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'formations',
+        component: FormationsListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'FORMATEUR'] }
+      },
+      {
+        path: 'formations/new',
+        component: FormationWizardComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'FORMATEUR'] }
+      },
       { path: '', redirectTo: 'stagiaire', pathMatch: 'full' }
     ]
   },
@@ -79,3 +103,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
+

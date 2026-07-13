@@ -39,7 +39,9 @@ export class FormationService {
       dateFin: new Date(),
       status: 'ACTIVE',
       stagiaires: [],
-      phases: f.phases ? f.phases.map((p: any) => this.mapPhaseDTO(p)) : []
+      phases: f.phases ? f.phases.map((p: any) => this.mapPhaseDTO(p)) : [],
+      category: f.category,
+      totalPrice: f.totalPrice
     };
   }
 
@@ -74,7 +76,9 @@ export class FormationService {
         stagiaireId: a.studentId.toString(),
         stagiaireNom: `${a.studentFirstName} ${a.studentLastName}`,
         stagiaireAvatar: a.studentAvatar,
-        present: a.present
+        present: a.present,
+        starRating: a.starRating,
+        sessionNote: a.sessionNote
       })) : []
     };
   }
@@ -118,10 +122,36 @@ export class FormationService {
   savePresence(seanceId: string, presences: Presence[]): Observable<boolean> {
     const payload = presences.map(p => ({
       studentId: parseInt(p.stagiaireId),
-      present: p.present
+      present: p.present,
+      starRating: p.starRating || null,
+      sessionNote: p.sessionNote || null
     }));
     return this.http.post(`${this.apiUrl}/attendance/session/${seanceId}`, payload).pipe(
       map(() => true)
     );
+  }
+
+  createFormation(formation: any): Observable<Formation> {
+    return this.http.post<any>(`${this.apiUrl}/formations`, formation).pipe(
+      map(f => this.mapFormationDTO(f))
+    );
+  }
+
+  addPhase(formationId: string, phase: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/formations/${formationId}/phases`, phase);
+  }
+
+  addSession(phaseId: string, session: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/phases/${phaseId}/sessions`, session);
+  }
+
+  assignTrainers(formationId: string, trainerIds: number[]): Observable<Formation> {
+    return this.http.put<any>(`${this.apiUrl}/formations/${formationId}/trainers`, trainerIds).pipe(
+      map(f => this.mapFormationDTO(f))
+    );
+  }
+
+  closeSession(sessionId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/sessions/${sessionId}/close`, {});
   }
 }

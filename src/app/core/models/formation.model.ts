@@ -10,7 +10,10 @@ export interface Formation {
   phases: Phase[];
   stagiaires: string[];
   status: 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE';
+  category?: string;
+  totalPrice?: number;
 }
+
 
 export interface Phase {
   id: string;
@@ -44,4 +47,7 @@ export interface Presence {
   stagiaireNom: string;
   stagiaireAvatar?: string;
   present: boolean;
+  starRating?: number; // 1-5 stars
+  sessionNote?: string; // custom feedback note
 }
+

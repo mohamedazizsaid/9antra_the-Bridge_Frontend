@@ -4,6 +4,13 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Paiement, PaiementStatus } from '../models/paiement.model';
 
+export interface RegisterPaymentRequest {
+  enrollmentId: number;
+  phaseId: number;
+  amount: number;
+  paymentMethod: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PaiementService {
   private apiUrl = 'http://localhost:8080/api/payments';
@@ -12,7 +19,6 @@ export class PaiementService {
 
   private mapPaymentDTO(p: any): Paiement {
     const today = new Date();
-    // Default mock dueDate as enrollmentDate + some months, or use paymentDate
     const echeance = p.paymentDate ? new Date(p.paymentDate) : new Date();
 
     let status: PaiementStatus = 'EN_ATTENTE';
@@ -24,7 +30,7 @@ export class PaiementService {
 
     return {
       id: p.id.toString(),
-      stagiaireId: p.studentId.toString(),
+      stagiaireId: p.studentId?.toString() ?? '',
       formationId: p.formationId ? p.formationId.toString() : '',
       phaseNumero: p.phaseOrder || 1,
       montant: p.amount || 0,
@@ -46,6 +52,10 @@ export class PaiementService {
     return this.http.get<any[]>(`${this.apiUrl}/formation/${formationId}`).pipe(
       map(list => list.map(p => this.mapPaymentDTO(p)))
     );
+  }
+
+  registerPayment(req: RegisterPaymentRequest): Observable<any> {
+    return this.http.post<any>(this.apiUrl, req);
   }
 
   getRetardCount(stagiaireId: string): Observable<number> {

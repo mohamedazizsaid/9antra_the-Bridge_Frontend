@@ -135,12 +135,13 @@ export class DashboardLayoutComponent implements OnInit {
     } else if (this.user.role === 'FORMATEUR') {
       this.menuItems = [
         { label: 'Vue d\'ensemble', route: '/dashboard/formateur', icon: '📊' },
-        { label: 'Mes Classes', route: '/dashboard/formateur/formations', icon: '🏫' },
+        { label: 'Mes Formations', route: '/dashboard/formateur/formations', icon: '🏫' },
         { label: 'Évaluations', route: '/dashboard/formateur/evaluations', icon: '📝' }
       ];
     } else {
       this.menuItems = [
-        { label: 'Vue d\'ensemble', route: '/dashboard/admin', icon: '📊' }
+        { label: 'Vue d\'ensemble', route: '/dashboard/admin', icon: '📊' },
+        { label: 'Formations', route: '/dashboard/admin/formations', icon: '🏫' }
       ];
     }
 
