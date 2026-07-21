@@ -10,8 +10,10 @@ import { DashboardLayoutComponent } from './pages/dashboard/layout/dashboard-lay
 import { AdminOverviewComponent } from './pages/dashboard/admin/overview/admin-overview.component';
 import { StagiaireOverviewComponent } from './pages/dashboard/stagiaire/overview/stagiaire-overview.component';
 import { FormateurOverviewComponent } from './pages/dashboard/formateur/overview/formateur-overview.component';
+import { EvaluationHistoryComponent } from './pages/dashboard/formateur/overview/evaluation-history.component';
 import { FormationsListComponent } from './pages/dashboard/formations/formations-list.component';
 import { FormationWizardComponent } from './pages/dashboard/formations/formation-wizard.component';
+import { FormationDetailComponent } from './pages/dashboard/formations/formation-detail.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
@@ -27,6 +29,7 @@ const routes: Routes = [
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
     children: [
+      // ─── Stagiaire ───────────────────────────────────────────────────────────
       {
         path: 'stagiaire',
         component: StagiaireOverviewComponent,
@@ -36,6 +39,12 @@ const routes: Routes = [
       {
         path: 'stagiaire/formations',
         component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
+      },
+      {
+        path: 'stagiaire/formations/:id',
+        component: FormationDetailComponent,
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] }
       },
@@ -51,6 +60,8 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] }
       },
+
+      // ─── Formateur ───────────────────────────────────────────────────────────
       {
         path: 'formateur',
         component: FormateurOverviewComponent,
@@ -64,10 +75,19 @@ const routes: Routes = [
         data: { roles: ['FORMATEUR'] }
       },
       {
-        path: 'formateur/evaluations',
-        redirectTo: 'formateur',
-        pathMatch: 'full'
+        path: 'formateur/formations/:id',
+        component: FormationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['FORMATEUR'] }
       },
+      {
+        path: 'formateur/evaluations',
+        component: EvaluationHistoryComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['FORMATEUR'] }
+      },
+
+      // ─── Admin ───────────────────────────────────────────────────────────────
       {
         path: 'admin',
         component: AdminOverviewComponent,
@@ -81,6 +101,14 @@ const routes: Routes = [
         data: { roles: ['ADMIN'] }
       },
       {
+        path: 'admin/formations/:id',
+        component: FormationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+
+      // ─── Shared Formations ───────────────────────────────────────────────────
+      {
         path: 'formations',
         component: FormationsListComponent,
         canActivate: [RoleGuard],
@@ -92,6 +120,13 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'FORMATEUR'] }
       },
+      {
+        path: 'formations/:id',
+        component: FormationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'FORMATEUR'] }
+      },
+
       { path: '', redirectTo: 'stagiaire', pathMatch: 'full' }
     ]
   },
@@ -103,4 +138,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-

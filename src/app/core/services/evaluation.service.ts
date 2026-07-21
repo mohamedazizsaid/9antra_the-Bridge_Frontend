@@ -31,6 +31,10 @@ export class EvaluationService {
     return this.http.get<Evaluation[]>(`${this.apiUrl}/student/${studentId}`);
   }
 
+  getEvaluationsByTrainer(trainerId: string): Observable<Evaluation[]> {
+    return this.http.get<Evaluation[]>(`${this.apiUrl}/trainer/${trainerId}`);
+  }
+
   saveEvaluation(evaluation: Evaluation): Observable<Evaluation> {
     const payload = {
       grade: evaluation.grade,

@@ -107,14 +107,20 @@ export class FormationService {
     );
   }
 
-  getUpcomingSeances(): Observable<Seance[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sessions/upcoming`).pipe(
+  getUpcomingSeances(trainerId?: string): Observable<Seance[]> {
+    const url = trainerId
+      ? `${this.apiUrl}/sessions/trainer/${trainerId}/upcoming`
+      : `${this.apiUrl}/sessions/upcoming`;
+    return this.http.get<any[]>(url).pipe(
       map(list => list.map(s => this.mapSessionDTO(s)))
     );
   }
 
-  getTodaySeances(): Observable<Seance[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sessions/today`).pipe(
+  getTodaySeances(trainerId?: string): Observable<Seance[]> {
+    const url = trainerId
+      ? `${this.apiUrl}/sessions/trainer/${trainerId}/today`
+      : `${this.apiUrl}/sessions/today`;
+    return this.http.get<any[]>(url).pipe(
       map(list => list.map(s => this.mapSessionDTO(s)))
     );
   }

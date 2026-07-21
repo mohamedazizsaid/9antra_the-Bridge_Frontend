@@ -294,6 +294,10 @@ import { Subscription } from 'rxjs';
             </div>
             <div class="flex items-center gap-3">
               <span class="text-[10px] font-bold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIF</span>
+              <button (click)="goToFormationDetail(f)"
+                      class="text-xs font-bold px-3 py-1.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-lg hover:opacity-90 transition-all">
+                Détails →
+              </button>
             </div>
           </div>
 
@@ -985,5 +989,9 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     else if (key === 'notifications') path += '/notifications';
     
     this.router.navigateByUrl(path);
+  }
+
+  goToFormationDetail(formation: Formation): void {
+    this.router.navigate([`/dashboard/stagiaire/formations/${formation.id}`]);
   }
 }
