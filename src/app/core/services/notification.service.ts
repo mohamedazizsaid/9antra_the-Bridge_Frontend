@@ -1,12 +1,12 @@
-import { Injectable, Inject, forwardRef } from '@angular/core';
+﻿import { Injectable, Inject, forwardRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class NotificationService {
+export class NotificationService implements OnDestroy {
   private apiUrl = 'http://localhost:8080/api/notifications';
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   notifications$ = this.notificationsSubject.asObservable();
@@ -14,7 +14,7 @@ export class NotificationService {
   private unreadCountSubject = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCountSubject.asObservable();
 
-  private ws: WebSocket | null = null;
+  private pollSubscription: Subscription | null = null;
 
   constructor(
     private http: HttpClient,
@@ -27,80 +27,42 @@ export class NotificationService {
   private setupAuthSubscription(): void {
     this.authService.currentUser$.subscribe(user => {
       if (user) {
-        this.connectWebSocket(user.id);
+        this.startPolling();
       } else {
-        this.disconnectWebSocket();
+        this.stopPolling();
+        this.notificationsSubject.next([]);
+        this.unreadCountSubject.next(0);
       }
     });
   }
 
-  private connectWebSocket(userId: string): void {
-    if (this.ws) {
-      this.ws.close();
-    }
-    // Connect directly to SockJS websocket endpoint (raw protocol)
-    this.ws = new WebSocket('ws://localhost:8080/ws/websocket');
-
-    this.ws.onopen = () => {
-      const connectFrame = 'CONNECT\naccept-version:1.1,1.0\nheart-beat:10000,10000\n\n\u0000';
-      this.ws?.send(connectFrame);
-    };
-
-    this.ws.onmessage = (event) => {
-      const msg = event.data;
-      if (msg.startsWith('CONNECTED')) {
-        const subFrame = `SUBSCRIBE\nid:sub-0\ndestination:/topic/notifications/${userId}\n\n\u0000`;
-        this.ws?.send(subFrame);
-      } else if (msg.startsWith('MESSAGE')) {
-        const parts = msg.split('\n\n');
-        if (parts.length > 1) {
-          const bodyStr = parts[1].replace(/\u0000$/, '').trim();
-          try {
-            const notifDTO = JSON.parse(bodyStr);
-            const mapped = this.mapNotification(notifDTO);
-            const current = this.notificationsSubject.value;
-            // Only prepend if not already present
-            if (!current.some(n => n.id === mapped.id)) {
-              this.notificationsSubject.next([mapped, ...current]);
-              this.unreadCountSubject.next(this.unreadCountSubject.value + 1);
-            }
-          } catch (e) {
-            console.error('Failed to parse WS notification payload', e);
-          }
-        }
-      }
-    };
-
-    this.ws.onclose = () => {
-      const user = this.authService.getCurrentUser();
-      if (user) {
-        setTimeout(() => this.connectWebSocket(user.id), 5000);
-      }
-    };
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollSubscription = interval(30000).subscribe(() => {
+      this.refreshNotifications();
+    });
   }
 
-  private disconnectWebSocket(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+  private stopPolling(): void {
+    if (this.pollSubscription) {
+      this.pollSubscription.unsubscribe();
+      this.pollSubscription = null;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   private mapNotification(n: any): Notification {
     let type: any = 'ANNONCE';
     const t = (n.title || '').toLowerCase();
-    if (t.includes('paiement') || t.includes('facture')) {
-      type = 'PAIEMENT_CONFIRME';
-    } else if (t.includes('séance') || t.includes('cours')) {
-      type = 'SEANCE_PLANIFIEE';
-    } else if (t.includes('certificat') || t.includes('blockchain')) {
-      type = 'CERTIFICAT_GENERE';
-    } else if (t.includes('phase') || t.includes('débloqu')) {
-      type = 'PHASE_DEBLOQUEE';
-    } else if (t.includes('note') || t.includes('évaluation')) {
-      type = 'EVALUATION_PUBLIEE';
-    }
-
+    if (t.includes('paiement') || t.includes('facture')) type = 'PAIEMENT_CONFIRME';
+    else if (t.includes('aujourd') || t.includes('seance') || t.includes('séance') || t.includes('cours')) type = 'SEANCE_PLANIFIEE';
+    else if (t.includes('certificat') || t.includes('blockchain') || t.includes('certification')) type = 'CERTIFICAT_GENERE';
+    else if (t.includes('phase') || t.includes('débloquée') || t.includes('debloquee')) type = 'PHASE_DEBLOQUEE';
+    else if (t.includes('évaluation') || t.includes('evaluation') || t.includes('note')) type = 'EVALUATION_PUBLIEE';
+    else if (t.includes('inscription') || t.includes('inscrit') || t.includes('bienvenu')) type = 'NOUVELLE_INSCRIPTION';
     return {
       id: n.id.toString(),
       type: type,
@@ -118,6 +80,7 @@ export class NotificationService {
     this.http.get<any[]>(`${this.apiUrl}/me`).subscribe({
       next: (list) => {
         const mapped = list.map(n => this.mapNotification(n));
+        mapped.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         this.notificationsSubject.next(mapped);
         this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
       },
@@ -127,7 +90,11 @@ export class NotificationService {
 
   getNotifications(): Observable<Notification[]> {
     return this.http.get<any[]>(`${this.apiUrl}/me`).pipe(
-      map(list => list.map(n => this.mapNotification(n))),
+      map(list => {
+        const mapped = list.map(n => this.mapNotification(n));
+        mapped.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        return mapped;
+      }),
       tap(mapped => {
         this.notificationsSubject.next(mapped);
         this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
