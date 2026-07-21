@@ -146,7 +146,7 @@ interface EnrollmentInfo {
               </div>
               <div class="flex items-center gap-4 flex-shrink-0">
                 <div class="text-right hidden sm:block">
-                  <p class="text-xs text-white/40">{{ phase.seances?.length || 0 }} séances</p>
+                  <p class="text-xs text-white/40">{{ phase.seances ? phase.seances.length : 0 }} séances</p>
                   <div class="flex items-center gap-2 mt-1">
                     <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div class="h-full rounded-full bg-gradient-to-r from-[#C62761] to-[#F5A623] transition-all duration-700"
@@ -322,14 +322,14 @@ interface EnrollmentInfo {
 
       <!-- Attendance Modal -->
       <div *ngIf="showAttendanceModal"
-           class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+           class="bridge-modal-overlay"
            (click)="closeAttendance()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
           <!-- Modal Header -->
           <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)]">
             <div>
-              <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence</h3>
+              <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence — Appel</h3>
               <p class="text-xs text-white/40 mt-0.5">
                 {{ selectedSeance?.formationNom }} · {{ selectedSeance?.date | date:'EEEE d MMMM y' }}
               </p>
@@ -345,38 +345,57 @@ interface EnrollmentInfo {
             </div>
           </div>
 
-          <!-- Presence Table -->
+          <!-- Presence Table (3 States: Présent | Retard | Absent) -->
           <div class="flex-1 overflow-y-auto p-6 space-y-3">
             <div *ngFor="let p of activePresences; let i = index"
-                 class="flex items-center gap-4 p-4 rounded-xl border transition-all"
-                 [class]="p.present ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-red-500/20 bg-red-500/[0.03]'"
+                 class="p-4 rounded-xl border transition-all"
+                 [class]="getPresenceCardClass(p)"
                  [style.animation-delay]="(i * 40) + 'ms'"
                  style="animation: fadeSlideIn 0.3s ease both">
-              <!-- Avatar -->
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {{ p.stagiaireNom[0] }}
-              </div>
-              <!-- Name -->
-              <div class="flex-1">
-                <p class="font-semibold text-white text-sm">{{ p.stagiaireNom }}</p>
-                <div class="flex items-center gap-2 mt-1" *ngIf="p.present">
-                  <button *ngFor="let star of [1,2,3,4,5]"
-                          (click)="p.starRating = star"
-                          class="text-base transition-transform hover:scale-125 focus:outline-none"
-                          [class]="(p.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                    {{ p.stagiaireNom?.[0] || 'S' }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-white text-sm">{{ p.stagiaireNom }}</p>
+                    <div class="flex items-center gap-1 mt-1" *ngIf="p.present">
+                      <button *ngFor="let star of [1,2,3,4,5]"
+                              (click)="p.starRating = star"
+                              class="text-base transition-transform hover:scale-125 focus:outline-none"
+                              [class]="(p.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- 3 States Buttons -->
+                <div class="flex items-center gap-1.5 self-end sm:self-center">
+                  <button (click)="setPresenceStatus(p, 'PRESENT')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="p.present && !isRetard(p)
+                            ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-400'">
+                    ✓ Présent
+                  </button>
+                  <button (click)="setPresenceStatus(p, 'RETARD')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="p.present && isRetard(p)
+                            ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-amber-500/20 hover:text-amber-400'">
+                    ⏰ Retard
+                  </button>
+                  <button (click)="setPresenceStatus(p, 'ABSENT')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="!p.present
+                            ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-400'">
+                    ✗ Absent
+                  </button>
                 </div>
               </div>
-              <!-- Toggle -->
-              <div class="flex items-center gap-3">
-                <span class="text-xs font-semibold" [class]="p.present ? 'text-emerald-400' : 'text-red-400'">
-                  {{ p.present ? 'Présent' : 'Absent' }}
-                </span>
-                <button (click)="togglePresence(i)"
-                        class="w-14 h-7 rounded-full transition-all duration-300 relative flex-shrink-0"
-                        [class]="p.present ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/10'">
-                  <div class="w-5 h-5 rounded-full bg-white absolute top-1 shadow-sm transition-all duration-300"
-                       [class]="p.present ? 'left-8' : 'left-1'"></div>
-                </button>
+              <div class="mt-2.5 pt-2 border-t border-white/5" *ngIf="p.present">
+                <input [(ngModel)]="p.sessionNote" type="text"
+                       class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
+                       placeholder="Remarque ou appréciation rapide..." />
               </div>
             </div>
           </div>
@@ -398,9 +417,9 @@ interface EnrollmentInfo {
 
       <!-- Evaluation Modal -->
       <div *ngIf="showEvalModal && selectedEnrollment"
-           class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+           class="bridge-modal-overlay"
            (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg p-6 space-y-5"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg p-6 space-y-5 shadow-2xl"
              (click)="$event.stopPropagation()">
           <div class="flex items-center justify-between">
             <h3 class="font-syne font-bold text-lg text-white">⭐ Évaluation Stagiaire</h3>
@@ -411,7 +430,7 @@ interface EnrollmentInfo {
           <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/5">
             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
               <img *ngIf="selectedEnrollment.studentAvatar" [src]="selectedEnrollment.studentAvatar" class="w-full h-full object-cover" />
-              <span *ngIf="!selectedEnrollment.studentAvatar">{{ selectedEnrollment.studentFirstName[0] }}</span>
+              <span *ngIf="!selectedEnrollment.studentAvatar">{{ selectedEnrollment.studentFirstName?.[0] || 'S' }}</span>
             </div>
             <div>
               <p class="font-semibold text-white">{{ selectedEnrollment.studentFirstName }} {{ selectedEnrollment.studentLastName }}</p>
@@ -421,19 +440,31 @@ interface EnrollmentInfo {
 
           <!-- Phase Selection -->
           <div>
-            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2">Phase évaluée</label>
+            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
             <select [(ngModel)]="evalForm.phaseId"
                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-              <option value="" class="bg-[#10102A]">Sélectionner une phase...</option>
+              <option value="" class="bg-[#10102A]">Sélectionner une phase par nom...</option>
               <option *ngFor="let phase of formation!.phases" [value]="phase.id" class="bg-[#10102A]">
                 Phase {{ phase.numero }} — {{ phase.nom }}
               </option>
             </select>
           </div>
 
+          <!-- Rating Stars -->
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne">Étoiles</label>
+            <div class="flex items-center gap-2">
+              <button *ngFor="let star of [1,2,3,4,5]"
+                      (click)="evalStarRating = star"
+                      class="text-2xl transition-transform hover:scale-125 focus:outline-none"
+                      [class]="(evalStarRating || 5) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
+              <span class="text-xs text-white/40 font-mono ml-2">{{ evalStarRating }}/5</span>
+            </div>
+          </div>
+
           <!-- Grade -->
           <div>
-            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2">Note (/20)</label>
+            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne">Note (/20)</label>
             <div class="flex items-center gap-4">
               <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5"
                      class="flex-1 accent-[#C62761]" />
@@ -449,23 +480,23 @@ interface EnrollmentInfo {
 
           <!-- Skills -->
           <div>
-            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2">Compétences acquises</label>
+            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences acquises</label>
             <input [(ngModel)]="evalForm.skills" type="text"
                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                   placeholder="Ex: Angular, TypeScript, RxJS (séparées par des virgules)" />
+                   placeholder="Ex: Angular, TypeScript, RxJS" />
           </div>
 
           <!-- Comment -->
           <div>
-            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2">Commentaire & Appréciation</label>
+            <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire & Appréciation</label>
             <textarea [(ngModel)]="evalForm.comment" rows="3"
                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
-                      placeholder="Appréciation générale sur la progression du stagiaire..."></textarea>
+                      placeholder="Appréciation générale sur la progression..."></textarea>
           </div>
 
           <!-- Certificate Notice -->
           <div *ngIf="evalForm.grade >= 14"
-               class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+               class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
             <span class="text-emerald-400 text-xl">🏅</span>
             <div>
               <p class="text-emerald-400 text-sm font-semibold">Certificat Blockchain sera généré</p>
@@ -609,6 +640,8 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     return this.formation?.status === 'TERMINEE';
   }
 
+  evalStarRating = 5;
+
   openAttendance(seance: Seance): void {
     this.selectedSeance = seance;
     this.activePresences = seance.presences ? JSON.parse(JSON.stringify(seance.presences)) : [];
@@ -622,8 +655,28 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     this.savingAttendance = false;
   }
 
-  togglePresence(index: number): void {
-    this.activePresences[index].present = !this.activePresences[index].present;
+  getPresenceCardClass(p: Presence): string {
+    if (p.present && !this.isRetard(p)) return 'border-emerald-500/30 bg-emerald-500/[0.04]';
+    if (p.present && this.isRetard(p)) return 'border-amber-500/30 bg-amber-500/[0.04]';
+    return 'border-red-500/20 bg-red-500/[0.03]';
+  }
+
+  setPresenceStatus(p: Presence, status: 'PRESENT' | 'RETARD' | 'ABSENT'): void {
+    if (status === 'PRESENT') {
+      p.present = true;
+      p.sessionNote = (p.sessionNote || '').replace('[RETARD]', '').trim();
+    } else if (status === 'RETARD') {
+      p.present = true;
+      if (!p.sessionNote?.includes('[RETARD]')) {
+        p.sessionNote = ('[RETARD] ' + (p.sessionNote || '')).trim();
+      }
+    } else {
+      p.present = false;
+    }
+  }
+
+  isRetard(p: Presence): boolean {
+    return p.sessionNote?.includes('[RETARD]') || false;
   }
 
   getPresentInModal(): number {

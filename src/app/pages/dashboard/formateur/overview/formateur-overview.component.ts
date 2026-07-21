@@ -6,8 +6,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FormationService } from '../../../../core/services/formation.service';
 import { EvaluationService } from '../../../../core/services/evaluation.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { UserService } from '../../../../core/services/user.service';
 import { User } from '../../../../core/models/user.model';
-import { Formation, Seance, Presence } from '../../../../core/models/formation.model';
+import { Formation, Phase, Seance, Presence } from '../../../../core/models/formation.model';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -160,7 +161,7 @@ import { Subscription } from 'rxjs';
                     </div>
                     <div class="text-left min-w-0">
                       <p class="text-sm font-semibold text-white truncate">{{ formation.nom }}</p>
-                      <p class="text-xs text-white/40">{{ formation.phases.length || 0 }} phases · {{ formation.stagiaires?.length || 0 }} stagiaires</p>
+                      <p class="text-xs text-white/40">{{ formation.phases.length || 0 }} phases · {{ formation.stagiaires ? formation.stagiaires.length : 0 }} stagiaires</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-3 flex-shrink-0">
@@ -281,44 +282,45 @@ import { Subscription } from 'rxjs';
         </div>
       </div>
 
-      <!-- ─── Attendance Modal ──────────────────────────────────── -->
+      <!-- ─── Attendance Sheet Modal ────────────────────────────── -->
       <div *ngIf="showAttendanceModal"
-           class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+           class="bridge-modal-overlay"
            (click)="closeAttendanceModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
           <!-- Modal Header -->
           <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)]">
             <div>
-              <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence</h3>
-              <p class="text-xs text-white/40 mt-0.5">{{ selectedSeance?.formationNom }}</p>
+              <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence — Appel</h3>
+              <p class="text-xs text-white/40 mt-0.5" *ngIf="selectedSeance">
+                {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }}
+              </p>
             </div>
             <div class="flex items-center gap-4">
               <div class="text-center">
-                <div class="flex items-baseline gap-1 justify-center">
-                  <span class="text-3xl font-mono font-bold text-emerald-400">{{ getPresentInModal() }}</span>
-                  <span class="text-white/30 text-lg">/{{ activePresences.length }}</span>
-                </div>
+                <span class="text-2xl font-mono font-bold text-emerald-400">{{ getPresentInModal() }}</span>
+                <span class="text-white/30 text-lg">/{{ activePresences.length }}</span>
                 <p class="text-[10px] text-white/40 uppercase tracking-wider">présents</p>
               </div>
               <button (click)="closeAttendanceModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
             </div>
           </div>
 
-          <!-- Presences List -->
+          <!-- Presences List (3 States: Présent, Retard, Absent) -->
           <div class="flex-1 overflow-y-auto p-6 space-y-3">
             <div *ngFor="let presence of activePresences; let i = index"
                  class="p-4 rounded-xl border transition-all"
-                 [class]="presence.present ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-red-500/20 bg-red-500/[0.03]'"
+                 [class]="getPresenceCardClass(presence)"
                  [style.animation-delay]="(i * 40) + 'ms'"
                  style="animation: fadeSlideIn 0.35s ease both">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                    {{ presence.stagiaireNom[0] }}
+                    {{ presence.stagiaireNom?.[0] || 'S' }}
                   </div>
                   <div>
                     <span class="text-sm font-semibold text-white">{{ presence.stagiaireNom }}</span>
+                    <!-- Star Rating for Present / Retard -->
                     <div class="flex items-center gap-1 mt-1" *ngIf="presence.present">
                       <button *ngFor="let star of [1,2,3,4,5]"
                               (click)="presence.starRating = star"
@@ -327,15 +329,29 @@ import { Subscription } from 'rxjs';
                     </div>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold" [class]="presence.present ? 'text-emerald-400' : 'text-red-400'">
-                    {{ presence.present ? 'Présent' : 'Absent' }}
-                  </span>
-                  <button (click)="togglePresence(i)"
-                          class="w-14 h-7 rounded-full transition-all duration-300 relative flex-shrink-0"
-                          [class]="presence.present ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/10'">
-                    <div class="w-5 h-5 rounded-full bg-white absolute top-1 shadow-sm transition-all duration-300"
-                         [class]="presence.present ? 'left-8' : 'left-1'"></div>
+
+                <!-- 3 States Buttons: Présent | Retard | Absent -->
+                <div class="flex items-center gap-1.5 self-end sm:self-center">
+                  <button (click)="setPresenceStatus(presence, 'PRESENT')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="presence.present && !isRetard(presence)
+                            ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-400'">
+                    ✓ Présent
+                  </button>
+                  <button (click)="setPresenceStatus(presence, 'RETARD')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="presence.present && isRetard(presence)
+                            ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-amber-500/20 hover:text-amber-400'">
+                    ⏰ Retard
+                  </button>
+                  <button (click)="setPresenceStatus(presence, 'ABSENT')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                          [class]="!presence.present
+                            ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                            : 'bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-400'">
+                    ✗ Absent
                   </button>
                 </div>
               </div>
@@ -343,7 +359,7 @@ import { Subscription } from 'rxjs';
               <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present">
                 <input [(ngModel)]="presence.sessionNote" type="text"
                        class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
-                       placeholder="Note ou appréciation rapide..." />
+                       placeholder="Remarque ou appréciation rapide..." />
               </div>
             </div>
             <div *ngIf="activePresences.length === 0" class="text-center py-8 text-white/30 text-sm">
@@ -367,29 +383,68 @@ import { Subscription } from 'rxjs';
 
       <!-- ─── Evaluation Modal ──────────────────────────────────── -->
       <div *ngIf="showEvalModal"
-           class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+           class="bridge-modal-overlay"
            (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-md p-7 space-y-5"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg p-7 space-y-5 shadow-2xl"
              (click)="$event.stopPropagation()">
           <div class="flex items-center justify-between">
-            <h3 class="font-syne font-bold text-lg">⭐ Nouvelle Évaluation</h3>
+            <h3 class="font-syne font-bold text-lg">⭐ Évaluer un Stagiaire</h3>
             <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
           </div>
           <div class="space-y-4">
+            <!-- Formation Select -->
             <div>
-              <label class="text-xs text-white/40 uppercase tracking-wider block mb-2">ID Stagiaire</label>
-              <input [(ngModel)]="evalForm.studentId" type="number"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                     placeholder="Ex: 42" />
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Formation</label>
+              <select [(ngModel)]="evalForm.formationId" (change)="onEvalFormationChange()"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                <option value="" class="bg-[#10102A]">Choisir une formation...</option>
+                <option *ngFor="let f of formations" [value]="f.id" class="bg-[#10102A]">
+                  {{ f.nom }}
+                </option>
+              </select>
             </div>
+
+            <!-- Stagiaire Select (By Name) -->
             <div>
-              <label class="text-xs text-white/40 uppercase tracking-wider block mb-2">ID Phase</label>
-              <input [(ngModel)]="evalForm.phaseId" type="number"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                     placeholder="Ex: 1" />
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Stagiaire</label>
+              <select [(ngModel)]="evalForm.studentId"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner le stagiaire par nom...</option>
+                <option *ngFor="let s of availableStudentsForEval" [ngValue]="s.id" class="bg-[#10102A]">
+                  {{ s.prenom }} {{ s.nom }} ({{ s.email }})
+                </option>
+              </select>
             </div>
+
+            <!-- Phase Select (By Name) -->
             <div>
-              <label class="text-xs text-white/40 uppercase tracking-wider block mb-2">Note (/20)</label>
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
+              <select [(ngModel)]="evalForm.phaseId"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner la phase par nom...</option>
+                <option *ngFor="let p of availablePhasesForEval" [ngValue]="p.id" class="bg-[#10102A]">
+                  Phase {{ p.numero }} — {{ p.nom }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Rating Stars (1-5) -->
+            <div>
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Évaluation Étoiles</label>
+              <div class="flex items-center gap-2">
+                <button *ngFor="let star of [1,2,3,4,5]"
+                        (click)="evalForm.starRating = star"
+                        class="text-2xl transition-transform hover:scale-125 focus:outline-none"
+                        [class]="(evalForm.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
+                <span class="text-xs text-white/50 ml-2 font-mono" *ngIf="evalForm.starRating">
+                  {{ evalForm.starRating }}/5 étoiles
+                </span>
+              </div>
+            </div>
+
+            <!-- Grade (/20) -->
+            <div>
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Note (/20)</label>
               <div class="flex items-center gap-4">
                 <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5"
                        class="flex-1 accent-[#C62761]" />
@@ -399,23 +454,31 @@ import { Subscription } from 'rxjs';
                 </span>
               </div>
             </div>
+
+            <!-- Skills -->
             <div>
-              <label class="text-xs text-white/40 uppercase tracking-wider block mb-2">Compétences acquises</label>
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences acquises</label>
               <input [(ngModel)]="evalForm.skills" type="text"
                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                     placeholder="Ex: Angular, TypeScript, RxJS" />
+                     placeholder="Ex: Spring Boot, Angular, Cybersécurité" />
             </div>
+
+            <!-- Comment -->
             <div>
-              <label class="text-xs text-white/40 uppercase tracking-wider block mb-2">Commentaire</label>
+              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire & Appréciation</label>
               <textarea [(ngModel)]="evalForm.comment" rows="3"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
-                        placeholder="Appréciation générale..."></textarea>
+                        placeholder="Appréciation globale sur la progression..."></textarea>
             </div>
+
+            <!-- Blockchain Certificate Banner -->
             <div *ngIf="evalForm.grade >= 14"
-                 class="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-              <span class="text-emerald-400 text-lg">🏅</span>
-              <p class="text-emerald-400 text-xs font-semibold">Certificat blockchain sera généré automatiquement</p>
+                 class="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <span class="text-emerald-400 text-xl">🏅</span>
+              <p class="text-emerald-400 text-xs font-semibold">Certificat Blockchain sera généré automatiquement (Note ≥ 14/20)</p>
             </div>
+
+            <!-- Submit -->
             <button (click)="submitEvaluation()"
                     [disabled]="!evalForm.studentId || !evalForm.phaseId || evalForm.grade === null"
                     class="w-full py-3.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(198,39,97,0.2)]">
@@ -428,6 +491,17 @@ import { Subscription } from 'rxjs';
     </div>
 
     <style>
+      .bridge-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 1rem;
+      }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -450,7 +524,10 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   private sub = new Subscription();
 
-  evalForm = { studentId: null as number | null, phaseId: null as number | null, grade: 10 as number, skills: '', comment: '' };
+  evalForm = { formationId: '', studentId: null as any, phaseId: null as any, grade: 10, starRating: 5, skills: '', comment: '' };
+  allStudents: User[] = [];
+  availableStudentsForEval: User[] = [];
+  availablePhasesForEval: Phase[] = [];
 
   get totalStagiaires(): number {
     return this.formations.reduce((sum, f) => sum + (f.stagiaires?.length || 0), 0);
@@ -470,6 +547,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private formationService: FormationService,
     private evaluationService: EvaluationService,
     private notificationService: NotificationService,
@@ -480,9 +558,18 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
+    this.userService.getAllUsers().subscribe(users => {
+      this.allStudents = users.filter(u => u.role === 'STAGIAIRE');
+      this.availableStudentsForEval = [...this.allStudents];
+    });
+
     this.sub.add(
       this.formationService.getFormationsByFormateur(this.user.id).subscribe(data => {
         this.formations = data;
+        if (data.length > 0 && !this.evalForm.formationId) {
+          this.evalForm.formationId = data[0].id;
+          this.onEvalFormationChange();
+        }
       })
     );
 
@@ -592,8 +679,63 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  openEvalModal(): void { this.showEvalModal = true; this.evalSuccess = false; }
+  openEvalModal(): void {
+    this.showEvalModal = true;
+    this.evalSuccess = false;
+    if (this.formations.length > 0 && !this.evalForm.formationId) {
+      this.evalForm.formationId = this.formations[0].id;
+    }
+    this.onEvalFormationChange();
+  }
+
   closeEvalModal(): void { this.showEvalModal = false; }
+
+  onEvalFormationChange(): void {
+    if (!this.evalForm.formationId) {
+      this.availablePhasesForEval = [];
+      this.availableStudentsForEval = [...this.allStudents];
+      return;
+    }
+    const f = this.formations.find(item => item.id.toString() === this.evalForm.formationId.toString());
+    if (f) {
+      this.availablePhasesForEval = f.phases || [];
+      if (f.stagiaires && f.stagiaires.length > 0) {
+        this.availableStudentsForEval = this.allStudents.filter(st => f.stagiaires.includes(st.id));
+        if (this.availableStudentsForEval.length === 0) {
+          this.availableStudentsForEval = [...this.allStudents];
+        }
+      } else {
+        this.availableStudentsForEval = [...this.allStudents];
+      }
+    } else {
+      this.availablePhasesForEval = [];
+      this.availableStudentsForEval = [...this.allStudents];
+    }
+  }
+
+  getPresenceCardClass(p: Presence): string {
+    if (p.present && !this.isRetard(p)) return 'border-emerald-500/30 bg-emerald-500/[0.04]';
+    if (p.present && this.isRetard(p)) return 'border-amber-500/30 bg-amber-500/[0.04]';
+    return 'border-red-500/20 bg-red-500/[0.03]';
+  }
+
+  setPresenceStatus(p: Presence, status: 'PRESENT' | 'RETARD' | 'ABSENT'): void {
+    if (status === 'PRESENT') {
+      p.present = true;
+      p.sessionNote = (p.sessionNote || '').replace('[RETARD]', '').trim();
+    } else if (status === 'RETARD') {
+      p.present = true;
+      if (!p.sessionNote?.includes('[RETARD]')) {
+        p.sessionNote = ('[RETARD] ' + (p.sessionNote || '')).trim();
+      }
+    } else {
+      p.present = false;
+    }
+  }
+
+  isRetard(p: Presence): boolean {
+    return p.sessionNote?.includes('[RETARD]') || false;
+  }
 
   submitEvaluation(): void {
     if (!this.evalForm.studentId || !this.evalForm.phaseId || this.evalForm.grade === null || !this.user) return;
@@ -610,7 +752,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
         this.evalSuccess = true;
         setTimeout(() => {
           this.closeEvalModal();
-          this.evalForm = { studentId: null, phaseId: null, grade: 10, skills: '', comment: '' };
+          this.evalForm = { formationId: '', studentId: null, phaseId: null, grade: 10, starRating: 5, skills: '', comment: '' };
         }, 1500);
       }
     });

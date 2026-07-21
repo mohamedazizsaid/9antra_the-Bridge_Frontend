@@ -298,6 +298,23 @@ import { Subscription } from 'rxjs';
                       class="text-xs font-bold px-3 py-1.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-lg hover:opacity-90 transition-all">
                 Détails →
               </button>
+              <!-- Unenroll -->
+              <button *ngIf="unenrollConfirmId !== f.id"
+                      (click)="unenrollConfirmId = f.id"
+                      class="text-xs font-semibold px-3 py-1.5 text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-all">
+                Se désinscrire
+              </button>
+              <div *ngIf="unenrollConfirmId === f.id" class="flex items-center gap-2">
+                <span class="text-xs text-red-300">Confirmer ?</span>
+                <button (click)="unenrollFormation(f)" [disabled]="unenrollingId === f.id"
+                        class="text-xs font-bold px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-all disabled:opacity-50">
+                  {{ unenrollingId === f.id ? '...' : 'Oui' }}
+                </button>
+                <button (click)="unenrollConfirmId = null"
+                        class="text-xs px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-lg transition-all">
+                  Non
+                </button>
+              </div>
             </div>
           </div>
 
@@ -728,6 +745,8 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
   enrollSuccessId: string | null = null;
   enrollErrorId: string | null = null;
   enrollError = '';
+  unenrollConfirmId: string | null = null;
+  unenrollingId: string | null = null;
 
   today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   private sub = new Subscription();
@@ -895,6 +914,23 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
         this.enrollErrorId = f.id;
         this.enrollError = e?.error?.message || 'Déjà inscrit ou erreur';
         setTimeout(() => { this.enrollErrorId = null; }, 4000);
+      }
+    });
+  }
+
+  unenrollFormation(f: Formation): void {
+    if (!this.user) return;
+    this.unenrollingId = f.id;
+    this.enrollmentService.unenrollStudent(parseInt(this.user.id), parseInt(f.id)).subscribe({
+      next: () => {
+        this.unenrollingId = null;
+        this.unenrollConfirmId = null;
+        this.myFormations = this.myFormations.filter(mf => mf.id !== f.id);
+        this.enrolledIds.delete(f.id);
+      },
+      error: () => {
+        this.unenrollingId = null;
+        this.unenrollConfirmId = null;
       }
     });
   }

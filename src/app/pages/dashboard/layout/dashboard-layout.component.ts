@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -235,6 +235,13 @@ export class DashboardLayoutComponent implements OnInit {
     this.user = this.authService.getCurrentUser();
     if (!this.user) {
       this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Redirect to role-appropriate home if landing on bare /dashboard
+    const url = this.router.url;
+    if (url === '/dashboard' || url === '/dashboard/') {
+      this.router.navigate([this.authService.getRedirectUrl(this.user.role)]);
       return;
     }
 

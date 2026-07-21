@@ -14,6 +14,13 @@ import { EvaluationHistoryComponent } from './pages/dashboard/formateur/overview
 import { FormationsListComponent } from './pages/dashboard/formations/formations-list.component';
 import { FormationWizardComponent } from './pages/dashboard/formations/formation-wizard.component';
 import { FormationDetailComponent } from './pages/dashboard/formations/formation-detail.component';
+import { SettingsComponent } from './pages/dashboard/settings/settings.component';
+import { AdminLogsComponent } from './pages/dashboard/admin/logs/admin-logs.component';
+import { AdminStatsComponent } from './pages/dashboard/admin/stats/admin-stats.component';
+import { AdminUsersComponent } from './pages/dashboard/admin/users/admin-users.component';
+import { AdminFormateursComponent } from './pages/dashboard/admin/formateurs/admin-formateurs.component';
+import { AdminBroadcastComponent } from './pages/dashboard/admin/broadcast/admin-broadcast.component';
+import { StagiaireHistoriqueComponent } from './pages/dashboard/stagiaire/historique/stagiaire-historique.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
@@ -29,6 +36,8 @@ const routes: Routes = [
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
     children: [
+      { path: 'settings', component: SettingsComponent },
+      
       // ─── Stagiaire ───────────────────────────────────────────────────────────
       {
         path: 'stagiaire',
@@ -38,13 +47,19 @@ const routes: Routes = [
       },
       {
         path: 'stagiaire/formations',
-        component: StagiaireOverviewComponent,
+        component: FormationsListComponent,
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] }
       },
       {
         path: 'stagiaire/formations/:id',
         component: FormationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
+      },
+      {
+        path: 'stagiaire/historique',
+        component: StagiaireHistoriqueComponent,
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] }
       },
@@ -103,6 +118,36 @@ const routes: Routes = [
       {
         path: 'admin/formations/:id',
         component: FormationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/users',
+        component: AdminUsersComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/formateurs',
+        component: AdminFormateursComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/stats',
+        component: AdminStatsComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/broadcast',
+        component: AdminBroadcastComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/logs',
+        component: AdminLogsComponent,
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] }
       },

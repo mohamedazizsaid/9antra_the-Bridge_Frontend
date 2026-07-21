@@ -311,6 +311,51 @@ img {
   box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.15);
 }
 
+/* ─── Global Bridge Controls (Inputs & Selects) ─── */
+select, .bridge-input {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 1rem !important;
+  font-size: 0.875rem !important;
+  transition: all 200ms ease;
+  outline: none;
+
+  &:hover {
+    border-color: rgba(198, 39, 97, 0.4) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  &:focus {
+    border-color: #C62761 !important;
+    box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.2) !important;
+    background-color: rgba(16, 16, 42, 0.9) !important;
+  }
+
+  option {
+    background-color: #10102A !important;
+    color: #FFFFFF !important;
+    padding: 10px;
+  }
+}
+
+/* ─── Fixed Modal Overlay Backdrop Fix ─── */
+.bridge-modal-overlay, .modal-backdrop-fixed {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  background-color: rgba(0, 0, 0, 0.82) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
 /* ─── Inputs (Light theme — auth cards) ─── */
 .input-light {
   width: 100%;
