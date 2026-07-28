@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Formation, Phase, Seance, Presence } from '../models/formation.model';
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +28,12 @@ export class FormationService {
 
   private mapFormationDTO(f: any): Formation {
     const mainTrainer = f.trainers && f.trainers.length > 0 ? f.trainers[0] : null;
+    // Extract student IDs — try multiple possible field names from the API
+    const rawStudents = f.students || f.enrolledStudents || f.stagiaires || f.trainees || [];
+    const studentIds: string[] = rawStudents.map((s: any) =>
+      typeof s === 'object' ? (s.id?.toString() || '') : (s?.toString() || '')
+    ).filter((id: string) => id !== '');
+
     return {
       id: f.id.toString(),
       nom: f.title,
@@ -35,10 +41,10 @@ export class FormationService {
       formateurId: mainTrainer ? mainTrainer.id.toString() : '',
       formateurNom: mainTrainer ? `${mainTrainer.firstName} ${mainTrainer.lastName}` : 'Aucun formateur',
       formateurAvatar: mainTrainer ? mainTrainer.avatar : '',
-      dateDebut: new Date(),
-      dateFin: new Date(),
+      dateDebut: f.startDate ? new Date(f.startDate) : new Date(),
+      dateFin: f.endDate ? new Date(f.endDate) : new Date(),
       status: 'ACTIVE',
-      stagiaires: [],
+      stagiaires: studentIds,
       phases: f.phases ? f.phases.map((p: any) => this.mapPhaseDTO(p)) : [],
       category: f.category,
       totalPrice: f.totalPrice
@@ -64,14 +70,16 @@ export class FormationService {
     return {
       id: s.id.toString(),
       phaseId: s.phaseId ? s.phaseId.toString() : '',
+      formationId: s.formationId ? s.formationId.toString() : '',
       formationNom: s.formationTitle || '',
       date: new Date(s.sessionDate),
       heureDebut: s.startTime ? s.startTime.substring(0, 5) : '',
-      heureFin: s.startTime ? s.startTime.substring(0, 5) : '',
+      heureFin: s.endTime ? s.endTime.substring(0, 5) : (s.startTime ? s.startTime.substring(0, 5) : ''),
       duree: s.duration ? `${s.duration}h` : '3h',
       salle: s.location || '',
-      formateurNom: s.formationTitle ? 'Formateur' : '',
+      formateurNom: s.trainerName || 'Formateur',
       type: s.meetingLink ? 'EN_LIGNE' : 'PRESENTIEL',
+      status: s.status === 'CLOSED' ? 'CLOTUREE' : 'OUVERTE',
       presences: s.attendances ? s.attendances.map((a: any) => ({
         stagiaireId: a.studentId.toString(),
         stagiaireNom: `${a.studentFirstName} ${a.studentLastName}`,
@@ -122,6 +130,20 @@ export class FormationService {
       : `${this.apiUrl}/sessions/today`;
     return this.http.get<any[]>(url).pipe(
       map(list => list.map(s => this.mapSessionDTO(s)))
+    );
+  }
+
+  getAllSeancesByFormateur(trainerId: string): Observable<Seance[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/sessions/trainer/${trainerId}`).pipe(
+      map(list => list.map(s => this.mapSessionDTO(s))),
+      catchError(() => of([]))
+    );
+  }
+
+  getPastSeancesByFormateur(trainerId: string): Observable<Seance[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/sessions/trainer/${trainerId}/past`).pipe(
+      map(list => list.map(s => this.mapSessionDTO(s))),
+      catchError(() => of([]))
     );
   }
 

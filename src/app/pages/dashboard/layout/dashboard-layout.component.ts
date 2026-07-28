@@ -271,7 +271,10 @@ export class DashboardLayoutComponent implements OnInit {
       this.menuItems = [
         { section: 'Principal' },
         { label: 'Vue d\'ensemble', route: '/dashboard/formateur', icon: '📊', exact: true },
+        { label: 'Agenda & Séances', route: '/dashboard/formateur/seances', icon: '📅' },
         { label: 'Mes Formations', route: '/dashboard/formateur/formations', icon: '🏫' },
+        { section: 'Stagiaires' },
+        { label: 'Mes Stagiaires', route: '/dashboard/formateur/stagiaires', icon: '👥' },
         { section: 'Pédagogie' },
         { label: 'Évaluations', route: '/dashboard/formateur/evaluations', icon: '📝' },
         { section: 'Compte' },

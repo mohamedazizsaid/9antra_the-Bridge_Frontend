@@ -31,6 +31,7 @@ export interface Phase {
 export interface Seance {
   id: string;
   phaseId: string;
+  formationId?: string;
   formationNom: string;
   date: Date;
   heureDebut: string;
@@ -40,6 +41,7 @@ export interface Seance {
   formateurNom: string;
   type: 'PRESENTIEL' | 'EN_LIGNE';
   presences?: Presence[];
+  status?: 'OUVERTE' | 'CLOTUREE';
 }
 
 export interface Presence {

@@ -34,14 +34,10 @@ import { Subscription } from 'rxjs';
            class="relative overflow-hidden rounded-2xl border border-[rgba(245,166,35,0.3)] bg-gradient-to-r from-[rgba(245,166,35,0.08)] to-[rgba(198,39,97,0.05)] p-5">
         <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(circle at 20% 50%, rgba(245,166,35,0.15) 0%, transparent 60%), radial-gradient(circle at 80% 50%, rgba(198,39,97,0.1) 0%, transparent 60%)"></div>
         <div class="relative z-10 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[rgba(245,166,35,0.15)] flex items-center justify-center text-2xl flex-shrink-0 animate-pulse">
-            ⏰
-          </div>
+          <div class="w-12 h-12 rounded-xl bg-[rgba(245,166,35,0.15)] flex items-center justify-center text-2xl flex-shrink-0 animate-pulse">⏰</div>
           <div class="flex-1">
             <p class="font-syne font-bold text-white">Séance qui commence bientôt !</p>
-            <p class="text-sm text-white/60 mt-0.5">
-              {{ todaySeances[0]?.formationNom }} — {{ todaySeances[0]?.heureDebut }} en {{ todaySeances[0]?.salle }}
-            </p>
+            <p class="text-sm text-white/60 mt-0.5">{{ todaySeances[0]?.formationNom }} — {{ todaySeances[0]?.heureDebut }} en {{ todaySeances[0]?.salle }}</p>
           </div>
           <button (click)="openAttendanceModal(todaySeances[0])"
                   class="flex-shrink-0 px-4 py-2.5 bg-[#F5A623] text-black font-bold rounded-xl text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(245,166,35,0.3)]">
@@ -60,9 +56,17 @@ import { Subscription } from 'rxjs';
                 class="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all hover:border-white/20">
           ⭐ Évaluer un stagiaire
         </button>
+        <button (click)="goToSeances()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all hover:border-white/20">
+          📅 Mon Agenda
+        </button>
         <button (click)="goToFormations()"
                 class="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all hover:border-white/20">
           🏫 Mes formations
+        </button>
+        <button (click)="goToStagiaires()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all hover:border-white/20">
+          👥 Mes stagiaires
         </button>
         <button (click)="goToEvaluations()"
                 class="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all hover:border-white/20">
@@ -70,36 +74,44 @@ import { Subscription } from 'rxjs';
         </button>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(245,166,35,0.3)] transition-all hover:scale-[1.02]">
+      <!-- Stats Cards (6) -->
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(198,39,97,0.3)] transition-all hover:scale-[1.02]">
           <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Formations</p>
-          <p class="text-3xl font-mono font-bold text-[#F5A623] mt-2">{{ formations.length }}</p>
+          <p class="text-3xl font-mono font-bold text-[#C62761] mt-2">{{ formations.length }}</p>
           <p class="text-xs text-[var(--bridge-text-muted)] mt-1">assignées</p>
         </div>
-        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(198,39,97,0.3)] transition-all hover:scale-[1.02]">
+        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(245,166,35,0.3)] transition-all hover:scale-[1.02]">
           <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Stagiaires</p>
-          <p class="text-3xl font-mono font-bold text-[#C62761] mt-2">{{ totalStagiaires }}</p>
-          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">total</p>
+          <p class="text-3xl font-mono font-bold text-[#F5A623] mt-2">{{ totalStagiaires }}</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">encadrés</p>
         </div>
         <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-emerald-500/30 transition-all hover:scale-[1.02]">
-          <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Séances Aujourd'hui</p>
-          <p class="text-3xl font-mono font-bold mt-2" [class]="todaySeances.length > 0 ? 'text-emerald-400' : 'text-white/30'">
-            {{ todaySeances.length }}
-          </p>
-          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">programmées</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Séances</p>
+          <p class="text-3xl font-mono font-bold mt-2" [class]="todaySeances.length > 0 ? 'text-emerald-400' : 'text-white/30'">{{ todaySeances.length }}</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">aujourd'hui</p>
         </div>
         <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-purple-500/30 transition-all hover:scale-[1.02]">
           <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Évaluations</p>
           <p class="text-3xl font-mono font-bold text-purple-400 mt-2">{{ evaluations.length }}</p>
           <p class="text-xs text-[var(--bridge-text-muted)] mt-1">saisies</p>
         </div>
+        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-blue-500/30 transition-all hover:scale-[1.02]">
+          <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Taux réussite</p>
+          <p class="text-3xl font-mono font-bold text-blue-400 mt-2">{{ getSuccessRate() }}%</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">≥ 14/20</p>
+        </div>
+        <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(245,166,35,0.3)] transition-all hover:scale-[1.02]">
+          <p class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider">Note moy.</p>
+          <p class="text-3xl font-mono font-bold text-[#F5A623] mt-2">{{ getAvgGrade() }}</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">/20</p>
+        </div>
       </div>
 
       <!-- Main Grid -->
       <div class="grid lg:grid-cols-3 gap-6">
 
-        <!-- Left: Sessions + Formations -->
+        <!-- Left: Sessions + Formations + Evaluations -->
         <div class="lg:col-span-2 space-y-6">
 
           <!-- Today's Sessions -->
@@ -112,7 +124,7 @@ import { Subscription } from 'rxjs';
               </span>
             </div>
 
-            <div class="space-y-4" *ngIf="todaySeances.length > 0">
+            <div class="space-y-3" *ngIf="todaySeances.length > 0">
               <div *ngFor="let seance of todaySeances"
                    class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:border-[rgba(198,39,97,0.25)] transition-all group cursor-pointer"
                    (click)="openAttendanceModal(seance)">
@@ -133,7 +145,12 @@ import { Subscription } from 'rxjs';
                         class="text-[10px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">
                     🌐 EN LIGNE
                   </span>
-                  <button class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                  <span *ngIf="seance.status === 'CLOTUREE'"
+                        class="text-[10px] px-2 py-0.5 bg-white/5 text-white/30 rounded-full font-bold">
+                    🔒 CLÔTURÉE
+                  </span>
+                  <button *ngIf="seance.status !== 'CLOTUREE'"
+                          class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg opacity-0 group-hover:opacity-100 transition-all">
                     Appel →
                   </button>
                 </div>
@@ -197,7 +214,7 @@ import { Subscription } from 'rxjs';
             </div>
           </div>
 
-          <!-- Recent Evaluations Preview -->
+          <!-- Recent Evaluations -->
           <div class="glass-card border border-[var(--bridge-border)] p-6">
             <div class="flex items-center justify-between mb-5">
               <h3 class="font-syne font-bold text-lg">📝 Évaluations récentes</h3>
@@ -231,23 +248,51 @@ import { Subscription } from 'rxjs';
           </div>
         </div>
 
-        <!-- Right: Attendance Stats + Upcoming -->
+        <!-- Right: Charts + Upcoming -->
         <div class="space-y-6">
-          <!-- Attendance Chart -->
+
+          <!-- Donut Chart — Assiduité Globale -->
           <div class="glass-card border border-[var(--bridge-border)] p-6">
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="font-syne font-bold text-base">📊 Assiduité</h3>
-              <span class="text-xs text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                ~{{ getGlobalAttendance() }}% moy.
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-syne font-bold text-base">📊 Assiduité Globale</h3>
+              <span class="text-xs text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                ~{{ getGlobalAttendance() }}%
               </span>
             </div>
-            <div class="space-y-4">
+            <!-- SVG Donut Chart -->
+            <div class="flex flex-col items-center mb-4">
+              <div class="relative">
+                <svg viewBox="0 0 120 120" class="w-32 h-32 -rotate-90">
+                  <!-- Track -->
+                  <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+                  <!-- Progress -->
+                  <circle cx="60" cy="60" r="46" fill="none"
+                          stroke="url(#donutGrad)" stroke-width="12"
+                          stroke-linecap="round"
+                          [attr.stroke-dasharray]="289"
+                          [attr.stroke-dashoffset]="289 - (289 * getGlobalAttendance() / 100)"
+                          style="transition: stroke-dashoffset 1s ease"/>
+                  <defs>
+                    <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#C62761"/>
+                      <stop offset="100%" style="stop-color:#F5A623"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-2xl font-mono font-bold text-white">{{ getGlobalAttendance() }}%</span>
+                  <span class="text-[9px] text-white/40 uppercase tracking-widest">moy.</span>
+                </div>
+              </div>
+            </div>
+            <!-- Per-formation bars -->
+            <div class="space-y-3">
               <div *ngFor="let formation of formations" class="space-y-1.5">
                 <div class="flex justify-between text-xs">
                   <span class="text-white/60 truncate flex-1 pr-2 max-w-[130px]">{{ formation.nom }}</span>
                   <span class="text-[#F5A623] font-mono font-semibold">{{ getAttendanceRate(formation) }}%</span>
                 </div>
-                <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <div class="h-full rounded-full bg-gradient-to-r from-[#C62761] to-[#F5A623] transition-all duration-1000"
                        [style.width]="getAttendanceRate(formation) + '%'"></div>
                 </div>
@@ -258,12 +303,32 @@ import { Subscription } from 'rxjs';
             </div>
           </div>
 
+          <!-- Grade Distribution Mini Chart -->
+          <div class="glass-card border border-[var(--bridge-border)] p-6" *ngIf="evaluations.length > 0">
+            <h3 class="font-syne font-bold text-base mb-4">📈 Distribution Notes</h3>
+            <div class="space-y-2.5">
+              <div *ngFor="let band of gradeBands" class="flex items-center gap-3">
+                <span class="text-[10px] font-bold w-20 flex-shrink-0" [class]="band.color">{{ band.label }}</span>
+                <div class="flex-1 h-4 bg-white/5 rounded-full overflow-hidden relative">
+                  <div class="h-full rounded-full transition-all duration-1000 ease-out"
+                       [style.width]="getBandPct(band.min, band.max) + '%'"
+                       [class]="band.bg"></div>
+                </div>
+                <span class="text-[10px] font-mono text-white/40 w-8 text-right">{{ getBandCount(band.min, band.max) }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Upcoming Sessions -->
           <div class="glass-card border border-[var(--bridge-border)] p-6">
-            <h3 class="font-syne font-bold text-base mb-5">📅 Prochaines Séances</h3>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-syne font-bold text-base">📅 Prochaines Séances</h3>
+              <button (click)="goToSeances()" class="text-xs text-[#C62761] hover:text-[#F5A623] font-semibold transition-colors">Voir agenda →</button>
+            </div>
             <div class="space-y-3">
               <div *ngFor="let seance of upcomingSeances"
-                   class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[rgba(198,39,97,0.15)] transition-all">
+                   class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[rgba(198,39,97,0.15)] transition-all cursor-pointer"
+                   (click)="openAttendanceModal(seance)">
                 <div class="text-center min-w-[40px] flex-shrink-0">
                   <div class="text-[10px] font-bold uppercase text-[#F5A623]">{{ formatDay(seance.date) }}</div>
                   <div class="text-lg font-mono font-bold text-white">{{ formatDayNum(seance.date) }}</div>
@@ -282,31 +347,43 @@ import { Subscription } from 'rxjs';
         </div>
       </div>
 
-      <!-- ─── Attendance Sheet Modal ────────────────────────────── -->
+      <!-- ─── Attendance Modal ─────────────────────────────────────────── -->
       <div *ngIf="showAttendanceModal"
            class="bridge-modal-overlay"
            (click)="closeAttendanceModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
-          <!-- Modal Header -->
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)]">
+
+          <!-- Header -->
+          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
             <div>
               <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence — Appel</h3>
               <p class="text-xs text-white/40 mt-0.5" *ngIf="selectedSeance">
-                {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }}
+                {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }} à {{ selectedSeance.heureDebut }}
               </p>
             </div>
             <div class="flex items-center gap-4">
-              <div class="text-center">
-                <span class="text-2xl font-mono font-bold text-emerald-400">{{ getPresentInModal() }}</span>
+              <div class="text-center px-3 py-2 bg-white/5 rounded-xl">
+                <span class="text-2xl font-mono font-bold"
+                      [class]="getPresentInModal() > 0 ? 'text-emerald-400' : 'text-white/30'">
+                  {{ getPresentInModal() }}
+                </span>
                 <span class="text-white/30 text-lg">/{{ activePresences.length }}</span>
-                <p class="text-[10px] text-white/40 uppercase tracking-wider">présents</p>
+                <p class="text-[9px] text-white/40 uppercase tracking-wider">présents</p>
               </div>
-              <button (click)="closeAttendanceModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+              <button (click)="closeAttendanceModal()"
+                      class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
             </div>
           </div>
 
-          <!-- Presences List (3 States: Présent, Retard, Absent) -->
+          <!-- Quick bulk actions -->
+          <div class="flex items-center gap-3 px-6 py-3 border-b border-white/5 bg-black/10 flex-shrink-0">
+            <span class="text-xs text-white/30">Action rapide :</span>
+            <button (click)="markAll('PRESENT')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all">✓ Tous présents</button>
+            <button (click)="markAll('ABSENT')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all">✗ Tous absents</button>
+          </div>
+
+          <!-- Presences List -->
           <div class="flex-1 overflow-y-auto p-6 space-y-3">
             <div *ngFor="let presence of activePresences; let i = index"
                  class="p-4 rounded-xl border transition-all"
@@ -315,13 +392,14 @@ import { Subscription } from 'rxjs';
                  style="animation: fadeSlideIn 0.35s ease both">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                    {{ presence.stagiaireNom?.[0] || 'S' }}
+                  <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden"
+                       [class]="presence.present ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623]' : 'bg-white/10'">
+                    <img *ngIf="presence.stagiaireAvatar" [src]="presence.stagiaireAvatar" class="w-full h-full object-cover" />
+                    <span *ngIf="!presence.stagiaireAvatar">{{ presence.stagiaireNom?.[0] || 'S' }}</span>
                   </div>
                   <div>
                     <span class="text-sm font-semibold text-white">{{ presence.stagiaireNom }}</span>
-                    <!-- Star Rating for Present / Retard -->
-                    <div class="flex items-center gap-1 mt-1" *ngIf="presence.present">
+                    <div class="flex items-center gap-1 mt-0.5" *ngIf="presence.present">
                       <button *ngFor="let star of [1,2,3,4,5]"
                               (click)="presence.starRating = star"
                               class="text-base transition-transform hover:scale-125 focus:outline-none"
@@ -329,8 +407,7 @@ import { Subscription } from 'rxjs';
                     </div>
                   </div>
                 </div>
-
-                <!-- 3 States Buttons: Présent | Retard | Absent -->
+                <!-- 3-state buttons -->
                 <div class="flex items-center gap-1.5 self-end sm:self-center">
                   <button (click)="setPresenceStatus(presence, 'PRESENT')"
                           class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
@@ -355,103 +432,106 @@ import { Subscription } from 'rxjs';
                   </button>
                 </div>
               </div>
-              <!-- Quick Note -->
+              <!-- Note -->
               <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present">
                 <input [(ngModel)]="presence.sessionNote" type="text"
                        class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
-                       placeholder="Remarque ou appréciation rapide..." />
+                       placeholder="Remarque ou appréciation rapide…" />
               </div>
             </div>
-            <div *ngIf="activePresences.length === 0" class="text-center py-8 text-white/30 text-sm">
+            <div *ngIf="activePresences.length === 0" class="text-center py-10 text-white/30 text-sm">
+              <div class="text-4xl mb-3">👥</div>
               Aucun stagiaire enregistré pour cette séance.
             </div>
           </div>
 
-          <!-- Modal Footer -->
-          <div class="p-6 border-t border-[var(--bridge-border)] flex flex-col sm:flex-row gap-3">
-            <button (click)="closeSession()" *ngIf="selectedSeance"
+          <!-- Footer -->
+          <div class="p-6 border-t border-[var(--bridge-border)] flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            <button (click)="closeSession()" *ngIf="selectedSeance && selectedSeance.status !== 'CLOTUREE'"
                     class="flex-1 py-3 bg-red-500/10 hover:bg-red-500/15 text-red-400 border border-red-500/20 font-bold rounded-xl transition-all text-sm">
               🔒 Clôturer la Séance
             </button>
-            <button (click)="saveAttendance()"
-                    class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 transition-all text-sm shadow-[0_0_15px_rgba(198,39,97,0.25)]">
-              ✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})
+            <button (click)="saveAttendance()" [disabled]="savingAttendance"
+                    class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm shadow-[0_0_15px_rgba(198,39,97,0.25)] flex items-center justify-center gap-2">
+              <span *ngIf="savingAttendance" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+              <span *ngIf="!savingAttendance">✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})</span>
+              <span *ngIf="savingAttendance">Enregistrement…</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ─── Evaluation Modal ──────────────────────────────────── -->
+      <!-- ─── Evaluation Modal ───────────────────────────────────────────── -->
       <div *ngIf="showEvalModal"
            class="bridge-modal-overlay"
            (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg p-7 space-y-5 shadow-2xl"
+        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg shadow-2xl flex flex-col max-h-[92vh]"
              (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between">
+
+          <!-- Header -->
+          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
             <h3 class="font-syne font-bold text-lg">⭐ Évaluer un Stagiaire</h3>
-            <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+            <button (click)="closeEvalModal()"
+                    class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
           </div>
-          <div class="space-y-4">
-            <!-- Formation Select -->
+
+          <!-- Scrollable body -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
+
+            <!-- Formation -->
             <div>
               <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Formation</label>
               <select [(ngModel)]="evalForm.formationId" (change)="onEvalFormationChange()"
                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option value="" class="bg-[#10102A]">Choisir une formation...</option>
-                <option *ngFor="let f of formations" [value]="f.id" class="bg-[#10102A]">
-                  {{ f.nom }}
-                </option>
+                <option value="" class="bg-[#10102A]">Choisir une formation…</option>
+                <option *ngFor="let f of formations" [value]="f.id" class="bg-[#10102A]">{{ f.nom }}</option>
               </select>
             </div>
 
-            <!-- Stagiaire Select (By Name) -->
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Stagiaire</label>
-              <select [(ngModel)]="evalForm.studentId"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner le stagiaire par nom...</option>
-                <option *ngFor="let s of availableStudentsForEval" [ngValue]="s.id" class="bg-[#10102A]">
-                  {{ s.prenom }} {{ s.nom }} ({{ s.email }})
-                </option>
-              </select>
-            </div>
-
-            <!-- Phase Select (By Name) -->
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
-              <select [(ngModel)]="evalForm.phaseId"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner la phase par nom...</option>
-                <option *ngFor="let p of availablePhasesForEval" [ngValue]="p.id" class="bg-[#10102A]">
-                  Phase {{ p.numero }} — {{ p.nom }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Rating Stars (1-5) -->
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Évaluation Étoiles</label>
-              <div class="flex items-center gap-2">
-                <button *ngFor="let star of [1,2,3,4,5]"
-                        (click)="evalForm.starRating = star"
-                        class="text-2xl transition-transform hover:scale-125 focus:outline-none"
-                        [class]="(evalForm.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
-                <span class="text-xs text-white/50 ml-2 font-mono" *ngIf="evalForm.starRating">
-                  {{ evalForm.starRating }}/5 étoiles
-                </span>
+            <!-- 2-col row: Stagiaire + Phase -->
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Stagiaire</label>
+                <select [(ngModel)]="evalForm.studentId"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                  <option [ngValue]="null" class="bg-[#10102A]">Sélectionner…</option>
+                  <option *ngFor="let s of availableStudentsForEval" [ngValue]="s.id" class="bg-[#10102A]">
+                    {{ s.prenom }} {{ s.nom }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
+                <select [(ngModel)]="evalForm.phaseId"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                  <option [ngValue]="null" class="bg-[#10102A]">Sélectionner…</option>
+                  <option *ngFor="let p of availablePhasesForEval" [ngValue]="p.id" class="bg-[#10102A]">
+                    Phase {{ p.numero }} — {{ p.nom }}
+                  </option>
+                </select>
               </div>
             </div>
 
-            <!-- Grade (/20) -->
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Note (/20)</label>
-              <div class="flex items-center gap-4">
-                <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5"
-                       class="flex-1 accent-[#C62761]" />
-                <span class="text-2xl font-mono font-bold w-14 text-right"
-                      [class]="getGradeClass(evalForm.grade)">
-                  {{ evalForm.grade }}
-                </span>
+            <!-- Stars + Grade in 2-col -->
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Évaluation Étoiles</label>
+                <div class="flex items-center gap-1 mt-1">
+                  <button *ngFor="let star of [1,2,3,4,5]"
+                          (click)="evalForm.starRating = star"
+                          class="text-2xl transition-transform hover:scale-125 focus:outline-none"
+                          [class]="(evalForm.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
+                  <span class="text-xs text-white/40 ml-1 font-mono" *ngIf="evalForm.starRating">{{ evalForm.starRating }}/5</span>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Note (/20)</label>
+                <div class="flex items-center gap-3 mt-1">
+                  <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5"
+                         class="flex-1 accent-[#C62761]" />
+                  <span class="text-xl font-mono font-bold w-12 text-right flex-shrink-0"
+                        [class]="getGradeClass(evalForm.grade)">{{ evalForm.grade }}</span>
+                </div>
               </div>
             </div>
 
@@ -460,7 +540,7 @@ import { Subscription } from 'rxjs';
               <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences acquises</label>
               <input [(ngModel)]="evalForm.skills" type="text"
                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                     placeholder="Ex: Spring Boot, Angular, Cybersécurité" />
+                     placeholder="Ex: Spring Boot, Angular, Docker…" />
             </div>
 
             <!-- Comment -->
@@ -468,21 +548,25 @@ import { Subscription } from 'rxjs';
               <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire & Appréciation</label>
               <textarea [(ngModel)]="evalForm.comment" rows="3"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
-                        placeholder="Appréciation globale sur la progression..."></textarea>
+                        placeholder="Appréciation globale sur la progression…"></textarea>
             </div>
 
-            <!-- Blockchain Certificate Banner -->
+            <!-- Certificate banner -->
             <div *ngIf="evalForm.grade >= 14"
                  class="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <span class="text-emerald-400 text-xl">🏅</span>
               <p class="text-emerald-400 text-xs font-semibold">Certificat Blockchain sera généré automatiquement (Note ≥ 14/20)</p>
             </div>
+          </div>
 
-            <!-- Submit -->
+          <!-- Footer -->
+          <div class="p-6 border-t border-[var(--bridge-border)] flex-shrink-0">
             <button (click)="submitEvaluation()"
-                    [disabled]="!evalForm.studentId || !evalForm.phaseId || evalForm.grade === null"
-                    class="w-full py-3.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(198,39,97,0.2)]">
-              {{ evalSuccess ? '✓ Évaluation enregistrée !' : 'Enregistrer l\'évaluation' }}
+                    [disabled]="!evalForm.studentId || !evalForm.phaseId || evalForm.grade === null || savingEval"
+                    class="w-full py-3.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(198,39,97,0.2)] flex items-center justify-center gap-2">
+              <span *ngIf="savingEval" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+              <span *ngIf="evalSuccess">✓ Évaluation enregistrée !</span>
+              <span *ngIf="!evalSuccess && !savingEval">Enregistrer l'évaluation</span>
             </button>
           </div>
         </div>
@@ -492,15 +576,11 @@ import { Subscription } from 'rxjs';
 
     <style>
       .bridge-modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.7);
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.75);
         backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-        padding: 1rem;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 50; padding: 1rem;
       }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
@@ -521,6 +601,8 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   selectedSeance: Seance | null = null;
   activePresences: Presence[] = [];
   evalSuccess = false;
+  savingAttendance = false;
+  savingEval = false;
   today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   private sub = new Subscription();
 
@@ -529,8 +611,18 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   availableStudentsForEval: User[] = [];
   availablePhasesForEval: Phase[] = [];
 
+  gradeBands = [
+    { label: '🏆 ≥16', min: 16, max: 20, color: 'text-emerald-400', bg: 'bg-emerald-500/60' },
+    { label: '⭐ 14-16', min: 14, max: 15.99, color: 'text-[#F5A623]', bg: 'bg-[#F5A623]/60' },
+    { label: '✓ 12-14', min: 12, max: 13.99, color: 'text-blue-400', bg: 'bg-blue-500/60' },
+    { label: '○ 10-12', min: 10, max: 11.99, color: 'text-purple-400', bg: 'bg-purple-500/60' },
+    { label: '✕ <10', min: 0, max: 9.99, color: 'text-red-400', bg: 'bg-red-500/60' },
+  ];
+
   get totalStagiaires(): number {
-    return this.formations.reduce((sum, f) => sum + (f.stagiaires?.length || 0), 0);
+    const ids = new Set<string>();
+    this.formations.forEach(f => f.stagiaires.forEach(id => ids.add(id)));
+    return ids.size || this.allStudents.length;
   }
 
   get hasSessionSoon(): boolean {
@@ -598,17 +690,11 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     this.expandedFormation = this.expandedFormation === id ? null : id;
   }
 
-  goToFormations(): void {
-    this.router.navigate(['/dashboard/formateur/formations']);
-  }
-
-  goToEvaluations(): void {
-    this.router.navigate(['/dashboard/formateur/evaluations']);
-  }
-
-  goToFormationDetail(formation: Formation): void {
-    this.router.navigate([`/dashboard/formateur/formations/${formation.id}`]);
-  }
+  goToFormations(): void { this.router.navigate(['/dashboard/formateur/formations']); }
+  goToEvaluations(): void { this.router.navigate(['/dashboard/formateur/evaluations']); }
+  goToSeances(): void { this.router.navigate(['/dashboard/formateur/seances']); }
+  goToStagiaires(): void { this.router.navigate(['/dashboard/formateur/stagiaires']); }
+  goToFormationDetail(formation: Formation): void { this.router.navigate([`/dashboard/formateur/formations/${formation.id}`]); }
 
   getAttendanceRate(formation: Formation): number {
     if (!formation.phases?.length) return 0;
@@ -622,6 +708,27 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     return Math.round(sum / this.formations.length);
   }
 
+  getSuccessRate(): number {
+    if (!this.evaluations.length) return 0;
+    const pass = this.evaluations.filter(e => (e.grade || 0) >= 14).length;
+    return Math.round((pass / this.evaluations.length) * 100);
+  }
+
+  getAvgGrade(): string {
+    if (!this.evaluations.length) return '—';
+    const avg = this.evaluations.reduce((s, e) => s + (e.grade || 0), 0) / this.evaluations.length;
+    return avg.toFixed(1);
+  }
+
+  getBandCount(min: number, max: number): number {
+    return this.evaluations.filter(e => (e.grade || 0) >= min && (e.grade || 0) <= max).length;
+  }
+
+  getBandPct(min: number, max: number): number {
+    if (!this.evaluations.length) return 0;
+    return Math.round(this.getBandCount(min, max) / this.evaluations.length * 100);
+  }
+
   getPresentCount(seance: Seance): number {
     return seance.presences?.filter(p => p.present).length || 0;
   }
@@ -631,8 +738,28 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   }
 
   openAttendanceModal(seance: Seance): void {
+    if (seance.status === 'CLOTUREE') return;
     this.selectedSeance = seance;
-    this.activePresences = seance.presences ? JSON.parse(JSON.stringify(seance.presences)) : [];
+
+    if (seance.presences && seance.presences.length > 0) {
+      this.activePresences = JSON.parse(JSON.stringify(seance.presences));
+    } else {
+      // Build from formation's students
+      const formation = this.formations.find(f => f.nom === seance.formationNom || f.id === seance.formationId);
+      let students: User[] = [];
+      if (formation && formation.stagiaires.length > 0) {
+        students = this.allStudents.filter(s => formation.stagiaires.includes(s.id));
+      }
+      if (students.length === 0) students = this.allStudents;
+      this.activePresences = students.map(s => ({
+        stagiaireId: s.id,
+        stagiaireNom: `${s.prenom} ${s.nom}`,
+        stagiaireAvatar: s.avatar,
+        present: false,
+        starRating: 0,
+        sessionNote: ''
+      }));
+    }
     this.showAttendanceModal = true;
   }
 
@@ -651,17 +778,22 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     this.showAttendanceModal = false;
     this.selectedSeance = null;
     this.activePresences = [];
+    this.savingAttendance = false;
   }
 
-  togglePresence(index: number): void {
-    this.activePresences[index].present = !this.activePresences[index].present;
+  markAll(status: 'PRESENT' | 'ABSENT'): void {
+    this.activePresences.forEach(p => this.setPresenceStatus(p, status));
   }
 
   saveAttendance(): void {
-    if (this.selectedSeance) {
-      this.formationService.savePresence(this.selectedSeance.id, this.activePresences).subscribe(() => {
-        this.selectedSeance!.presences = [...this.activePresences];
-        this.closeAttendanceModal();
+    if (this.selectedSeance && !this.savingAttendance) {
+      this.savingAttendance = true;
+      this.formationService.savePresence(this.selectedSeance.id, this.activePresences).subscribe({
+        next: () => {
+          this.selectedSeance!.presences = [...this.activePresences];
+          this.closeAttendanceModal();
+        },
+        error: () => { this.savingAttendance = false; }
       });
     }
   }
@@ -671,6 +803,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
       if (confirm('Voulez-vous vraiment clôturer cette séance ? Cela validera la progression et déclenchera les certificats si c\'est la dernière séance.')) {
         this.formationService.closeSession(this.selectedSeance.id).subscribe({
           next: () => {
+            if (this.selectedSeance) this.selectedSeance.status = 'CLOTUREE';
             this.closeAttendanceModal();
           },
           error: (e) => alert(e?.error?.message || 'Erreur lors de la clôture')
@@ -682,6 +815,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   openEvalModal(): void {
     this.showEvalModal = true;
     this.evalSuccess = false;
+    this.savingEval = false;
     if (this.formations.length > 0 && !this.evalForm.formationId) {
       this.evalForm.formationId = this.formations[0].id;
     }
@@ -701,9 +835,7 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
       this.availablePhasesForEval = f.phases || [];
       if (f.stagiaires && f.stagiaires.length > 0) {
         this.availableStudentsForEval = this.allStudents.filter(st => f.stagiaires.includes(st.id));
-        if (this.availableStudentsForEval.length === 0) {
-          this.availableStudentsForEval = [...this.allStudents];
-        }
+        if (this.availableStudentsForEval.length === 0) this.availableStudentsForEval = [...this.allStudents];
       } else {
         this.availableStudentsForEval = [...this.allStudents];
       }
@@ -738,7 +870,8 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
   }
 
   submitEvaluation(): void {
-    if (!this.evalForm.studentId || !this.evalForm.phaseId || this.evalForm.grade === null || !this.user) return;
+    if (!this.evalForm.studentId || !this.evalForm.phaseId || this.evalForm.grade === null || !this.user || this.savingEval) return;
+    this.savingEval = true;
     const payload = {
       studentId: this.evalForm.studentId.toString(),
       trainerId: this.user.id,
@@ -750,11 +883,13 @@ export class FormateurOverviewComponent implements OnInit, OnDestroy {
     this.evaluationService.saveEvaluation(payload as any).subscribe({
       next: () => {
         this.evalSuccess = true;
+        this.savingEval = false;
         setTimeout(() => {
           this.closeEvalModal();
           this.evalForm = { formationId: '', studentId: null, phaseId: null, grade: 10, starRating: 5, skills: '', comment: '' };
         }, 1500);
-      }
+      },
+      error: () => { this.savingEval = false; }
     });
   }
 

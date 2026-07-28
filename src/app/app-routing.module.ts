@@ -11,6 +11,8 @@ import { AdminOverviewComponent } from './pages/dashboard/admin/overview/admin-o
 import { StagiaireOverviewComponent } from './pages/dashboard/stagiaire/overview/stagiaire-overview.component';
 import { FormateurOverviewComponent } from './pages/dashboard/formateur/overview/formateur-overview.component';
 import { EvaluationHistoryComponent } from './pages/dashboard/formateur/overview/evaluation-history.component';
+import { FormateurSeancesComponent } from './pages/dashboard/formateur/overview/formateur-seances.component';
+import { FormateurStagiairesComponent } from './pages/dashboard/formateur/overview/formateur-stagiaires.component';
 import { FormationsListComponent } from './pages/dashboard/formations/formations-list.component';
 import { FormationWizardComponent } from './pages/dashboard/formations/formation-wizard.component';
 import { FormationDetailComponent } from './pages/dashboard/formations/formation-detail.component';
@@ -110,6 +112,18 @@ const routes: Routes = [
       {
         path: 'formateur/evaluations',
         component: EvaluationHistoryComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['FORMATEUR'] }
+      },
+      {
+        path: 'formateur/seances',
+        component: FormateurSeancesComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['FORMATEUR'] }
+      },
+      {
+        path: 'formateur/stagiaires',
+        component: FormateurStagiairesComponent,
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] }
       },
