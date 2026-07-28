@@ -120,6 +120,243 @@ interface EnrollmentInfo {
           </button>
         </div>
 
+        <!-- ══ STAGIAIRE TABS ══ -->
+
+        <!-- Tab: Ma Progression (Stagiaire) -->
+        <div *ngIf="activeTab === 'my-progress'" class="space-y-5">
+
+          <!-- Global progress card -->
+          <div class="glass-card border border-[var(--bridge-border)] p-6 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.05)] to-transparent pointer-events-none"></div>
+            <div class="relative z-10">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                  <h3 class="font-syne font-bold text-xl text-white">Ma Progression Globale</h3>
+                  <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">{{ formation?.formateurNom }}</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-4xl font-mono font-black bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent">{{ getMyFormationProgress() }}%</p>
+                  <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mt-1">Complété</p>
+                </div>
+              </div>
+              <div class="h-3 rounded-full bg-white/5 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full transition-all duration-1000"
+                     [style.width]="getMyFormationProgress() + '%'"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phases Timeline -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-bold text-[var(--bridge-text-muted)] uppercase tracking-wider">Phases de formation</h4>
+            <div *ngFor="let phase of formation?.phases; let i = index; let last = last" class="relative">
+              <!-- Connector -->
+              <div *ngIf="!last" class="absolute left-[27px] top-[56px] w-0.5 h-[calc(100%+12px)] bg-gradient-to-b from-white/10 to-transparent z-0"></div>
+
+              <div class="glass-card border overflow-hidden transition-all duration-300 relative z-10"
+                   [class]="phase.status === 'COMPLETEE' ? 'border-emerald-500/20 hover:border-emerald-500/40' : phase.status === 'EN_COURS' ? 'border-[rgba(198,39,97,0.2)] hover:border-[rgba(198,39,97,0.4)]' : 'border-[var(--bridge-border)]'">
+                <div class="p-5 flex items-center gap-4">
+                  <!-- Status Circle -->
+                  <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0 border-2 shadow-lg"
+                       [class]="phase.status === 'COMPLETEE'
+                         ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/10'
+                         : phase.status === 'EN_COURS'
+                         ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761] shadow-[rgba(198,39,97,0.1)] animate-pulse'
+                         : 'bg-white/5 border-white/10 text-white/20'">
+                    {{ phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒' }}
+                  </div>
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <span class="text-[10px] text-[var(--bridge-text-muted)] font-mono">Phase {{ phase.numero }}</span>
+                        <h4 class="font-syne font-bold text-white"
+                            [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'">{{ phase.nom }}</h4>
+                      </div>
+                      <div class="text-right flex-shrink-0">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wide"
+                              [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : phase.status === 'EN_COURS' ? 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'
+                                : 'bg-white/5 text-white/30 border-white/10'">
+                          {{ phase.status === 'COMPLETEE' ? 'Complétée' : phase.status === 'EN_COURS' ? 'En cours' : 'Verrouillée' }}
+                        </span>
+                        <p *ngIf="phase.status !== 'VERROUILLEE'" class="font-mono text-xs font-bold mt-1"
+                           [class]="phase.status === 'COMPLETEE' ? 'text-emerald-400' : 'text-[#F5A623]'">
+                          {{ phase.progression }}%
+                        </p>
+                      </div>
+                    </div>
+                    <!-- Progress bar -->
+                    <div *ngIf="phase.status !== 'VERROUILLEE'" class="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <div class="h-full rounded-full transition-all duration-1000"
+                           [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
+                           [style.width]="phase.progression + '%'"></div>
+                    </div>
+                    <!-- Meta -->
+                    <div *ngIf="phase.status !== 'VERROUILLEE'" class="flex items-center gap-4 mt-2 text-[10px] text-[var(--bridge-text-muted)]">
+                      <span>📅 {{ phase.seances?.length || 0 }} séances</span>
+                      <span *ngIf="phase.status === 'COMPLETEE'" class="text-emerald-400 font-semibold">✓ Phase complétée</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Mes Présences (Stagiaire) -->
+        <div *ngIf="activeTab === 'my-presence'" class="space-y-5">
+
+          <!-- Attendance Rate Card -->
+          <div class="glass-card border border-[var(--bridge-border)] p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-syne font-bold text-lg text-white">Mon Assiduité</h3>
+              <span class="font-mono text-2xl font-black"
+                    [class]="getMyAttendanceRate() >= 75 ? 'text-emerald-400' : 'text-red-400'">{{ getMyAttendanceRate() }}%</span>
+            </div>
+            <div class="relative h-3 rounded-full bg-white/5 overflow-hidden mb-2">
+              <div class="h-full rounded-full transition-all duration-1000"
+                   [class]="getMyAttendanceRate() >= 75 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-red-500 to-orange-500'"
+                   [style.width]="getMyAttendanceRate() + '%'"></div>
+              <div class="absolute top-0 bottom-0 w-0.5 bg-white/30" style="left: 75%"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-[var(--bridge-text-muted)]">Seuil requis: 75%</span>
+              <span [class]="getMyAttendanceRate() >= 75 ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'">
+                {{ getMyAttendanceRate() >= 75 ? '✓ Éligible aux certificats' : '⚠ Seuil non atteint' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Presences per phase -->
+          <div *ngFor="let phase of formation?.phases" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
+            <div class="p-4 border-b border-[var(--bridge-border)] flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white">{{ phase.numero }}</div>
+              <div>
+                <h4 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h4>
+                <p class="text-xs text-[var(--bridge-text-muted)]">{{ phase.seances?.length || 0 }} séance(s)</p>
+              </div>
+            </div>
+            <div class="divide-y divide-white/[0.03]">
+              <div *ngFor="let seance of phase.seances"
+                   class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all">
+                <!-- Date -->
+                <div class="text-center w-12 flex-shrink-0">
+                  <div class="text-[10px] font-bold uppercase text-[#F5A623]">{{ formatDay(seance.date) }}</div>
+                  <div class="text-lg font-mono font-bold text-white">{{ formatDayNum(seance.date) }}</div>
+                </div>
+                <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
+                <!-- Session info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-white">{{ seance.heureDebut || '—' }}</span>
+                    <span *ngIf="seance.type === 'EN_LIGNE'" class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">🌐 EN LIGNE</span>
+                    <span *ngIf="seance.type !== 'EN_LIGNE'" class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">🏫 PRÉSENTIEL</span>
+                  </div>
+                  <p class="text-xs text-white/40 mt-0.5">📍 {{ seance.salle || 'Salle non définie' }}</p>
+                  <!-- My presence status -->
+                  <div *ngIf="getMyPresenceForSeance(seance) as pres" class="flex items-center gap-3 mt-2">
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border"
+                          [class]="pres.present ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'">
+                      {{ pres.present ? '✓ Présent' : '✗ Absent' }}
+                    </span>
+                    <div *ngIf="pres.starRating" class="flex items-center gap-0.5">
+                      <span *ngFor="let s of [1,2,3,4,5]"
+                            [class]="s <= pres.starRating ? 'text-[#F5A623]' : 'text-white/15'"
+                            class="text-sm">★</span>
+                    </div>
+                    <p *ngIf="pres.sessionNote" class="text-xs text-white/40 italic truncate max-w-xs">"{{ pres.sessionNote }}"</p>
+                  </div>
+                  <p *ngIf="!getMyPresenceForSeance(seance)" class="text-xs text-white/20 italic mt-1">Non enregistrée</p>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!phase.seances || phase.seances.length === 0" class="p-6 text-center text-xs text-white/30 italic">
+              Aucune séance dans cette phase
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Mon Évaluation (Stagiaire) -->
+        <div *ngIf="activeTab === 'my-eval'" class="space-y-4">
+
+          <!-- Empty state -->
+          <div *ngIf="getMyEvals().length === 0" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+            <div class="text-6xl mb-4">⭐</div>
+            <p class="font-syne font-bold text-xl text-white">Aucune évaluation reçue</p>
+            <p class="text-white/40 text-sm mt-2 max-w-sm mx-auto">
+              Vos évaluations apparaîtront ici après la complétion de chaque phase.
+              Une note ≥ 14/20 génère un certificat blockchain.
+            </p>
+          </div>
+
+          <!-- My evaluations -->
+          <div *ngFor="let ev of getMyEvals(); let i = index"
+               class="glass-card border border-[var(--bridge-border)] overflow-hidden transition-all hover:border-[rgba(198,39,97,0.3)]">
+            <div class="h-1" [class]="ev.grade >= 14 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"></div>
+            <div class="p-6">
+              <div class="flex items-start gap-5">
+                <!-- Grade circle -->
+                <div class="flex-shrink-0">
+                  <div class="w-16 h-16 rounded-2xl border-2 flex items-center justify-center"
+                       [class]="ev.grade >= 16 ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-400' : ev.grade >= 14 ? 'border-blue-500/60 bg-blue-500/10 text-blue-400' : 'border-[rgba(198,39,97,0.4)] bg-[rgba(198,39,97,0.1)] text-[#C62761]'">
+                    <span class="font-mono font-black text-xl">{{ ev.grade }}</span>
+                  </div>
+                  <p class="text-[10px] text-center text-[var(--bridge-text-muted)] mt-1 font-mono">/20</p>
+                </div>
+                <!-- Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <h3 class="font-syne font-bold text-white text-base">{{ ev.phaseTitle }}</h3>
+                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">Évalué par {{ ev.trainerName }}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                      <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border"
+                            [class]="ev.grade >= 14 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'">
+                        {{ ev.grade >= 16 ? 'Excellent' : ev.grade >= 14 ? 'Très bien' : ev.grade >= 12 ? 'Bien' : ev.grade >= 10 ? 'Passable' : 'Insuffisant' }}
+                      </span>
+                      <p class="text-[10px] text-white/30 mt-1">{{ ev.evaluationDate | date:'dd/MM/yyyy' }}</p>
+                    </div>
+                  </div>
+                  <!-- Stars -->
+                  <div class="flex items-center gap-1 mb-3">
+                    <span *ngFor="let s of [1,2,3,4,5]"
+                          [class]="s <= gradeToStars(ev.grade) ? 'text-[#F5A623]' : 'text-white/15'"
+                          class="text-lg">★</span>
+                    <span class="text-xs text-[var(--bridge-text-muted)] ml-1 font-mono">{{ gradeToStars(ev.grade) }}/5</span>
+                  </div>
+                  <!-- Progress bar -->
+                  <div class="h-1.5 rounded-full bg-white/5 overflow-hidden mb-3">
+                    <div class="h-full rounded-full transition-all duration-1000"
+                         [class]="ev.grade >= 14 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
+                         [style.width]="((ev.grade / 20) * 100) + '%'"></div>
+                  </div>
+                  <!-- Comment -->
+                  <blockquote *ngIf="ev.comment"
+                              class="border-l-2 border-[rgba(198,39,97,0.4)] pl-3 text-sm text-[var(--bridge-text-muted)] italic leading-relaxed mb-3">
+                    "{{ ev.comment }}"
+                  </blockquote>
+                  <!-- Skills -->
+                  <div *ngIf="ev.skills" class="flex flex-wrap gap-1.5">
+                    <span *ngFor="let skill of ev.skills.split(',')"
+                          class="text-[11px] bg-[rgba(245,166,35,0.08)] text-[#F5A623] px-2.5 py-1 rounded-full border border-[rgba(245,166,35,0.2)] font-medium">
+                      ✦ {{ skill.trim() }}
+                    </span>
+                  </div>
+                  <!-- Certificate notice -->
+                  <div *ngIf="ev.grade >= 14" class="mt-4 flex items-center gap-3 p-3 rounded-xl bg-emerald-500/[0.07] border border-emerald-500/20">
+                    <span class="text-emerald-400 text-lg">🏅</span>
+                    <p class="text-emerald-400 text-xs font-semibold">Certificat blockchain généré pour cette phase</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ FORMATEUR / ADMIN TABS ══ -->
+
         <!-- Tab: Phases & Séances -->
         <div *ngIf="activeTab === 'phases'" class="space-y-4">
           <div *ngFor="let phase of formation.phases; let pi = index"
@@ -547,7 +784,18 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   private sub = new Subscription();
   private formationId = '';
 
+  get isStagiaire(): boolean {
+    return this.user?.role === 'STAGIAIRE';
+  }
+
   get tabs() {
+    if (this.isStagiaire) {
+      return [
+        { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
+        { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
+        { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() }
+      ];
+    }
     return [
       { id: 'phases', label: 'Phases & Séances', icon: '🗂️', count: this.formation?.phases.length },
       { id: 'stagiaires', label: 'Stagiaires', icon: '👥', count: this.enrollments.length },
@@ -557,6 +805,50 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
 
   get canManage(): boolean {
     return this.user?.role === 'FORMATEUR' || this.user?.role === 'ADMIN';
+  }
+
+  getMyPresenceCount(): number {
+    if (!this.formation || !this.user) return 0;
+    let count = 0;
+    this.formation.phases.forEach(p => {
+      p.seances?.forEach(s => {
+        const pres = s.presences?.find(pr => pr.stagiaireId === this.user!.id);
+        if (pres) count++;
+      });
+    });
+    return count;
+  }
+
+  getMyEvalCount(): number {
+    return this.phaseEvaluations.filter(e => e.studentId?.toString() === this.user?.id?.toString()).length;
+  }
+
+  getMyPresenceForSeance(seance: any): any {
+    if (!seance.presences || !this.user) return null;
+    return seance.presences.find((p: any) => p.stagiaireId === this.user!.id) || null;
+  }
+
+  getMyAttendanceRate(): number {
+    if (!this.formation || !this.user) return 0;
+    let total = 0, present = 0;
+    this.formation.phases.forEach(p => {
+      p.seances?.forEach(s => {
+        const pres = s.presences?.find(pr => pr.stagiaireId === this.user!.id);
+        if (pres) { total++; if (pres.present) present++; }
+      });
+    });
+    return total > 0 ? Math.round((present / total) * 100) : 0;
+  }
+
+  getMyEvals(): any[] {
+    return this.phaseEvaluations.filter(e => e.studentId?.toString() === this.user?.id?.toString());
+  }
+
+  getMyFormationProgress(): number {
+    if (!this.formation) return 0;
+    const phases = this.formation.phases || [];
+    if (phases.length === 0) return 0;
+    return Math.round(phases.reduce((s, p) => s + (p.progression || 0), 0) / phases.length);
   }
 
   get filteredEnrollments(): EnrollmentInfo[] {
@@ -582,6 +874,10 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     this.user = this.authService.getCurrentUser();
     this.formationId = this.route.snapshot.paramMap.get('id') || '';
     this.loadFormationDetails();
+    // Set default tab for stagiaire
+    if (this.user?.role === 'STAGIAIRE') {
+      this.activeTab = 'my-progress';
+    }
   }
 
   ngOnDestroy(): void { this.sub.unsubscribe(); }
@@ -803,6 +1099,10 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
       case 'VERROUILLEE': return '🔒 Verrouillée';
       default: return status;
     }
+  }
+
+  gradeToStars(grade: number): number {
+    return Math.round((grade / 20) * 5);
   }
 
   getGradeClass(grade: number): string {

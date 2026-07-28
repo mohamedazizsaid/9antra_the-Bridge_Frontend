@@ -144,7 +144,7 @@ import { User } from '../../../core/models/user.model';
 
             <!-- CTA -->
             <div class="mt-4 flex items-center justify-between">
-              <button class="text-xs text-[#C62761] font-semibold group-hover:text-[#F5A623] transition-colors">
+              <button class="text-xs text-[#C62761] font-semibold group-hover:text-[#F5A623] transition-colors" (click)="goToFormationDetail(f)">
                 Voir les détails →
               </button>
               <div class="flex -space-x-1">
@@ -286,7 +286,7 @@ export class FormationsListComponent implements OnInit {
   }
 
   openFormation(f: Formation): void {
-    const base = this.user?.role === 'FORMATEUR' ? '/dashboard/formateur' : '/dashboard';
+    const base = this.user?.role === 'FORMATEUR' ? '/dashboard/formateur' : '/dashboard/stagiaire';
     this.router.navigate([`${base}/formations/${f.id}`]);
   }
 
@@ -304,7 +304,9 @@ export class FormationsListComponent implements OnInit {
       default: return 'bg-white/5 text-white/30';
     }
   }
-
+  goToFormationDetail(formation: Formation): void {
+    this.router.navigate([`/dashboard/stagiaire/formations/${formation.id}`]);
+  }
   getStatusClass(status: string): string {
     switch (status) {
       case 'ACTIVE': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';

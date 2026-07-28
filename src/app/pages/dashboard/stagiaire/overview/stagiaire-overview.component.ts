@@ -226,9 +226,9 @@ import { Subscription } from 'rxjs';
                         class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]">
                   {{ enrollingId === f.id ? '⏳...' : "S'inscrire →" }}
                 </button>
-                <button *ngIf="isEnrolled(f.id)" (click)="setActiveTab('mes-formations')"
+                <button *ngIf="isEnrolled(f.id)" (click)="goToFormationDetail(f)"
                         class="px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
-                  Voir →
+                  Voir détails →
                 </button>
               </div>
               <!-- Enroll success/error messages -->

@@ -75,6 +75,18 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] }
       },
+      {
+        path: 'stagiaire/presence',
+        component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
+      },
+      {
+        path: 'stagiaire/notifications',
+        component: StagiaireOverviewComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] }
+      },
 
       // ─── Formateur ───────────────────────────────────────────────────────────
       {

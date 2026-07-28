@@ -57,9 +57,9 @@ import { User, Role } from '../../../core/models/user.model';
         <div class="p-3 border-t border-[var(--bridge-border)]">
           <div class="flex items-center gap-3 overflow-hidden px-1 py-1 rounded-lg hover:bg-white/[0.03] transition-all cursor-pointer"
                [routerLink]="settingsRoute">
-            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold border border-white/10 flex-shrink-0 text-sm">
-              <img *ngIf="user?.avatar" [src]="user!.avatar" class="w-full h-full rounded-full object-cover" alt="" onerror="this.style.display='none'">
-              <span>{{ userInitials }}</span>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold border border-white/10 flex-shrink-0 text-sm overflow-hidden">
+              <img *ngIf="user?.avatar" [src]="user!.avatar" class="w-full h-full rounded-full object-cover" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+              <span *ngIf="!user?.avatar" class="flex items-center justify-center w-full h-full">{{ userInitials }}</span>
             </div>
             <div class="flex-1 min-w-0" *ngIf="!isSidebarCollapsed">
               <h5 class="text-xs font-semibold text-white truncate">{{ user?.prenom }} {{ user?.nom }}</h5>
