@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../../core/services/user.service';
@@ -89,63 +89,85 @@ import { AdminService } from '../../../../core/services/admin.service';
       </div>
 
       <!-- User Detail Modal -->
-      <div *ngIf="selectedUser" class="fixed inset-0 z-50 flex items-center justify-center" (click)="selectedUser=null">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-        <div class="relative bg-[#10102A] rounded-2xl border border-[var(--bridge-border)] p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
+      <div *ngIf="selectedUser" class="modal-inline-overlay" (click)="selectedUser=null">
+        <div class="modal-backdrop"></div>
+        <div class="modal-panel w-full max-w-lg max-h-[90vh] overflow-y-auto"
              (click)="$event.stopPropagation()">
-          <div class="flex items-start justify-between mb-6">
-            <div class="flex items-center gap-4">
-              <img [src]="selectedUser.avatar" class="w-16 h-16 rounded-2xl object-cover border border-[var(--bridge-border)]" alt="">
-              <div>
-                <h3 class="font-syne font-bold text-xl text-white">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h3>
-                <p class="text-sm text-[var(--bridge-text-muted)]">{{ selectedUser.email }}</p>
-                <div class="flex items-center gap-2 mt-1">
-                  <span [class]="getRoleClass(selectedUser.role)" class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{{ selectedUser.role }}</span>
-                  <span [class]="getStatusClass(selectedUser.status)" class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{{ selectedUser.status }}</span>
+          <!-- Modal Top Accent Bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-3xl"></div>
+          <div class="p-7">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-7">
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[rgba(198,39,97,0.3)] shadow-[0_0_20px_rgba(198,39,97,0.2)]">
+                    <img [src]="selectedUser.avatar" class="w-full h-full object-cover" alt=""
+                         onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=U&backgroundColor=C62761'">
+                  </div>
+                  <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[#101026]"
+                       [class]="selectedUser.status === 'ACTIVE' ? 'bg-emerald-400' : selectedUser.status === 'BANNED' ? 'bg-red-400' : 'bg-yellow-400'"></div>
+                </div>
+                <div>
+                  <h3 class="font-syne font-bold text-xl text-white">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h3>
+                  <p class="text-sm text-[var(--bridge-text-muted)] mt-0.5">{{ selectedUser.email }}</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span [class]="getRoleClass(selectedUser.role)" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">{{ selectedUser.role }}</span>
+                    <span [class]="getStatusClass(selectedUser.status)" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">{{ selectedUser.status }}</span>
+                  </div>
                 </div>
               </div>
+              <button (click)="selectedUser=null" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 hover:border-white/10">
+                <span class="text-lg leading-none">✕</span>
+              </button>
             </div>
-            <button (click)="selectedUser=null" class="text-white/50 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-all">✕</button>
-          </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">Âge</p>
-              <p class="text-sm text-white font-medium mt-1">{{ selectedUser.age }} ans</p>
+            <!-- Info Grid -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">Âge</p>
+                <p class="text-base text-white font-semibold">{{ selectedUser.age || '—' }} <span class="text-xs text-white/40">ans</span></p>
+              </div>
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">Téléphone</p>
+                <p class="text-base text-white font-semibold truncate">{{ selectedUser.phone || '—' }}</p>
+              </div>
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">Inscrit le</p>
+                <p class="text-base text-white font-semibold">{{ selectedUser.createdAt | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">Dernière activité</p>
+                <p class="text-base text-white font-semibold">{{ selectedUser.lastActivity | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">Fournisseur auth</p>
+                <p class="text-base text-white font-semibold">{{ selectedUser.authProvider || '—' }}</p>
+              </div>
+              <div class="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] hover:border-[rgba(198,39,97,0.15)] transition-colors overflow-hidden">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-1">ID</p>
+                <p class="text-sm text-white font-mono truncate">{{ selectedUser.id }}</p>
+              </div>
             </div>
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">Téléphone</p>
-              <p class="text-sm text-white font-medium mt-1">{{ selectedUser.phone || 'Non renseigné' }}</p>
-            </div>
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">Date d'inscription</p>
-              <p class="text-sm text-white font-medium mt-1">{{ selectedUser.createdAt | date:'dd/MM/yyyy' }}</p>
-            </div>
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">Dernière activité</p>
-              <p class="text-sm text-white font-medium mt-1">{{ selectedUser.lastActivity | date:'dd/MM/yyyy' }}</p>
-            </div>
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">Fournisseur auth</p>
-              <p class="text-sm text-white font-medium mt-1">{{ selectedUser.authProvider }}</p>
-            </div>
-            <div class="bg-white/5 rounded-xl p-3">
-              <p class="text-xs text-[var(--bridge-text-muted)]">ID</p>
-              <p class="text-sm text-white font-medium mt-1 font-mono">{{ selectedUser.id }}</p>
-            </div>
-          </div>
 
-          <!-- Actions -->
-          <div class="flex gap-3 mt-6">
-            <select [(ngModel)]="newStatus" class="bridge-input flex-1 text-sm">
-              <option value="">Changer le statut...</option>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
-              <option value="BANNED">BANNED</option>
-            </select>
-            <button (click)="changeStatus()" [disabled]="!newStatus" class="bridge-btn-primary px-4 py-2 text-sm disabled:opacity-50">
-              Appliquer
-            </button>
+            <!-- Divider -->
+            <div class="h-px bg-gradient-to-r from-transparent via-[rgba(198,39,97,0.2)] to-transparent mb-5"></div>
+
+            <!-- Actions -->
+            <div>
+              <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-3">Changer le statut</p>
+              <div class="flex gap-3">
+                <select [(ngModel)]="newStatus" class="bridge-input flex-1 text-sm">
+                  <option value="">Sélectionner un statut...</option>
+                  <option value="ACTIVE">✅ ACTIVE</option>
+                  <option value="INACTIVE">⏸ INACTIVE</option>
+                  <option value="BANNED">🚫 BANNED</option>
+                </select>
+                <button (click)="changeStatus()" [disabled]="!newStatus"
+                        class="px-5 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_rgba(198,39,97,0.2)]">
+                  Appliquer
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

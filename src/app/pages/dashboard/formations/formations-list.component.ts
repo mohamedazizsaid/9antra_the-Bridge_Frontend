@@ -144,7 +144,7 @@ import { User } from '../../../core/models/user.model';
 
             <!-- CTA -->
             <div class="mt-4 flex items-center justify-between">
-              <button class="text-xs text-[#C62761] font-semibold group-hover:text-[#F5A623] transition-colors" (click)="goToFormationDetail(f)">
+              <button class="text-xs text-[#C62761] font-semibold group-hover:text-[#F5A623] transition-colors" (click)="openFormation(f)">
                 Voir les détails →
               </button>
               <div class="flex -space-x-1">

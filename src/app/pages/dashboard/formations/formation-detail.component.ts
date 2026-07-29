@@ -561,24 +561,27 @@ interface EnrollmentInfo {
       <div *ngIf="showAttendanceModal"
            class="bridge-modal-overlay"
            (click)="closeAttendance()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
+        <div class="glass-card w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
+          <!-- Top Accent Bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
+
           <!-- Modal Header -->
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)]">
+          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
             <div>
               <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence — Appel</h3>
               <p class="text-xs text-white/40 mt-0.5">
                 {{ selectedSeance?.formationNom }} · {{ selectedSeance?.date | date:'EEEE d MMMM y' }}
               </p>
             </div>
-            <div class="flex items-center gap-4">
-              <div class="text-center">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 px-4 py-2 rounded-2xl border bg-white/5 border-white/10">
                 <span class="text-2xl font-mono font-bold text-emerald-400">{{ getPresentInModal() }}</span>
                 <span class="text-white/30">/</span>
                 <span class="text-lg font-mono text-white/50">{{ activePresences.length }}</span>
-                <p class="text-[10px] text-white/40 uppercase tracking-wider">présents</p>
+                <p class="text-[9px] text-white/40 uppercase tracking-wider ml-1">présents</p>
               </div>
-              <button (click)="closeAttendance()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+              <button (click)="closeAttendance()" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5">✕</button>
             </div>
           </div>
 
@@ -656,11 +659,21 @@ interface EnrollmentInfo {
       <div *ngIf="showEvalModal && selectedEnrollment"
            class="bridge-modal-overlay"
            (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg p-6 space-y-5 shadow-2xl"
+        <div class="glass-card w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
              (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between">
-            <h3 class="font-syne font-bold text-lg text-white">⭐ Évaluation Stagiaire</h3>
-            <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+          <!-- Top Accent Bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
+
+          <!-- Header -->
+          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base shadow-lg">⭐</div>
+              <div>
+                <h3 class="font-syne font-bold text-base text-white leading-tight">Évaluation Stagiaire</h3>
+                <p class="text-[10px] text-white/40 mt-0.5">Saisie des notes & appréciation</p>
+              </div>
+            </div>
+            <button (click)="closeEvalModal()" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5">✕</button>
           </div>
 
           <!-- Student Info -->

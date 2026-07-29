@@ -251,10 +251,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    const savedEmail = localStorage.getItem('bridge_remember_email');
     this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: [savedEmail || '', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      rememberMe: [false]
+      rememberMe: [!!savedEmail]
     });
 
     this.startTypewriter();
@@ -304,10 +305,19 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     this.loading = true;
+    const rememberMe = this.loginForm.value.rememberMe;
+    const email = this.loginForm.value.email;
+
+    if (rememberMe) {
+      localStorage.setItem('bridge_remember_email', email);
+    } else {
+      localStorage.removeItem('bridge_remember_email');
+    }
+
     this.authService.login({
-      email: this.loginForm.value.email,
+      email: email,
       password: this.loginForm.value.password
-    }, this.loginForm.value.rememberMe).subscribe({
+    }, rememberMe).subscribe({
       next: (res) => {
         this.loading = false;
         const redirectUrl = this.authService.getRedirectUrl(res.role);

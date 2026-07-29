@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { interval, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { AnimatedBgComponent } from '../../../shared/components/animated-bg/animated-bg.component';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -26,11 +28,12 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <div class="my-auto py-12">
           <span class="text-xs font-bold text-[var(--bridge-gold)] tracking-widest uppercase">CONFIDENTIALITÉ</span>
-          <h2 class="font-syne font-extrabold text-3xl md:text-4xl lg:text-5xl mt-4 leading-tight max-w-md">
-            Entrez le code et choisissez un<br/>
-            <span class="text-gradient font-bold">nouveau mot de passe</span>
+          <h2 class="font-syne font-extrabold text-3xl md:text-4xl lg:text-5xl mt-4 leading-tight max-w-md min-h-[80px] md:min-h-[120px]">
+            {{ typedLine1 }}<br/>
+            <span class="text-gradient font-bold">{{ typedLine2 }}</span>
+            <span class="animate-pulse text-[var(--bridge-gold)]">|</span>
           </h2>
-          <p class="mt-6 text-[var(--bridge-text-muted)] text-sm md:text-base max-w-md leading-relaxed">
+          <p class="mt-6 text-[var(--bridge-text-muted)] text-sm md:text-base max-w-md leading-relaxed animate-fade">
             Le nouveau mot de passe sera protégé et appliquera le même thème que le reste de votre expérience The Bridge.
           </p>
         </div>
@@ -87,13 +90,26 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fade {
+      animation: fade 1s ease-in-out 1s both;
+    }
+  `]
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetForm;
   loading = false;
   submitted = false;
   message = '';
+
+  typedLine1 = '';
+  typedLine2 = '';
+  private subscriptions: Subscription[] = [];
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router, private route: ActivatedRoute) {
     this.resetForm = this.fb.group({
@@ -109,6 +125,35 @@ export class ResetPasswordComponent implements OnInit {
     if (email) {
       this.resetForm.patchValue({ email });
     }
+    this.startTypewriter();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  startTypewriter() {
+    const text1 = 'Entrez le code et choisissez un';
+    const text2 = 'nouveau mot de passe';
+
+    let i = 0;
+    const sub1 = interval(45).pipe(take(text1.length)).subscribe({
+      next: () => {
+        this.typedLine1 = text1.substring(0, i + 1);
+        i++;
+      },
+      complete: () => {
+        let j = 0;
+        const sub2 = interval(55).pipe(take(text2.length)).subscribe({
+          next: () => {
+            this.typedLine2 = text2.substring(0, j + 1);
+            j++;
+          }
+        });
+        this.subscriptions.push(sub2);
+      }
+    });
+    this.subscriptions.push(sub1);
   }
 
   passwordsMatch(group: any) {

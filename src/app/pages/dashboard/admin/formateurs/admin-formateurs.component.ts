@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -52,51 +52,81 @@ import { UserService } from '../../../../core/services/user.service';
       </div>
 
       <!-- Create Modal -->
-      <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center" (click)="showModal=false">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-        <div class="relative bg-[#10102A] rounded-2xl border border-[var(--bridge-border)] p-6 w-full max-w-md shadow-2xl"
-             (click)="$event.stopPropagation()">
-          <h3 class="font-syne font-bold text-white text-xl mb-6">Créer un compte formateur</h3>
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Prénom *</label>
-                <input [(ngModel)]="newFormateur.firstName" placeholder="Prénom" class="bridge-input w-full">
+      <div *ngIf="showModal" class="modal-inline-overlay" (click)="showModal=false">
+        <div class="modal-backdrop"></div>
+        <div class="modal-panel w-full max-w-md" (click)="$event.stopPropagation()">
+          <!-- Top Accent -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-3xl"></div>
+          <div class="p-7">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-7">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xl shadow-lg">
+                  🎓
+                </div>
+                <div>
+                  <h3 class="font-syne font-bold text-white text-lg leading-tight">Créer un compte formateur</h3>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">Remplissez le formulaire ci-dessous</p>
+                </div>
+              </div>
+              <button (click)="showModal=false" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5">✕</button>
+            </div>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-2">Prénom *</label>
+                  <input [(ngModel)]="newFormateur.firstName" placeholder="Prénom" class="bridge-input w-full">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-2">Nom *</label>
+                  <input [(ngModel)]="newFormateur.lastName" placeholder="Nom" class="bridge-input w-full">
+                </div>
               </div>
               <div>
-                <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Nom *</label>
-                <input [(ngModel)]="newFormateur.lastName" placeholder="Nom" class="bridge-input w-full">
+                <label class="block text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-2">Email professionnel *</label>
+                <input [(ngModel)]="newFormateur.email" type="email" placeholder="formateur@9antra.tn" class="bridge-input w-full">
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-2">Téléphone</label>
+                  <input [(ngModel)]="newFormateur.phone" placeholder="+216 xx xxx xxx" class="bridge-input w-full">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold mb-2">Âge</label>
+                  <input [(ngModel)]="newFormateur.age" type="number" placeholder="Ex: 35" class="bridge-input w-full">
+                </div>
               </div>
             </div>
-            <div>
-              <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Email professionnel *</label>
-              <input [(ngModel)]="newFormateur.email" type="email" placeholder="formateur@9antra.tn" class="bridge-input w-full">
+
+            <!-- Info Notice -->
+            <div class="flex items-start gap-3 bg-amber-500/[0.08] border border-amber-500/20 rounded-2xl p-4 mt-5">
+              <span class="text-xl flex-shrink-0">⚠️</span>
+              <p class="text-xs text-amber-300/80 leading-relaxed">
+                Un email sera envoyé au formateur avec un mot de passe temporaire. Il devra le changer lors de sa première connexion.
+              </p>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Téléphone</label>
-                <input [(ngModel)]="newFormateur.phone" placeholder="+216 xx xxx xxx" class="bridge-input w-full">
-              </div>
-              <div>
-                <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Âge</label>
-                <input [(ngModel)]="newFormateur.age" type="number" placeholder="Ex: 35" class="bridge-input w-full">
-              </div>
+
+            <!-- Feedback -->
+            <p *ngIf="createError" class="text-red-400 text-xs mt-4 text-center bg-red-500/10 border border-red-500/20 rounded-xl py-2.5">{{ createError }}</p>
+            <p *ngIf="createSuccess" class="text-emerald-400 text-xs mt-4 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2.5">{{ createSuccess }}</p>
+
+            <!-- Divider -->
+            <div class="h-px bg-gradient-to-r from-transparent via-[rgba(198,39,97,0.2)] to-transparent mt-5 mb-5"></div>
+
+            <!-- Actions -->
+            <div class="flex gap-3">
+              <button (click)="showModal=false" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-semibold text-sm rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                Annuler
+              </button>
+              <button (click)="createFormateur()"
+                      [disabled]="creating || !newFormateur.firstName || !newFormateur.lastName || !newFormateur.email"
+                      class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_rgba(198,39,97,0.2)] flex items-center justify-center gap-2">
+                <span *ngIf="creating" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+                <span>{{ creating ? 'Création...' : '✅ Créer et envoyer email' }}</span>
+              </button>
             </div>
           </div>
-          <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mt-4">
-            <p class="text-xs text-amber-400">
-              ⚠️ Un email sera envoyé au formateur avec un mot de passe temporaire. Il devra le changer lors de sa première connexion.
-            </p>
-          </div>
-          <div class="flex gap-3 mt-6">
-            <button (click)="showModal=false" class="bridge-btn-secondary flex-1 py-2.5 text-sm">Annuler</button>
-            <button (click)="createFormateur()" [disabled]="creating || !newFormateur.firstName || !newFormateur.lastName || !newFormateur.email"
-                    class="bridge-btn-primary flex-1 py-2.5 text-sm disabled:opacity-50">
-              {{ creating ? '⏳ Création...' : '✅ Créer et envoyer email' }}
-            </button>
-          </div>
-          <p *ngIf="createError" class="text-red-400 text-xs mt-3 text-center">{{ createError }}</p>
-          <p *ngIf="createSuccess" class="text-emerald-400 text-xs mt-3 text-center animate-fadeIn">{{ createSuccess }}</p>
         </div>
       </div>
     </div>

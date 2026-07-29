@@ -189,34 +189,55 @@ import { Subscription, forkJoin } from 'rxjs';
       <div *ngIf="showAttendanceModal"
            class="bridge-modal-overlay"
            (click)="closeAttendanceModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl"
+        <div class="glass-card w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
 
+          <!-- Top Accent Bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
+
           <!-- Modal Header -->
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
+          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
             <div>
-              <h3 class="font-syne font-bold text-lg text-white">📋 Feuille de Présence</h3>
+              <h3 class="font-syne font-bold text-lg text-white flex items-center gap-2">
+                📋 Feuille de Présence
+              </h3>
               <p class="text-xs text-white/40 mt-0.5" *ngIf="selectedSeance">
                 {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }} à {{ selectedSeance.heureDebut }}
               </p>
             </div>
-            <div class="flex items-center gap-4">
-              <!-- Live counter -->
-              <div class="text-center px-4 py-2 bg-white/5 rounded-xl">
-                <span class="text-2xl font-mono font-bold"
+            <div class="flex items-center gap-3">
+              <!-- Live counter badge -->
+              <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl border"
+                   [class]="getPresentInModal() === activePresences.length
+                     ? 'bg-emerald-500/10 border-emerald-500/20'
+                     : getPresentInModal() > 0
+                     ? 'bg-amber-500/10 border-amber-500/20'
+                     : 'bg-red-500/10 border-red-500/20'">
+                <span class="text-2xl font-mono font-bold leading-none"
                       [class]="getPresentInModal() === activePresences.length ? 'text-emerald-400' : getPresentInModal() > 0 ? 'text-[#F5A623]' : 'text-red-400'">
                   {{ getPresentInModal() }}
                 </span>
-                <span class="text-white/30 text-lg">/{{ activePresences.length }}</span>
-                <p class="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">présents</p>
+                <div>
+                  <p class="text-white/50 text-xs leading-none">/{{ activePresences.length }}</p>
+                  <p class="text-[9px] text-white/30 uppercase tracking-wider mt-0.5 leading-none">présents</p>
+                </div>
               </div>
               <button (click)="closeAttendanceModal()"
-                      class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+                      class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5">✕</button>
+            </div>
+          </div>
+
+          <!-- Presence Progress Bar -->
+          <div class="px-6 pt-3 pb-1 flex-shrink-0" *ngIf="activePresences.length > 0">
+            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500"
+                   [class]="getPresentInModal() === activePresences.length ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
+                   [style.width]="(activePresences.length > 0 ? (getPresentInModal() / activePresences.length) * 100 : 0) + '%'"></div>
             </div>
           </div>
 
           <!-- Quick All-Present / All-Absent -->
-          <div class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0 bg-black/10">
+          <div class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0">
             <span class="text-xs text-white/40">Action rapide :</span>
             <button (click)="markAll('PRESENT')"
                     class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all">
@@ -231,7 +252,7 @@ import { Subscription, forkJoin } from 'rxjs';
           <!-- Presences List -->
           <div class="flex-1 overflow-y-auto p-6 space-y-3">
             <div *ngFor="let presence of activePresences; let i = index"
-                 class="p-4 rounded-xl border transition-all"
+                 class="p-4 rounded-2xl border transition-all"
                  [class]="getPresenceCardClass(presence)"
                  [style.animation-delay]="(i * 30) + 'ms'"
                  style="animation: fadeSlideIn 0.3s ease both">
@@ -285,7 +306,7 @@ import { Subscription, forkJoin } from 'rxjs';
               <!-- Note input (for present students) -->
               <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present">
                 <input [(ngModel)]="presence.sessionNote" type="text"
-                       class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
+                       class="w-full bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
                        placeholder="Remarque rapide (ex: excellent travail, manque de participation…)" />
               </div>
             </div>
@@ -298,7 +319,7 @@ import { Subscription, forkJoin } from 'rxjs';
           </div>
 
           <!-- Modal Footer -->
-          <div class="p-6 border-t border-[var(--bridge-border)] flex flex-col sm:flex-row gap-3 flex-shrink-0">
+          <div class="px-6 py-4 border-t border-white/[0.06] flex flex-col sm:flex-row gap-3 flex-shrink-0">
             <button (click)="closeSession()"
                     *ngIf="selectedSeance && selectedSeance.status !== 'CLOTUREE'"
                     class="flex-1 py-3 bg-red-500/10 hover:bg-red-500/15 text-red-400 border border-red-500/20 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2">
@@ -318,13 +339,6 @@ import { Subscription, forkJoin } from 'rxjs';
     </div>
 
     <style>
-      .bridge-modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(8px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 50; padding: 1rem;
-      }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }

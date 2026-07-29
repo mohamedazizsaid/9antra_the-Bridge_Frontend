@@ -188,9 +188,11 @@ interface StagiaireCard {
       <div *ngIf="selectedStudent"
            class="bridge-modal-overlay"
            (click)="selectedStudent = null">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl"
+        <div class="glass-card w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl"
              (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
+          <!-- Top Accent -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
+          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
             <div class="flex items-center gap-4">
               <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xl font-bold text-white overflow-hidden">
                 <img *ngIf="selectedStudent.user.avatar" [src]="selectedStudent.user.avatar" class="w-full h-full object-cover" />
@@ -266,10 +268,18 @@ interface StagiaireCard {
       <div *ngIf="showEvalModal"
            class="bridge-modal-overlay"
            (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
+        <div class="glass-card w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
              (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
-            <h3 class="font-syne font-bold text-lg">⭐ Évaluer un Stagiaire</h3>
+          <!-- Top Accent -->
+          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
+          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base shadow-lg">⭐</div>
+              <div>
+                <h3 class="font-syne font-bold text-base text-white leading-tight">Évaluer un Stagiaire</h3>
+                <p class="text-[10px] text-white/40 mt-0.5">Note, étoiles et compétences</p>
+              </div>
+            </div>
             <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
           </div>
           <div class="flex-1 overflow-y-auto p-6 space-y-4">
@@ -345,13 +355,6 @@ interface StagiaireCard {
     </div>
 
     <style>
-      .bridge-modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(8px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 50; padding: 1rem;
-      }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }

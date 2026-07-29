@@ -332,7 +332,10 @@ import { Subscription } from 'rxjs';
         background: rgba(0,0,0,0.75);
         backdrop-filter: blur(8px);
         display: flex; align-items: center; justify-content: center;
-        z-index: 50; padding: 1rem;
+        z-index: 9999; padding: 1rem;
+      }
+      .bridge-modal-card {
+        background: #12122b;
       }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }

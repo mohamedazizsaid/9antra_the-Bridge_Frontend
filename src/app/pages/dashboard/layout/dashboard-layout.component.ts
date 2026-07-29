@@ -207,9 +207,11 @@ import { User, Role } from '../../../core/models/user.model';
         </div>
 
         <!-- Main Content View -->
-        <main class="flex-1 overflow-y-auto bg-[#08081A]">
-          <div class="p-6">
-            <router-outlet></router-outlet>
+        <main class="flex-1 min-h-0 bg-[#08081A] relative">
+          <div class="h-full overflow-y-auto">
+            <div class="p-6">
+              <router-outlet></router-outlet>
+            </div>
           </div>
         </main>
       </div>
