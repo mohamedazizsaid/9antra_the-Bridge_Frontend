@@ -122,8 +122,8 @@ import { User, Role } from '../../../core/models/user.model';
 
         <!-- ─── Notification Dropdown ─── -->
         <div *ngIf="showNotifications"
-             class="absolute right-4 top-[64px] w-[380px] max-w-[calc(100vw-2rem)] z-50 bridge-card overflow-hidden"
-             style="animation: dropdownIn 0.2s cubic-bezier(0.34,1.15,0.64,1) both; box-shadow: 0 20px 60px rgba(0,0,0,0.5)">
+             class="absolute right-4 top-[64px] w-[380px] max-w-[calc(100vw-2rem)] z-50 bridge-card overflow-hidden bg-[#10102A] backdrop-blur-xl border border-white/10"
+             style="animation: dropdownIn 0.2s cubic-bezier(0.34,1.15,0.64,1) both; box-shadow: 0 20px 60px rgba(0,0,0,0.85)">
           <div class="h-0.5 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--bridge-border)]">

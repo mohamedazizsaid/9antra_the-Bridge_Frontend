@@ -23,13 +23,17 @@ import { AdminUsersComponent } from './pages/dashboard/admin/users/admin-users.c
 import { AdminFormateursComponent } from './pages/dashboard/admin/formateurs/admin-formateurs.component';
 import { AdminBroadcastComponent } from './pages/dashboard/admin/broadcast/admin-broadcast.component';
 import { StagiaireHistoriqueComponent } from './pages/dashboard/stagiaire/historique/stagiaire-historique.component';
+import { PaymentCallbackComponent } from './pages/payment-callback/payment-callback.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
   { path: '', component: SplashComponent },
   { path: 'home', component: LandingComponent },
+  { path: 'payment-success', component: PaymentCallbackComponent },
+  { path: 'payment-fail', component: PaymentCallbackComponent },
   { path: 'auth/login', component: LoginComponent },
+
   { path: 'auth/forgot-password', component: ForgotPasswordComponent },
   { path: 'auth/reset-password', component: ResetPasswordComponent },
   { path: 'auth/register', component: RegisterComponent },

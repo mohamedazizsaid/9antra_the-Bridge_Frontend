@@ -458,20 +458,30 @@ import { Subscription } from 'rxjs';
                   <span *ngIf="getDaysUntilDue(p.dateEcheance) < 0"> — {{ -getDaysUntilDue(p.dateEcheance) }} jrs de retard</span>
                 </p>
               </div>
-              <!-- Amount -->
-              <div class="text-right flex-shrink-0">
+              <!-- Amount & Action -->
+              <div class="text-right flex-shrink-0 flex flex-col items-end gap-2">
                 <p class="font-mono font-bold text-white text-base">{{ p.montant }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase mt-1 inline-block"
-                      [class]="p.status === 'PAYE' ? 'bg-emerald-500/10 text-emerald-400'
-                             : p.status === 'EN_RETARD' ? 'bg-red-500/10 text-red-400'
-                             : 'bg-orange-500/10 text-orange-400'">
-                  {{ p.status === 'PAYE' ? 'Payé' : p.status === 'EN_RETARD' ? 'Retard' : 'Attente' }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <button *ngIf="p.status !== 'PAYE'"
+                          (click)="payWithFlouci(p)"
+                          [disabled]="loadingFlouciPaiementId === p.id"
+                          class="px-3 py-1 rounded-xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-xs hover:opacity-90 transition-all flex items-center gap-1 shadow-md disabled:opacity-50">
+                    <span *ngIf="loadingFlouciPaiementId === p.id" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    💳 {{ loadingFlouciPaiementId === p.id ? 'Chargement...' : 'Payer Flouci' }}
+                  </button>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase inline-block"
+                        [class]="p.status === 'PAYE' ? 'bg-emerald-500/10 text-emerald-400'
+                               : p.status === 'EN_RETARD' ? 'bg-red-500/10 text-red-400'
+                               : 'bg-orange-500/10 text-orange-400'">
+                    {{ p.status === 'PAYE' ? 'Payé' : p.status === 'EN_RETARD' ? 'Retard' : 'Attente' }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
 
       <!-- ═══════════════════════════════ TAB: CERTIFICATS ═══════════════════════════════ -->
       <div *ngIf="activeTab === 'certificats'" class="space-y-6">
@@ -750,6 +760,42 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
   paiements: Paiement[] = [];
   retardCount = 0;
   urgentPayments: Paiement[] = [];
+  loadingFlouciPaiementId: string | null = null;
+
+  payWithFlouci(paiement: Paiement): void {
+    if (!paiement) return;
+    this.loadingFlouciPaiementId = paiement.id;
+
+    // Récupérer l'inscription active pour extraire enrollmentId et phaseId
+    const firstFormation = this.myFormations && this.myFormations.length > 0 ? this.myFormations[0] : null;
+    const phaseId = Number(paiement.phaseNumero) || 1;
+    const enrollmentId = Number(paiement.id) || 1;
+
+    localStorage.setItem('pending_flouci_enrollment_id', enrollmentId.toString());
+    localStorage.setItem('pending_flouci_phase_id', phaseId.toString());
+
+    this.paiementService.initiateFlouciPayment({
+      enrollmentId: enrollmentId,
+      phaseId: phaseId,
+      amount: paiement.montant
+    }).subscribe({
+      next: (res) => {
+        this.loadingFlouciPaiementId = null;
+        if (res && res.result && res.result.link) {
+          window.location.href = res.result.link;
+        } else if (res && res.link) {
+          window.location.href = res.link;
+        } else {
+          alert('Impossible d\'obtenir le lien de paiement Flouci.');
+        }
+      },
+      error: (err) => {
+        this.loadingFlouciPaiementId = null;
+        alert(err?.error?.message || 'Erreur lors de la connexion avec Flouci.');
+      }
+    });
+  }
+
 
   // Certificates
   certificats: Certificat[] = [];

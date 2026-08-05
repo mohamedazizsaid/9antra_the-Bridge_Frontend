@@ -63,4 +63,18 @@ export class PaiementService {
       map(res => res.count)
     );
   }
+
+  initiateFlouciPayment(payload: { enrollmentId: number; phaseId: number; amount: number }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/flouci/initiate`, payload);
+  }
+
+  verifyFlouciPayment(paymentId: string, enrollmentId: number, phaseId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/flouci/verify/${paymentId}`, {
+      params: {
+        enrollmentId: enrollmentId.toString(),
+        phaseId: phaseId.toString()
+      }
+    });
+  }
 }
+
