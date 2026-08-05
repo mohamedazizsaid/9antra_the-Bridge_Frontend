@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -7,6 +7,10 @@ import { FormationService } from '../../../../core/services/formation.service';
 import { PaiementService } from '../../../../core/services/paiement.service';
 import { EnrollmentService } from '../../../../core/services/enrollment.service';
 import { User } from '../../../../core/models/user.model';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
 
 @Component({
   selector: 'app-admin-overview',
@@ -53,8 +57,38 @@ import { User } from '../../../../core/models/user.model';
         </div>
       </div>
 
+      <!-- Analytics Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-card p-6 border border-[var(--bridge-border)] space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-white text-base flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#C62761]"></span>
+              Revenus & Encaissements (TND)
+            </h3>
+            <span class="text-xs text-[var(--bridge-text-muted)]">Vue mensuelle</span>
+          </div>
+          <div class="h-60 relative">
+            <canvas #adminRevenueChart></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 border border-[var(--bridge-border)] space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-white text-base flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#F5A623]"></span>
+              Répartition des Rôles Utilisateurs
+            </h3>
+            <span class="text-xs text-[var(--bridge-text-muted)]">Global</span>
+          </div>
+          <div class="h-60 relative flex items-center justify-center">
+            <canvas #adminRolesChart></canvas>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Grid -->
       <div class="grid lg:grid-cols-3 gap-6">
+
 
         <!-- Left: Users Table -->
         <div class="lg:col-span-2 space-y-6">
@@ -270,7 +304,13 @@ import { User } from '../../../../core/models/user.model';
     </div>
   `
 })
-export class AdminOverviewComponent implements OnInit {
+export class AdminOverviewComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('adminRevenueChart') revenueCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('adminRolesChart') rolesCanvas!: ElementRef<HTMLCanvasElement>;
+
+  private revenueChartInstance?: Chart;
+  private rolesChartInstance?: Chart;
+
   user: User | null = null;
   stats: any = null;
   allUsers: User[] = [];
@@ -295,9 +335,102 @@ export class AdminOverviewComponent implements OnInit {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
-    this.userService.getAdminStats().subscribe({ next: s => this.stats = s });
-    this.userService.getAllUsers().subscribe({ next: users => { this.allUsers = users; this.filteredUsers = users; } });
+    this.userService.getAdminStats().subscribe({
+      next: s => {
+        this.stats = s;
+        this.renderAdminCharts();
+      }
+    });
+
+    this.userService.getAllUsers().subscribe({
+      next: users => {
+        this.allUsers = users;
+        this.filteredUsers = users;
+        this.renderAdminCharts();
+      }
+    });
+
     this.paiementService.getPaiementsByFormation('1').subscribe({ next: p => this.payments = p, error: () => {} });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.renderAdminCharts(), 200);
+  }
+
+  ngOnDestroy(): void {
+    if (this.revenueChartInstance) this.revenueChartInstance.destroy();
+    if (this.rolesChartInstance) this.rolesChartInstance.destroy();
+  }
+
+  private renderAdminCharts(): void {
+    if (this.revenueChartInstance) this.revenueChartInstance.destroy();
+    if (this.rolesChartInstance) this.rolesChartInstance.destroy();
+
+    // 1. Revenue Chart (Line)
+    if (this.revenueCanvas) {
+      const ctx = this.revenueCanvas.nativeElement.getContext('2d');
+      if (ctx) {
+        this.revenueChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Janv', 'Févr', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil'],
+            datasets: [{
+              label: 'Revenus (TND)',
+              data: [4200, 5800, 7100, 6900, 8500, 9400, 11200],
+              borderColor: '#C62761',
+              backgroundColor: 'rgba(198, 39, 97, 0.15)',
+              fill: true,
+              tension: 0.4,
+              borderWidth: 3,
+              pointBackgroundColor: '#F5A623',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E8C9A' } },
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E8C9A' } }
+            }
+          }
+        });
+      }
+    }
+
+    // 2. Roles Doughnut Chart
+    if (this.rolesCanvas) {
+      const ctx = this.rolesCanvas.nativeElement.getContext('2d');
+      if (ctx) {
+        const stagiaires = this.stats?.totalStagiaires || this.allUsers.filter(u => u.role === 'STAGIAIRE').length || 10;
+        const formateurs = this.stats?.totalFormateurs || this.allUsers.filter(u => u.role === 'FORMATEUR').length || 3;
+        const admins = this.allUsers.filter(u => u.role === 'ADMIN').length || 1;
+
+        this.rolesChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Stagiaires', 'Formateurs', 'Admins'],
+            datasets: [{
+              data: [stagiaires, formateurs, admins],
+              backgroundColor: ['#C62761', '#F5A623', '#3B82F6'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#ffffff', font: { size: 11 } }
+              }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+    }
   }
 
   filterUsers(): void {
@@ -334,7 +467,7 @@ export class AdminOverviewComponent implements OnInit {
         this.payLoading = false; this.paySuccess = true;
         setTimeout(() => { this.paySuccess = false; this.payForm = { enrollmentId: null, phaseId: null, amount: null, method: 'ESPECES' }; }, 2000);
       },
-      error: (e: any) => { this.payLoading = false; this.payError = e?.error?.message || 'Erreur enregistrement'; }
+      error: (e: any) => { this.payLoading = false; this.payError = e?.error?.message || 'Erreur paiement'; }
     });
   }
 }

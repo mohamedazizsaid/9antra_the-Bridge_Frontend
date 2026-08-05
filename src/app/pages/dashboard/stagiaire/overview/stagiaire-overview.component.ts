@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -14,6 +14,10 @@ import { Paiement } from '../../../../core/models/paiement.model';
 import { Certificat } from '../../../../core/models/certificat.model';
 import { Notification } from '../../../../core/models/notification.model';
 import { Subscription } from 'rxjs';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
 
 @Component({
   selector: 'app-stagiaire-overview',
@@ -596,11 +600,16 @@ import { Subscription } from 'rxjs';
       <div *ngIf="activeTab === 'presence'" class="space-y-6">
 
         <!-- Global attendance stat -->
-        <div class="glass-card border border-[var(--bridge-border)] p-6">
+        <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-syne font-bold text-lg">📊 Mon Assiduité Globale</h3>
+            <h3 class="font-syne font-bold text-lg">📊 Analyse de Présence & Progression</h3>
             <span class="font-mono text-2xl font-black" [class]="attendanceRate >= 75 ? 'text-emerald-400' : 'text-red-400'">{{ attendanceRate }}%</span>
           </div>
+
+          <div class="h-64 relative">
+            <canvas #stagiairePresenceChart></canvas>
+          </div>
+
           <div class="h-3 rounded-full bg-white/5 overflow-hidden mb-2">
             <div class="h-full rounded-full transition-all duration-1000"
                  [class]="attendanceRate >= 75 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-red-500 to-orange-500'"
@@ -615,6 +624,7 @@ import { Subscription } from 'rxjs';
         </div>
 
         <!-- Per formation breakdown -->
+
         <div *ngFor="let f of myFormations" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
           <div class="p-5 border-b border-[var(--bridge-border)] flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base flex-shrink-0">📚</div>
@@ -728,17 +738,21 @@ import { Subscription } from 'rxjs';
     </div>
   `
 })
-export class StagiaireOverviewComponent implements OnInit, OnDestroy {
+export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('stagiairePresenceChart') presenceCanvas!: ElementRef<HTMLCanvasElement>;
+  private presenceChartInstance?: Chart;
+
   user: User | null = null;
   activeTab: string = 'catalogue';
 
+
   tabs = [
-    { key: 'catalogue',      icon: '🔎', label: 'Catalogue' },
+    { key: 'catalogue', icon: '🔎', label: 'Catalogue' },
     { key: 'mes-formations', icon: '📚', label: 'Mes Formations' },
-    { key: 'paiements',      icon: '💳', label: 'Paiements' },
-    { key: 'certificats',    icon: '🏆', label: 'Certificats' },
-    { key: 'presence',       icon: '📋', label: 'Présence & Éval.' },
-    { key: 'notifications',  icon: '🔔', label: 'Notifications' },
+    { key: 'paiements', icon: '💳', label: 'Paiements' },
+    { key: 'certificats', icon: '🏆', label: 'Certificats' },
+    { key: 'presence', icon: '📋', label: 'Présence & Éval.' },
+    { key: 'notifications', icon: '🔔', label: 'Notifications' },
   ];
 
   // Catalogue
@@ -841,7 +855,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private enrollmentService: EnrollmentService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -906,7 +920,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.formationService.getUpcomingSeances().subscribe({
         next: data => { this.upcomingSeances = data; },
-        error: () => {}
+        error: () => { }
       })
     );
 
@@ -924,7 +938,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
             return days >= 0 && days <= 10;
           });
         },
-        error: () => {}
+        error: () => { }
       })
     );
 
@@ -932,7 +946,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.certificatService.getCertificatsByStagiaire(this.user.id).subscribe({
         next: data => { this.certificats = data; },
-        error: () => {}
+        error: () => { }
       })
     );
 
@@ -947,7 +961,51 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     this.notificationService.refreshNotifications();
   }
 
-  ngOnDestroy(): void { this.sub.unsubscribe(); }
+  ngAfterViewInit(): void {
+    setTimeout(() => this.renderStagiaireChart(), 200);
+  }
+
+  ngOnDestroy(): void {
+    if (this.presenceChartInstance) this.presenceChartInstance.destroy();
+    this.sub.unsubscribe();
+  }
+
+  private renderStagiaireChart(): void {
+    if (this.presenceChartInstance) this.presenceChartInstance.destroy();
+
+    if (this.presenceCanvas) {
+      const ctx = this.presenceCanvas.nativeElement.getContext('2d');
+      if (ctx) {
+        this.presenceChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4'],
+            datasets: [{
+              label: 'Mon Assiduité (%)',
+              data: [100, 85, 90, 95],
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              fill: true,
+              tension: 0.4,
+              borderWidth: 3,
+              pointBackgroundColor: '#F5A623',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E8C9A' } },
+              y: { min: 50, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E8C9A' } }
+            }
+          }
+        });
+      }
+    }
+  }
+
 
   // ── Catalogue ──────────────────────────────────────────────────────────────
   filterCatalogue(): void {
@@ -1089,7 +1147,7 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
     else if (key === 'certificats') path += '/certificats';
     else if (key === 'presence') path += '/presence';
     else if (key === 'notifications') path += '/notifications';
-    
+
     this.router.navigateByUrl(path);
   }
 

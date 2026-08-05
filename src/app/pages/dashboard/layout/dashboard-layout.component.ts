@@ -233,7 +233,7 @@ export class DashboardLayoutComponent implements OnInit {
     private authService: AuthService,
     private notificationService: NotificationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -262,7 +262,6 @@ export class DashboardLayoutComponent implements OnInit {
     if (this.user.role === 'STAGIAIRE') {
       this.menuItems = [
         { section: 'Principal' },
-        { label: 'Vue d\'ensemble', route: '/dashboard/stagiaire', icon: '📊', exact: true },
         { label: 'Mes Formations', route: '/dashboard/stagiaire/formations', icon: '📚' },
         { section: 'Personnel' },
         { label: 'Certificats', route: '/dashboard/stagiaire/certificats', icon: '🏅' },
@@ -274,7 +273,7 @@ export class DashboardLayoutComponent implements OnInit {
     } else if (this.user.role === 'FORMATEUR') {
       this.menuItems = [
         { section: 'Principal' },
-        { label: 'Vue d\'ensemble', route: '/dashboard/formateur', icon: '📊', exact: true },
+        { label: 'Vue d\'ensemble', route: '/dashboard/formateur', icon: '🏠', exact: true },
         { label: 'Agenda & Séances', route: '/dashboard/formateur/seances', icon: '📅' },
         { label: 'Mes Formations', route: '/dashboard/formateur/formations', icon: '🏫' },
         { section: 'Stagiaires' },
@@ -285,6 +284,7 @@ export class DashboardLayoutComponent implements OnInit {
         { label: 'Paramètres', route: '/dashboard/settings', icon: '⚙️' },
       ];
     } else {
+
       this.menuItems = [
         { section: 'Tableau de bord' },
         { label: 'Vue d\'ensemble', route: '/dashboard/admin', icon: '📊', exact: true },
