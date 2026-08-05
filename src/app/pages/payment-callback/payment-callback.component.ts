@@ -18,8 +18,8 @@ import { PaiementService } from '../../core/services/paiement.service';
         <div *ngIf="loading" class="space-y-6 py-6">
           <div class="w-16 h-16 border-4 border-[#C62761] border-t-transparent rounded-full animate-spin mx-auto"></div>
           <div>
-            <h2 class="text-xl font-bold text-white font-syne">Vérification du paiement Flouci</h2>
-            <p class="text-sm text-[var(--bridge-text-muted)] mt-2">Veuillez patienter pendant la confirmation de votre transaction...</p>
+            <h2 class="text-xl font-bold text-white font-syne">Vérification du paiement Stripe</h2>
+            <p class="text-sm text-[var(--bridge-text-muted)] mt-2">Veuillez patienter pendant la confirmation de votre transaction Stripe...</p>
           </div>
         </div>
 
@@ -30,7 +30,7 @@ import { PaiementService } from '../../core/services/paiement.service';
           </div>
           <div>
             <h2 class="text-2xl font-bold text-white font-syne">Paiement Réussi !</h2>
-            <p class="text-sm text-emerald-300/80 mt-2">Votre règlement Flouci a été validé avec succès. Votre accès et votre progression ont été mis à jour.</p>
+            <p class="text-sm text-emerald-300/80 mt-2">Votre règlement Stripe a été validé avec succès. Votre accès et votre progression ont été mis à jour.</p>
           </div>
           <div class="pt-4">
             <button (click)="goToDashboard()"
@@ -47,7 +47,7 @@ import { PaiementService } from '../../core/services/paiement.service';
           </div>
           <div>
             <h2 class="text-2xl font-bold text-white font-syne">Paiement Non Validé</h2>
-            <p class="text-sm text-red-300/80 mt-2">{{ errorMessage || 'La transaction n\'a pas pu être confirmée par Flouci.' }}</p>
+            <p class="text-sm text-red-300/80 mt-2">{{ errorMessage || 'La transaction n\'a pas pu être confirmée par Stripe.' }}</p>
           </div>
           <div class="pt-4 flex gap-3">
             <button (click)="goToDashboard()"
@@ -73,26 +73,25 @@ export class PaymentCallbackComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const paymentId = this.route.snapshot.queryParamMap.get('payment_id');
-    const enrollmentId = this.route.snapshot.queryParamMap.get('enrollmentId') || localStorage.getItem('pending_flouci_enrollment_id');
-    const phaseId = this.route.snapshot.queryParamMap.get('phaseId') || localStorage.getItem('pending_flouci_phase_id');
+    const sessionId = this.route.snapshot.queryParamMap.get('session_id');
+    const enrollmentId = this.route.snapshot.queryParamMap.get('enrollmentId') || localStorage.getItem('pending_stripe_enrollment_id');
+    const phaseId = this.route.snapshot.queryParamMap.get('phaseId') || localStorage.getItem('pending_stripe_phase_id');
 
-    if (paymentId && enrollmentId && phaseId) {
-      this.paiementService.verifyFlouciPayment(paymentId, Number(enrollmentId), Number(phaseId)).subscribe({
+    if (sessionId && enrollmentId && phaseId) {
+      this.paiementService.verifyStripePayment(sessionId, Number(enrollmentId), Number(phaseId)).subscribe({
         next: () => {
           this.loading = false;
           this.success = true;
-          localStorage.removeItem('pending_flouci_enrollment_id');
-          localStorage.removeItem('pending_flouci_phase_id');
+          localStorage.removeItem('pending_stripe_enrollment_id');
+          localStorage.removeItem('pending_stripe_phase_id');
         },
-        error: (err) => {
+        error: (err: any) => {
           this.loading = false;
           this.success = false;
-          this.errorMessage = err?.error?.message || 'Erreur lors de la validation du paiement.';
+          this.errorMessage = err?.error?.message || 'Erreur lors de la validation du paiement Stripe.';
         }
       });
     } else {
-      // Si la redirection revient sur success sans paramètre payment_id direct
       const isSuccessPath = this.router.url.includes('payment-success');
       this.loading = false;
       this.success = isSuccessPath;

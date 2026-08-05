@@ -64,17 +64,19 @@ export class PaiementService {
     );
   }
 
-  initiateFlouciPayment(payload: { enrollmentId: number; phaseId: number; amount: number }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/flouci/initiate`, payload);
+  initiateStripePayment(payload: { enrollmentId: number; phaseId: number; amount: number }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/stripe/create-checkout-session`, payload);
   }
 
-  verifyFlouciPayment(paymentId: string, enrollmentId: number, phaseId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/flouci/verify/${paymentId}`, {
+  verifyStripePayment(sessionId: string, enrollmentId: number, phaseId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/stripe/verify`, {
       params: {
+        sessionId: sessionId,
         enrollmentId: enrollmentId.toString(),
         phaseId: phaseId.toString()
       }
     });
   }
 }
+
 

@@ -463,11 +463,11 @@ import { Subscription } from 'rxjs';
                 <p class="font-mono font-bold text-white text-base">{{ p.montant }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
                 <div class="flex items-center gap-2">
                   <button *ngIf="p.status !== 'PAYE'"
-                          (click)="payWithFlouci(p)"
-                          [disabled]="loadingFlouciPaiementId === p.id"
+                          (click)="payWithStripe(p)"
+                          [disabled]="loadingStripePaiementId === p.id"
                           class="px-3 py-1 rounded-xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-xs hover:opacity-90 transition-all flex items-center gap-1 shadow-md disabled:opacity-50">
-                    <span *ngIf="loadingFlouciPaiementId === p.id" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    💳 {{ loadingFlouciPaiementId === p.id ? 'Chargement...' : 'Payer Flouci' }}
+                    <span *ngIf="loadingStripePaiementId === p.id" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    💳 {{ loadingStripePaiementId === p.id ? 'Chargement...' : 'Payer Stripe' }}
                   </button>
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase inline-block"
                         [class]="p.status === 'PAYE' ? 'bg-emerald-500/10 text-emerald-400'
@@ -476,6 +476,7 @@ import { Subscription } from 'rxjs';
                     {{ p.status === 'PAYE' ? 'Payé' : p.status === 'EN_RETARD' ? 'Retard' : 'Attente' }}
                   </span>
                 </div>
+
               </div>
             </div>
           </div>
@@ -760,41 +761,38 @@ export class StagiaireOverviewComponent implements OnInit, OnDestroy {
   paiements: Paiement[] = [];
   retardCount = 0;
   urgentPayments: Paiement[] = [];
-  loadingFlouciPaiementId: string | null = null;
+  loadingStripePaiementId: string | null = null;
 
-  payWithFlouci(paiement: Paiement): void {
+  payWithStripe(paiement: Paiement): void {
     if (!paiement) return;
-    this.loadingFlouciPaiementId = paiement.id;
+    this.loadingStripePaiementId = paiement.id;
 
-    // Récupérer l'inscription active pour extraire enrollmentId et phaseId
-    const firstFormation = this.myFormations && this.myFormations.length > 0 ? this.myFormations[0] : null;
     const phaseId = Number(paiement.phaseNumero) || 1;
     const enrollmentId = Number(paiement.id) || 1;
 
-    localStorage.setItem('pending_flouci_enrollment_id', enrollmentId.toString());
-    localStorage.setItem('pending_flouci_phase_id', phaseId.toString());
+    localStorage.setItem('pending_stripe_enrollment_id', enrollmentId.toString());
+    localStorage.setItem('pending_stripe_phase_id', phaseId.toString());
 
-    this.paiementService.initiateFlouciPayment({
+    this.paiementService.initiateStripePayment({
       enrollmentId: enrollmentId,
       phaseId: phaseId,
       amount: paiement.montant
     }).subscribe({
-      next: (res) => {
-        this.loadingFlouciPaiementId = null;
-        if (res && res.result && res.result.link) {
-          window.location.href = res.result.link;
-        } else if (res && res.link) {
-          window.location.href = res.link;
+      next: (res: any) => {
+        this.loadingStripePaiementId = null;
+        if (res && res.url) {
+          window.location.href = res.url;
         } else {
-          alert('Impossible d\'obtenir le lien de paiement Flouci.');
+          alert('Impossible d\'obtenir le lien de paiement Stripe.');
         }
       },
-      error: (err) => {
-        this.loadingFlouciPaiementId = null;
-        alert(err?.error?.message || 'Erreur lors de la connexion avec Flouci.');
+      error: (err: any) => {
+        this.loadingStripePaiementId = null;
+        alert(err?.error?.message || 'Erreur lors de la connexion avec Stripe.');
       }
     });
   }
+
 
 
   // Certificates
