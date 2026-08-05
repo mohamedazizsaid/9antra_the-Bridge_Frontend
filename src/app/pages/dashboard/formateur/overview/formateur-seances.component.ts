@@ -185,160 +185,154 @@ import { Subscription, forkJoin } from 'rxjs';
         </div>
       </div>
 
-      <!-- ─── Attendance Modal ────────────────────────────── -->
-      <div *ngIf="showAttendanceModal"
-           class="bridge-modal-overlay"
-           (click)="closeAttendanceModal()">
-        <div class="glass-card w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl"
-             (click)="$event.stopPropagation()">
+      <!-- ─── Inline : Feuille de Présence ─── -->
+      <div *ngIf="showAttendanceModal" class="bridge-card overflow-hidden inline-view-card">
+        <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
 
-          <!-- Top Accent Bar -->
-          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
-
-          <!-- Modal Header -->
-          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
-            <div>
-              <h3 class="font-syne font-bold text-lg text-white flex items-center gap-2">
-                📋 Feuille de Présence
-              </h3>
-              <p class="text-xs text-white/40 mt-0.5" *ngIf="selectedSeance">
-                {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }} à {{ selectedSeance.heureDebut }}
-              </p>
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+          <div>
+            <h3 class="font-syne font-bold text-sm text-white flex items-center gap-2">📋 Feuille de Présence</h3>
+            <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5" *ngIf="selectedSeance">
+              {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM y' }} à {{ selectedSeance.heureDebut }}
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Live counter badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl border"
+                 [class]="getPresentInModal() === activePresences.length
+                   ? 'bg-emerald-500/10 border-emerald-500/20'
+                   : getPresentInModal() > 0
+                   ? 'bg-amber-500/10 border-amber-500/20'
+                   : 'bg-red-500/10 border-red-500/20'">
+              <span class="text-xl font-mono font-bold leading-none"
+                    [class]="getPresentInModal() === activePresences.length ? 'text-emerald-400' : getPresentInModal() > 0 ? 'text-[#F5A623]' : 'text-red-400'">
+                {{ getPresentInModal() }}
+              </span>
+              <div>
+                <p class="text-white/50 text-xs leading-none">/{{ activePresences.length }}</p>
+                <p class="text-[9px] text-white/30 uppercase tracking-wider mt-0.5 leading-none">présents</p>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <!-- Live counter badge -->
-              <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl border"
-                   [class]="getPresentInModal() === activePresences.length
-                     ? 'bg-emerald-500/10 border-emerald-500/20'
-                     : getPresentInModal() > 0
-                     ? 'bg-amber-500/10 border-amber-500/20'
-                     : 'bg-red-500/10 border-red-500/20'">
-                <span class="text-2xl font-mono font-bold leading-none"
-                      [class]="getPresentInModal() === activePresences.length ? 'text-emerald-400' : getPresentInModal() > 0 ? 'text-[#F5A623]' : 'text-red-400'">
-                  {{ getPresentInModal() }}
-                </span>
+            <button (click)="closeAttendanceModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="px-5 pt-3 pb-1" *ngIf="activePresences.length > 0">
+          <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500"
+                 [class]="getPresentInModal() === activePresences.length ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
+                 [style.width]="(activePresences.length > 0 ? (getPresentInModal() / activePresences.length) * 100 : 0) + '%'"></div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="flex items-center gap-3 px-5 py-3 border-b border-white/5">
+          <span class="text-xs text-white/40">Action rapide :</span>
+          <button (click)="markAll('PRESENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all">
+            ✓ Tous présents
+          </button>
+          <button (click)="markAll('ABSENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all">
+            ✗ Tous absents
+          </button>
+        </div>
+
+        <!-- Presences List -->
+        <div class="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
+          <div *ngFor="let presence of activePresences; let i = index"
+               class="p-4 rounded-2xl border transition-all"
+               [class]="getPresenceCardClass(presence)"
+               [style.animation-delay]="(i * 30) + 'ms'"
+               style="animation: fadeSlideIn 0.3s ease both">
+
+            <div class="flex items-center justify-between gap-4">
+              <!-- Student info -->
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
+                     [class]="presence.present ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623]' : 'bg-white/10'">
+                  <img *ngIf="presence.stagiaireAvatar" [src]="presence.stagiaireAvatar" class="w-full h-full object-cover" />
+                  <span *ngIf="!presence.stagiaireAvatar">{{ (presence.stagiaireNom || 'S')[0] }}</span>
+                </div>
                 <div>
-                  <p class="text-white/50 text-xs leading-none">/{{ activePresences.length }}</p>
-                  <p class="text-[9px] text-white/30 uppercase tracking-wider mt-0.5 leading-none">présents</p>
-                </div>
-              </div>
-              <button (click)="closeAttendanceModal()"
-                      class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5">✕</button>
-            </div>
-          </div>
-
-          <!-- Presence Progress Bar -->
-          <div class="px-6 pt-3 pb-1 flex-shrink-0" *ngIf="activePresences.length > 0">
-            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500"
-                   [class]="getPresentInModal() === activePresences.length ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
-                   [style.width]="(activePresences.length > 0 ? (getPresentInModal() / activePresences.length) * 100 : 0) + '%'"></div>
-            </div>
-          </div>
-
-          <!-- Quick All-Present / All-Absent -->
-          <div class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0">
-            <span class="text-xs text-white/40">Action rapide :</span>
-            <button (click)="markAll('PRESENT')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all">
-              ✓ Tous présents
-            </button>
-            <button (click)="markAll('ABSENT')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all">
-              ✗ Tous absents
-            </button>
-          </div>
-
-          <!-- Presences List -->
-          <div class="flex-1 overflow-y-auto p-6 space-y-3">
-            <div *ngFor="let presence of activePresences; let i = index"
-                 class="p-4 rounded-2xl border transition-all"
-                 [class]="getPresenceCardClass(presence)"
-                 [style.animation-delay]="(i * 30) + 'ms'"
-                 style="animation: fadeSlideIn 0.3s ease both">
-
-              <div class="flex items-center justify-between gap-4">
-                <!-- Student info -->
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
-                       [class]="presence.present ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623]' : 'bg-white/10'">
-                    <img *ngIf="presence.stagiaireAvatar" [src]="presence.stagiaireAvatar" class="w-full h-full object-cover" />
-                    <span *ngIf="!presence.stagiaireAvatar">{{ (presence.stagiaireNom || 'S')[0] }}</span>
-                  </div>
-                  <div>
-                    <span class="text-sm font-semibold text-white">{{ presence.stagiaireNom }}</span>
-                    <!-- Star Rating (présents uniquement) -->
-                    <div class="flex items-center gap-0.5 mt-0.5" *ngIf="presence.present">
-                      <button *ngFor="let star of [1,2,3,4,5]"
-                              (click)="presence.starRating = star"
-                              class="text-sm transition-transform hover:scale-125 focus:outline-none leading-none"
-                              [class]="(presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
-                    </div>
+                  <span class="text-sm font-semibold text-white">{{ presence.stagiaireNom }}</span>
+                  <div class="flex items-center gap-0.5 mt-0.5" *ngIf="presence.present">
+                    <button *ngFor="let star of [1,2,3,4,5]"
+                            (click)="presence.starRating = star"
+                            class="text-sm transition-transform hover:scale-125 focus:outline-none leading-none"
+                            [class]="(presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
                   </div>
                 </div>
-
-                <!-- Status Buttons -->
-                <div class="flex items-center gap-1.5 flex-shrink-0">
-                  <button (click)="setPresenceStatus(presence, 'PRESENT')"
-                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                          [class]="presence.present && !isRetard(presence)
-                            ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                            : 'bg-white/5 text-white/40 hover:bg-emerald-500/20 hover:text-emerald-400'">
-                    ✓ Présent
-                  </button>
-                  <button (click)="setPresenceStatus(presence, 'RETARD')"
-                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                          [class]="presence.present && isRetard(presence)
-                            ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.3)]'
-                            : 'bg-white/5 text-white/40 hover:bg-amber-500/20 hover:text-amber-400'">
-                    ⏰ Retard
-                  </button>
-                  <button (click)="setPresenceStatus(presence, 'ABSENT')"
-                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                          [class]="!presence.present
-                            ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]'
-                            : 'bg-white/5 text-white/40 hover:bg-rose-500/20 hover:text-rose-400'">
-                    ✗ Absent
-                  </button>
-                </div>
               </div>
 
-              <!-- Note input (for present students) -->
-              <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present">
-                <input [(ngModel)]="presence.sessionNote" type="text"
-                       class="w-full bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
-                       placeholder="Remarque rapide (ex: excellent travail, manque de participation…)" />
+              <!-- Status Buttons -->
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <button (click)="setPresenceStatus(presence, 'PRESENT')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        [class]="presence.present && !isRetard(presence)
+                          ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                          : 'bg-white/5 text-white/40 hover:bg-emerald-500/20 hover:text-emerald-400'">
+                  ✓ Présent
+                </button>
+                <button (click)="setPresenceStatus(presence, 'RETARD')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        [class]="presence.present && isRetard(presence)
+                          ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.3)]'
+                          : 'bg-white/5 text-white/40 hover:bg-amber-500/20 hover:text-amber-400'">
+                  ⏰ Retard
+                </button>
+                <button (click)="setPresenceStatus(presence, 'ABSENT')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        [class]="!presence.present
+                          ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]'
+                          : 'bg-white/5 text-white/40 hover:bg-rose-500/20 hover:text-rose-400'">
+                  ✗ Absent
+                </button>
               </div>
             </div>
 
-            <div *ngIf="activePresences.length === 0" class="text-center py-12">
-              <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl mx-auto mb-4">👥</div>
-              <p class="text-white/50 font-medium">Aucun stagiaire pour cette séance</p>
-              <p class="text-white/30 text-xs mt-2">Les stagiaires apparaîtront ici une fois inscrits.</p>
+            <!-- Note input -->
+            <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present">
+              <input [(ngModel)]="presence.sessionNote" type="text"
+                     class="w-full bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
+                     placeholder="Remarque rapide (ex: excellent travail, manque de participation…)" />
             </div>
           </div>
 
-          <!-- Modal Footer -->
-          <div class="px-6 py-4 border-t border-white/[0.06] flex flex-col sm:flex-row gap-3 flex-shrink-0">
-            <button (click)="closeSession()"
-                    *ngIf="selectedSeance && selectedSeance.status !== 'CLOTUREE'"
-                    class="flex-1 py-3 bg-red-500/10 hover:bg-red-500/15 text-red-400 border border-red-500/20 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2">
-              🔒 Clôturer la Séance
-            </button>
-            <button (click)="saveAttendance()"
-                    [disabled]="savingAttendance"
-                    class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm shadow-[0_0_15px_rgba(198,39,97,0.25)] flex items-center justify-center gap-2">
-              <span *ngIf="savingAttendance" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-              <span *ngIf="!savingAttendance">✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})</span>
-              <span *ngIf="savingAttendance">Enregistrement…</span>
-            </button>
+          <div *ngIf="activePresences.length === 0" class="text-center py-12">
+            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl mx-auto mb-4">👥</div>
+            <p class="text-white/50 font-medium">Aucun stagiaire pour cette séance</p>
+            <p class="text-white/30 text-xs mt-2">Les stagiaires apparaîtront ici une fois inscrits.</p>
           </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex gap-3 px-5 py-4 border-t border-[var(--bridge-border)] flex-wrap">
+          <button (click)="closeSession()"
+                  *ngIf="selectedSeance && selectedSeance.status !== 'CLOTUREE'"
+                  class="py-2.5 px-5 bg-red-500/10 hover:bg-red-500/15 text-red-400 border border-red-500/20 font-bold rounded-xl transition-all text-sm flex items-center gap-2">
+            🔒 Clôturer la Séance
+          </button>
+          <button (click)="saveAttendance()"
+                  [disabled]="savingAttendance"
+                  class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm flex items-center justify-center gap-2">
+            <span *ngIf="savingAttendance" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+            <span *ngIf="!savingAttendance">✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})</span>
+            <span *ngIf="savingAttendance">Enregistrement…</span>
+          </button>
         </div>
       </div>
 
     </div>
 
     <style>
+      @keyframes inlineCardIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .inline-view-card { animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both; }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -346,6 +340,7 @@ import { Subscription, forkJoin } from 'rxjs';
       .animate-fadein { animation: fadeSlideIn 0.4s ease both; }
     </style>
   `
+
 })
 export class FormateurSeancesComponent implements OnInit, OnDestroy {
   user: User | null = null;

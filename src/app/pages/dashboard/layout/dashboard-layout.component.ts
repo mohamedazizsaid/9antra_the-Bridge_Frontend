@@ -120,91 +120,93 @@ import { User, Role } from '../../../core/models/user.model';
           </div>
         </header>
 
-        <!-- Notification Panel Overlay -->
-        <div *ngIf="showNotifications" 
-             class="fixed inset-0 z-40 flex justify-end"
-             (click)="closeNotifications()">
-          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div class="relative w-full max-w-md h-full bg-[#10102A] border-l border-[var(--bridge-border)] flex flex-col shadow-2xl"
-               (click)="$event.stopPropagation()">
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--bridge-border)] flex-shrink-0">
-              <div>
-                <h3 class="font-syne font-bold text-white text-lg">Centre de notifications</h3>
-                <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">{{ unreadCount }} non lue(s)</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button *ngIf="unreadCount > 0" (click)="markAllRead()" 
-                        class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/5">
-                  Tout marquer lu
-                </button>
-                <button (click)="closeNotifications()" 
-                        class="p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-all">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
+        <!-- ─── Notification Dropdown ─── -->
+        <div *ngIf="showNotifications"
+             class="absolute right-4 top-[64px] w-[380px] max-w-[calc(100vw-2rem)] z-50 bridge-card overflow-hidden"
+             style="animation: dropdownIn 0.2s cubic-bezier(0.34,1.15,0.64,1) both; box-shadow: 0 20px 60px rgba(0,0,0,0.5)">
+          <div class="h-0.5 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
+          <!-- Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--bridge-border)]">
+            <div>
+              <h3 class="font-syne font-bold text-white text-sm">🔔 Notifications</h3>
+              <p class="text-[10px] text-[var(--bridge-text-muted)] mt-0.5">{{ unreadCount }} non lue(s)</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button *ngIf="unreadCount > 0" (click)="markAllRead()"
+                      class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/5">
+                Tout lire
+              </button>
+              <button (click)="closeNotifications()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Notifications List -->
+          <div class="max-h-[70vh] overflow-y-auto">
+            <div *ngIf="notifications.length === 0" class="flex flex-col items-center justify-center text-center px-8 py-12">
+              <div class="text-4xl mb-3">🔔</div>
+              <p class="text-white/60 font-medium text-sm">Aucune notification</p>
+              <p class="text-white/30 text-xs mt-1">Vous êtes à jour !</p>
             </div>
 
-            <!-- Notifications List -->
-            <div class="flex-1 overflow-y-auto">
-              <div *ngIf="notifications.length === 0" class="flex flex-col items-center justify-center h-full text-center px-8">
-                <div class="text-5xl mb-4">🔔</div>
-                <p class="text-white/60 font-medium">Aucune notification</p>
-                <p class="text-white/30 text-sm mt-1">Vous êtes à jour !</p>
-              </div>
-
-              <div *ngFor="let notif of notifications" 
-                   [class]="!notif.read ? 'bg-white/[0.02] border-l-2 border-[var(--bridge-crimson)]' : ''"
-                   class="border-b border-white/5 transition-all hover:bg-white/[0.03] cursor-pointer group"
-                   (click)="openNotification(notif)">
-                <div class="px-5 py-4">
-                  <div class="flex items-start gap-3">
-                    <div [class]="getNotifIconBg(notif.type)"
-                         class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-base mt-0.5">
-                      {{ getNotifIcon(notif.type) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center justify-between gap-2">
-                        <p class="text-sm font-semibold text-white truncate">{{ notif.title }}</p>
-                        <span *ngIf="!notif.read" class="w-2 h-2 rounded-full bg-[var(--bridge-crimson)] flex-shrink-0"></span>
-                      </div>
-                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5 line-clamp-2 leading-relaxed">{{ notif.body }}</p>
-                      <p class="text-[10px] text-white/30 mt-1.5">{{ formatTime(notif.timestamp) }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Notification Detail Modal -->
-            <div *ngIf="selectedNotif" 
-                 class="absolute inset-0 bg-[#10102A] flex flex-col z-10">
-              <div class="flex items-center gap-3 px-5 py-4 border-b border-[var(--bridge-border)] flex-shrink-0">
-                <button (click)="selectedNotif = null" 
+            <!-- Notif detail view (inside dropdown) -->
+            <div *ngIf="selectedNotif" style="animation: dropdownIn 0.2s cubic-bezier(0.34,1.15,0.64,1) both">
+              <div class="flex items-center gap-3 px-4 py-3 border-b border-[var(--bridge-border)]">
+                <button (click)="selectedNotif = null"
                         class="p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-all">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                   </svg>
                 </button>
-                <h4 class="font-semibold text-white text-sm">Détail de la notification</h4>
+                <h4 class="font-semibold text-white text-xs">Détail de la notification</h4>
               </div>
-              <div class="flex-1 p-6 overflow-y-auto">
+              <div class="p-5 text-center">
                 <div [class]="getNotifIconBg(selectedNotif.type)"
-                     class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto">
+                     class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 mx-auto">
                   {{ getNotifIcon(selectedNotif.type) }}
                 </div>
-                <h3 class="font-syne font-bold text-white text-xl text-center mb-3">{{ selectedNotif.title }}</h3>
-                <p class="text-[var(--bridge-text-muted)] text-sm leading-relaxed text-center mb-6">{{ selectedNotif.body }}</p>
-                <div class="bg-white/5 rounded-xl p-4">
-                  <p class="text-xs text-white/40">Reçu le</p>
-                  <p class="text-sm text-white font-medium mt-1">{{ selectedNotif.timestamp | date:'dd MMMM yyyy à HH:mm' }}</p>
+                <h3 class="font-syne font-bold text-white text-base mb-2">{{ selectedNotif.title }}</h3>
+                <p class="text-[var(--bridge-text-muted)] text-xs leading-relaxed mb-4">{{ selectedNotif.body }}</p>
+                <div class="bg-white/5 rounded-xl p-3 text-left">
+                  <p class="text-[10px] text-white/40">Reçu le</p>
+                  <p class="text-xs text-white font-medium mt-0.5">{{ selectedNotif.timestamp | date:'dd MMMM yyyy à HH:mm' }}</p>
                 </div>
               </div>
             </div>
+
+            <ng-container *ngIf="!selectedNotif">
+              <div *ngFor="let notif of notifications"
+                   [class]="!notif.read ? 'bg-white/[0.02] border-l-2 border-[var(--bridge-crimson)]' : ''"
+                   class="border-b border-white/5 transition-all hover:bg-white/[0.03] cursor-pointer"
+                   (click)="openNotification(notif)">
+                <div class="px-4 py-3">
+                  <div class="flex items-start gap-3">
+                    <div [class]="getNotifIconBg(notif.type)"
+                         class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+                      {{ getNotifIcon(notif.type) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-xs font-semibold text-white truncate">{{ notif.title }}</p>
+                        <span *ngIf="!notif.read" class="w-1.5 h-1.5 rounded-full bg-[var(--bridge-crimson)] flex-shrink-0"></span>
+                      </div>
+                      <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5 line-clamp-2 leading-relaxed">{{ notif.body }}</p>
+                      <p class="text-[10px] text-white/30 mt-1">{{ formatTime(notif.timestamp) }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
           </div>
         </div>
+
+        <!-- Backdrop to close notifications on outside click -->
+        <div *ngIf="showNotifications"
+             class="fixed inset-0 z-40"
+             (click)="closeNotifications()"></div>
 
         <!-- Main Content View -->
         <main class="flex-1 min-h-0 bg-[#08081A] relative">

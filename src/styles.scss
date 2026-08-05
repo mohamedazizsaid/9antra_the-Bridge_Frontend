@@ -420,6 +420,154 @@ select, .bridge-input {
   animation: modalPanelIn 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
+/* ─── Bridge Side Panel (remplace les modals plein écran) ─── */
+/* Overlay wrapper — z-index 1300 (au-dessus du toggle thème à 1200 et de la topbar) */
+.bridge-side-panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: auto;
+  /* Empêcher le scroll du fond */
+  overflow: hidden;
+}
+
+/* Fond sombre — cliquable pour fermer */
+.bridge-side-panel-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 4, 18, 0.72);
+  backdrop-filter: blur(6px) saturate(80%);
+  -webkit-backdrop-filter: blur(6px) saturate(80%);
+  animation: bridgeBackdropIn var(--dur-fast) ease both;
+  cursor: pointer;
+}
+
+/* Panneau principal — glisse depuis la droite */
+.bridge-side-panel {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  height: 100%;
+  background: linear-gradient(180deg, #141430 0%, #0f0f28 100%);
+  border-left: 1px solid color-mix(in srgb, var(--bridge-crimson) 22%, transparent);
+  box-shadow:
+    -1px 0 0 rgba(255, 255, 255, 0.03),
+    -30px 0 80px rgba(0, 0, 0, 0.7),
+    0 0 50px -10px rgba(198, 39, 97, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: bridgePanelSlideIn var(--dur-normal) cubic-bezier(0.34, 1.15, 0.64, 1) both;
+}
+
+/* Bande d'accent couleur en haut du panel */
+.bridge-side-panel-accent {
+  height: 3px;
+  width: 100%;
+  background: var(--grad-brand);
+  flex-shrink: 0;
+}
+
+/* En-tête du panel */
+.bridge-side-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--bridge-border) 60%, transparent);
+  flex-shrink: 0;
+}
+
+/* Corps scrollable */
+.bridge-side-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative; /* Pour le detail overlay absolu */
+  scrollbar-width: thin;
+  scrollbar-color: var(--bridge-border) transparent;
+}
+
+/* Variante sans padding (notifications list) */
+.bridge-side-panel-body.no-pad {
+  padding: 0;
+  gap: 0;
+}
+
+/* Pied de page avec les boutons d'action */
+.bridge-side-panel-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--bridge-border) 60%, transparent);
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Bouton fermer × */
+.bridge-side-panel-close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
+  flex-shrink: 0;
+}
+
+.bridge-side-panel-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Version fermante (sortie) */
+.bridge-side-panel.is-closing {
+  animation: bridgePanelSlideOut 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+.bridge-side-panel-overlay.is-closing .bridge-side-panel-backdrop {
+  animation: bridgeBackdropOut 220ms ease both;
+}
+
+/* Responsive mobile — largeur pleine */
+@media (max-width: 480px) {
+  .bridge-side-panel { max-width: 100%; }
+}
+
+/* Light theme overrides */
+:root[data-theme='light'] .bridge-side-panel {
+  background: linear-gradient(180deg, var(--bridge-surface) 0%, var(--bridge-bg) 100%);
+  border-left-color: color-mix(in srgb, var(--bridge-border) 80%, transparent);
+}
+
+/* ─── Keyframes Side Panel ─── */
+@keyframes bridgeBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes bridgeBackdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes bridgePanelSlideIn {
+  from { transform: translateX(100%); opacity: 0.7; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes bridgePanelSlideOut {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0.5; }
+}
+
 
 /* ─── Inputs (Light theme — auth cards) ─── */
 .input-light {

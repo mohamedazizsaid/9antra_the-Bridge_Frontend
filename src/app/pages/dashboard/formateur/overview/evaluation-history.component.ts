@@ -302,41 +302,39 @@ import { Subscription } from 'rxjs';
 
       </ng-container>
 
-      <!-- ─── Eval Quick Modal ─────────────────────────────────────────── -->
-      <div *ngIf="showEvalModal"
-           class="bridge-modal-overlay"
-           (click)="closeEvalModal()">
-        <div class="glass-card border border-[var(--bridge-border)] w-full max-w-lg shadow-2xl flex flex-col max-h-[92vh]"
-             (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between p-6 border-b border-[var(--bridge-border)] flex-shrink-0">
-            <h3 class="font-syne font-bold text-lg">⭐ Nouvelle Évaluation</h3>
-            <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+      <!-- ─── Inline : Nouvelle Évaluation ─── -->
+      <div *ngIf="showEvalModal" class="bridge-card overflow-hidden inline-view-card">
+        <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base">⭐</div>
+            <h3 class="font-syne font-bold text-sm text-white">Nouvelle Évaluation</h3>
           </div>
-          <div class="flex-1 overflow-y-auto p-6 space-y-4">
-            <p class="text-white/50 text-sm text-center py-8">
-              Rendez-vous sur la page <strong class="text-white">Mes Stagiaires</strong> pour évaluer directement.<br/>
-              <button (click)="closeEvalModal(); router.navigate(['/dashboard/formateur/stagiaires'])"
-                      class="mt-4 px-5 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all">
-                👥 Aller aux Stagiaires →
-              </button>
+          <button (click)="closeEvalModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+        </div>
+        <div class="p-8 text-center space-y-5">
+          <div class="text-4xl">👥</div>
+          <div>
+            <p class="text-white font-semibold mb-2">Pour créer une évaluation</p>
+            <p class="text-[var(--bridge-text-muted)] text-sm leading-relaxed">
+              Rendez-vous sur la page <strong class="text-white">Mes Stagiaires</strong> pour évaluer directement un stagiaire depuis sa fiche.
             </p>
           </div>
+          <button (click)="closeEvalModal(); router.navigate(['/dashboard/formateur/stagiaires'])"
+                  class="px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all inline-flex items-center gap-2">
+            👥 Aller aux Stagiaires →
+          </button>
         </div>
       </div>
 
     </div>
 
     <style>
-      .bridge-modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(8px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 9999; padding: 1rem;
+      @keyframes inlineCardIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-      .bridge-modal-card {
-        background: #12122b;
-      }
+      .inline-view-card { animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both; }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }

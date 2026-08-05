@@ -533,28 +533,50 @@ import { Subscription } from 'rxjs';
           </div>
         </div>
 
-        <!-- Certificate verif modal -->
-        <div *ngIf="selectedCertForVerif" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-             (click)="selectedCertForVerif = null">
-          <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-          <div class="relative glass-card border border-[rgba(198,39,97,0.4)] rounded-2xl p-8 max-w-md w-full"
-               (click)="$event.stopPropagation()">
-            <div class="text-center">
-              <div class="text-5xl mb-4">🔗</div>
-              <h3 class="font-syne font-bold text-xl text-white mb-2">Certificat Vérifié</h3>
-              <p class="text-sm text-[var(--bridge-text-muted)] mb-6">{{ selectedCertForVerif.phaseNom }} — {{ selectedCertForVerif.formationNom }}</p>
-              <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                <div class="flex items-center justify-center gap-2 text-emerald-400 font-semibold text-sm mb-2">
-                  <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Authentifié sur la Blockchain
-                </div>
-                <p class="font-mono text-xs text-emerald-300/70 break-all">{{ selectedCertForVerif.hashBlockchain }}</p>
+        <!-- ─── Inline : Certificat Vérifié ─── -->
+        <div *ngIf="selectedCertForVerif" class="bridge-card overflow-hidden inline-view-card">
+          <div class="h-1 bg-gradient-to-r from-emerald-600 to-emerald-400"></div>
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 flex items-center justify-center text-base">🔗</div>
+              <div>
+                <h3 class="font-syne font-bold text-sm text-white">Certificat Vérifié</h3>
+                <p class="text-[10px] text-white/40 mt-0.5">Authentifié sur la Blockchain</p>
               </div>
-              <p class="text-xs text-[var(--bridge-text-muted)] mb-6">Émis le {{ selectedCertForVerif.dateObtention | date:'dd/MM/yyyy' }}</p>
-              <button (click)="selectedCertForVerif = null"
-                      class="px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all">
-                Fermer
-              </button>
             </div>
+            <button (click)="selectedCertForVerif = null" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+          </div>
+          <!-- Content -->
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Formation info -->
+              <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                <p class="text-[10px] text-white/40 uppercase tracking-wider mb-1">Formation</p>
+                <p class="text-sm font-semibold text-white">{{ selectedCertForVerif.phaseNom }}</p>
+                <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">{{ selectedCertForVerif.formationNom }}</p>
+              </div>
+              <!-- Issue date -->
+              <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                <p class="text-[10px] text-white/40 uppercase tracking-wider mb-1">Date d'émission</p>
+                <p class="text-sm text-white font-semibold">{{ selectedCertForVerif.dateObtention | date:'dd MMMM yyyy' }}</p>
+              </div>
+            </div>
+            <!-- Blockchain hash -->
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+              <div class="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                Authentifié sur la Blockchain
+              </div>
+              <p class="font-mono text-xs text-emerald-300/70 break-all leading-relaxed">{{ selectedCertForVerif.hashBlockchain }}</p>
+            </div>
+          </div>
+          <!-- Footer -->
+          <div class="px-5 py-4 border-t border-[var(--bridge-border)] flex justify-end">
+            <button (click)="selectedCertForVerif = null"
+                    class="px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all">
+              Fermer
+            </button>
           </div>
         </div>
       </div>

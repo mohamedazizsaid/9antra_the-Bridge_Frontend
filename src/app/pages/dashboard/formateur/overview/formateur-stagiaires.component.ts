@@ -184,48 +184,44 @@ interface StagiaireCard {
         </div>
       </div>
 
-      <!-- Student Detail Modal -->
-      <div *ngIf="selectedStudent"
-           class="bridge-modal-overlay"
-           (click)="selectedStudent = null">
-        <div class="glass-card w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl"
-             (click)="$event.stopPropagation()">
-          <!-- Top Accent -->
-          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
-          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
-            <div class="flex items-center gap-4">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xl font-bold text-white overflow-hidden">
-                <img *ngIf="selectedStudent.user.avatar" [src]="selectedStudent.user.avatar" class="w-full h-full object-cover" />
-                <span *ngIf="!selectedStudent.user.avatar">{{ selectedStudent.user.prenom[0] }}{{ selectedStudent.user.nom[0] }}</span>
-              </div>
-              <div>
-                <h3 class="font-syne font-bold text-lg text-white">{{ selectedStudent.user.prenom }} {{ selectedStudent.user.nom }}</h3>
-                <p class="text-sm text-white/40">{{ selectedStudent.user.email }}</p>
-              </div>
+      <!-- ─── Inline : Détail Stagiaire ─── -->
+      <div *ngIf="selectedStudent && !showEvalModal" class="bridge-card overflow-hidden inline-view-card">
+        <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xl font-bold text-white overflow-hidden flex-shrink-0">
+              <img *ngIf="selectedStudent.user.avatar" [src]="selectedStudent.user.avatar" class="w-full h-full object-cover" />
+              <span *ngIf="!selectedStudent.user.avatar">{{ selectedStudent.user.prenom[0] }}{{ selectedStudent.user.nom[0] }}</span>
             </div>
-            <button (click)="selectedStudent = null"
-                    class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
+            <div>
+              <h3 class="font-syne font-bold text-white text-sm">{{ selectedStudent.user.prenom }} {{ selectedStudent.user.nom }}</h3>
+              <p class="text-xs text-[var(--bridge-text-muted)]">{{ selectedStudent.user.email }}</p>
+            </div>
+          </div>
+          <button (click)="selectedStudent = null" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+        </div>
+        <!-- Content -->
+        <div class="p-5 space-y-5">
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
+              <p class="text-[10px] text-white/40 uppercase tracking-wider">Note moy.</p>
+              <p class="text-2xl font-mono font-bold mt-1" [class]="getGradeClass(selectedStudent.avgGrade)">
+                {{ selectedStudent.avgGrade !== null ? selectedStudent.avgGrade.toFixed(1) : '—' }}</p>
+              <p class="text-[10px] text-white/30">/20</p>
+            </div>
+            <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
+              <p class="text-[10px] text-white/40 uppercase tracking-wider">Évaluations</p>
+              <p class="text-2xl font-mono font-bold text-purple-400 mt-1">{{ selectedStudent.evaluationCount }}</p>
+            </div>
+            <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
+              <p class="text-[10px] text-white/40 uppercase tracking-wider">Progression</p>
+              <p class="text-2xl font-mono font-bold text-[#F5A623] mt-1">{{ selectedStudent.progression }}%</p>
+            </div>
           </div>
 
-          <div class="flex-1 overflow-y-auto p-6 space-y-5">
-            <!-- Stats row -->
-            <div class="grid grid-cols-3 gap-3">
-              <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
-                <p class="text-[10px] text-white/40 uppercase tracking-wider">Note moy.</p>
-                <p class="text-2xl font-mono font-bold mt-1" [class]="getGradeClass(selectedStudent.avgGrade)">
-                  {{ selectedStudent.avgGrade !== null ? selectedStudent.avgGrade.toFixed(1) : '—' }}</p>
-                <p class="text-[10px] text-white/30">/20</p>
-              </div>
-              <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
-                <p class="text-[10px] text-white/40 uppercase tracking-wider">Évaluations</p>
-                <p class="text-2xl font-mono font-bold text-purple-400 mt-1">{{ selectedStudent.evaluationCount }}</p>
-              </div>
-              <div class="text-center p-4 bg-white/[0.03] rounded-xl border border-white/5">
-                <p class="text-[10px] text-white/40 uppercase tracking-wider">Progression</p>
-                <p class="text-2xl font-mono font-bold text-[#F5A623] mt-1">{{ selectedStudent.progression }}%</p>
-              </div>
-            </div>
-
+          <div class="grid md:grid-cols-2 gap-4">
             <!-- Formations -->
             <div>
               <p class="text-[10px] text-white/40 uppercase tracking-widest mb-3">Formations</p>
@@ -238,7 +234,7 @@ interface StagiaireCard {
               </div>
             </div>
 
-            <!-- Evaluations history -->
+            <!-- Evaluations reçues -->
             <div *ngIf="getStudentEvals(selectedStudent.user.id).length > 0">
               <p class="text-[10px] text-white/40 uppercase tracking-widest mb-3">Évaluations reçues</p>
               <div class="space-y-2">
@@ -248,113 +244,128 @@ interface StagiaireCard {
                     <p class="text-sm text-white/80">{{ ev.phaseTitle }}</p>
                     <p class="text-[10px] text-white/40 mt-0.5">{{ ev.evaluationDate | date:'dd/MM/yyyy' }}</p>
                   </div>
-                  <span class="font-mono font-bold text-sm px-3 py-1 rounded-xl"
-                        [class]="getGradeBadgeClass(ev.grade)">{{ ev.grade }}/20</span>
+                  <span class="font-mono font-bold text-sm px-3 py-1 rounded-xl" [class]="getGradeBadgeClass(ev.grade)">{{ ev.grade }}/20</span>
                 </div>
               </div>
             </div>
           </div>
-
-          <div class="p-6 border-t border-[var(--bridge-border)] flex-shrink-0">
-            <button (click)="openEvalModal(selectedStudent)"
-                    class="w-full py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 transition-all text-sm">
-              ⭐ Évaluer ce stagiaire
-            </button>
-          </div>
+        </div>
+        <!-- Actions -->
+        <div class="px-5 py-4 border-t border-[var(--bridge-border)] flex gap-3">
+          <button (click)="selectedStudent = null" class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all">
+            Fermer
+          </button>
+          <button (click)="openEvalModal(selectedStudent)"
+                  class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 transition-all text-sm">
+            ⭐ Évaluer ce stagiaire
+          </button>
         </div>
       </div>
 
-      <!-- Evaluation Quick Modal -->
-      <div *ngIf="showEvalModal"
-           class="bridge-modal-overlay"
-           (click)="closeEvalModal()">
-        <div class="glass-card w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
-             (click)="$event.stopPropagation()">
-          <!-- Top Accent -->
-          <div class="h-1 w-full bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] rounded-t-2xl flex-shrink-0"></div>
-          <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base shadow-lg">⭐</div>
+      <!-- ─── Inline : Formulaire Évaluation ─── -->
+      <div *ngIf="showEvalModal" class="bridge-card overflow-hidden inline-view-card">
+        <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base">⭐</div>
+            <div>
+              <h3 class="font-syne font-bold text-sm text-white">Évaluer un Stagiaire</h3>
+              <p class="text-[10px] text-[var(--bridge-text-muted)] mt-0.5">Note, étoiles et compétences</p>
+            </div>
+          </div>
+          <button (click)="closeEvalModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+        </div>
+        <!-- Form body — 2 columns on md+ -->
+        <div class="p-5">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-4">
               <div>
-                <h3 class="font-syne font-bold text-base text-white leading-tight">Évaluer un Stagiaire</h3>
-                <p class="text-[10px] text-white/40 mt-0.5">Note, étoiles et compétences</p>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Formation</label>
+                <select [(ngModel)]="evalForm.formationId" (change)="onEvalFormationChange()"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                  <option value="" class="bg-[#10102A]">Choisir une formation…</option>
+                  <option *ngFor="let f of formations" [value]="f.id" class="bg-[#10102A]">{{ f.nom }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Stagiaire</label>
+                <select [(ngModel)]="evalForm.studentId"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                  <option [ngValue]="null" class="bg-[#10102A]">Sélectionner le stagiaire…</option>
+                  <option *ngFor="let s of availableStudents" [ngValue]="s.id" class="bg-[#10102A]">{{ s.prenom }} {{ s.nom }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
+                <select [(ngModel)]="evalForm.phaseId"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                  <option [ngValue]="null" class="bg-[#10102A]">Sélectionner la phase…</option>
+                  <option *ngFor="let p of availablePhases" [ngValue]="p.id" class="bg-[#10102A]">Phase {{ p.numero }} — {{ p.nom }}</option>
+                </select>
               </div>
             </div>
-            <button (click)="closeEvalModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all">✕</button>
-          </div>
-          <div class="flex-1 overflow-y-auto p-6 space-y-4">
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Formation</label>
-              <select [(ngModel)]="evalForm.formationId" (change)="onEvalFormationChange()"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option value="" class="bg-[#10102A]">Choisir une formation…</option>
-                <option *ngFor="let f of formations" [value]="f.id" class="bg-[#10102A]">{{ f.nom }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Stagiaire</label>
-              <select [(ngModel)]="evalForm.studentId"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner le stagiaire…</option>
-                <option *ngFor="let s of availableStudents" [ngValue]="s.id" class="bg-[#10102A]">{{ s.prenom }} {{ s.nom }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
-              <select [(ngModel)]="evalForm.phaseId"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
-                <option [ngValue]="null" class="bg-[#10102A]">Sélectionner la phase…</option>
-                <option *ngFor="let p of availablePhases" [ngValue]="p.id" class="bg-[#10102A]">Phase {{ p.numero }} — {{ p.nom }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Note (/20)</label>
-              <div class="flex items-center gap-4">
-                <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5" class="flex-1 accent-[#C62761]" />
-                <span class="text-2xl font-mono font-bold w-14 text-right" [class]="getGradeClass(evalForm.grade)">{{ evalForm.grade }}</span>
+            <div class="space-y-4">
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Note (/20)</label>
+                <div class="flex items-center gap-4">
+                  <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5" class="flex-1 accent-[#C62761]" />
+                  <span class="text-2xl font-mono font-bold w-14 text-right" [class]="getGradeClass(evalForm.grade)">{{ evalForm.grade }}</span>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Étoiles</label>
+                <div class="flex items-center gap-2">
+                  <button *ngFor="let star of [1,2,3,4,5]" (click)="evalForm.starRating = star"
+                          class="text-2xl transition-transform hover:scale-125 focus:outline-none"
+                          [class]="(evalForm.starRating||0) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences</label>
+                <input [(ngModel)]="evalForm.skills" type="text"
+                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
+                       placeholder="Ex: Spring Boot, Angular, Docker…" />
+              </div>
+              <div>
+                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire</label>
+                <textarea [(ngModel)]="evalForm.comment" rows="2"
+                          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
+                          placeholder="Appréciation globale…"></textarea>
               </div>
             </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Étoiles</label>
-              <div class="flex items-center gap-2">
-                <button *ngFor="let star of [1,2,3,4,5]" (click)="evalForm.starRating = star"
-                        class="text-2xl transition-transform hover:scale-125 focus:outline-none"
-                        [class]="(evalForm.starRating||0) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
-              </div>
-            </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences</label>
-              <input [(ngModel)]="evalForm.skills" type="text"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                     placeholder="Ex: Spring Boot, Angular, Docker…" />
-            </div>
-            <div>
-              <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire</label>
-              <textarea [(ngModel)]="evalForm.comment" rows="3"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
-                        placeholder="Appréciation globale sur la progression…"></textarea>
-            </div>
-            <div *ngIf="evalForm.grade >= 14"
-                 class="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <span class="text-xl">🏅</span>
-              <p class="text-emerald-400 text-xs font-semibold">Certificat Blockchain sera généré automatiquement</p>
-            </div>
           </div>
-          <div class="p-6 border-t border-[var(--bridge-border)] flex-shrink-0">
-            <button (click)="submitEvaluation()"
-                    [disabled]="!evalForm.studentId || !evalForm.phaseId || evalSaving"
-                    class="w-full py-3.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(198,39,97,0.2)] flex items-center justify-center gap-2">
-              <span *ngIf="evalSaving" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-              <span *ngIf="evalSuccess">✓ Évaluation enregistrée !</span>
-              <span *ngIf="!evalSuccess && !evalSaving">Enregistrer l'évaluation</span>
-            </button>
+
+          <!-- Certificate notice -->
+          <div *ngIf="evalForm.grade >= 14"
+               class="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mt-4">
+            <span class="text-lg">🏅</span>
+            <p class="text-emerald-400 text-xs font-semibold">Certificat Blockchain sera généré automatiquement</p>
           </div>
+        </div>
+        <!-- Actions -->
+        <div class="flex gap-3 px-5 py-4 border-t border-[var(--bridge-border)]">
+          <button (click)="closeEvalModal()" class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all">
+            Annuler
+          </button>
+          <button (click)="submitEvaluation()"
+                  [disabled]="!evalForm.studentId || !evalForm.phaseId || evalSaving"
+                  class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+            <span *ngIf="evalSaving" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+            <span *ngIf="evalSuccess">✓ Évaluation enregistrée !</span>
+            <span *ngIf="!evalSuccess && !evalSaving">Enregistrer l'évaluation</span>
+          </button>
         </div>
       </div>
 
     </div>
 
     <style>
+      @keyframes inlineCardIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .inline-view-card { animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both; }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -362,6 +373,7 @@ interface StagiaireCard {
       .animate-fadein { animation: fadeSlideIn 0.4s ease both; }
     </style>
   `
+
 })
 export class FormateurStagiairesComponent implements OnInit, OnDestroy {
   user: User | null = null;
