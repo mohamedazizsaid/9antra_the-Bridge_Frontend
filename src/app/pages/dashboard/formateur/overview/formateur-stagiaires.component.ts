@@ -414,7 +414,15 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
-    // Load formations first — student IDs come from formation.stagiaires
+    // Load all users to get full student details (names, avatars, emails)
+    this.sub.add(
+      this.userService.getAllUsers().subscribe(users => {
+        this.allStudents = users.filter(u => u.role === 'STAGIAIRE');
+        this.buildCards();
+      })
+    );
+
+    // Load formations assigned to trainer
     this.sub.add(
       this.formationService.getFormationsByFormateur(this.user.id).subscribe(data => {
         this.formations = data;

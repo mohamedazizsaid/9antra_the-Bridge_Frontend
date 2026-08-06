@@ -127,7 +127,7 @@ Chart.register(...registerables);
                     <td class="py-3 px-4">
                       <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {{ u.prenom?.[0] }}{{ u.nom?.[0] }}
+                          {{ u.prenom[0] }}{{ u.nom[0] }}
                         </div>
                         <div>
                           <p class="font-semibold text-white text-sm">{{ u.prenom }} {{ u.nom }}</p>

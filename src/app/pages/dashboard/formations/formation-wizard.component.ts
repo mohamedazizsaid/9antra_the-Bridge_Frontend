@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { FormationService } from '../../../core/services/formation.service';
 import { UserService } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { User } from '../../../core/models/user.model';
 
@@ -260,13 +261,19 @@ export class FormationWizardComponent implements OnInit {
   constructor(
     private formationService: FormationService,
     private userService: UserService,
+    private authService: AuthService,
     private toastService: ToastService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
     this.userService.getAllUsers().subscribe(users => {
       this.trainersList = users.filter(u => u.role === 'FORMATEUR');
+      if (currentUser?.role === 'FORMATEUR') {
+        // Automatically assign connected formateur
+        this.selectedTrainers = [currentUser.id.toString()];
+      }
     });
   }
 

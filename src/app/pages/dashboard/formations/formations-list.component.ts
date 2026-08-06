@@ -141,7 +141,7 @@ import { User } from '../../../core/models/user.model';
               </div>
               <div class="flex justify-between text-xs text-[var(--bridge-text-muted)]">
                 <span>Stagiaires :</span>
-                <span class="font-semibold text-white/60">{{ f.stagiaires?.length || 0 }}</span>
+                <span class="font-semibold text-white/60">{{ f.stagiaires.length }}</span>
               </div>
             </div>
 
@@ -163,8 +163,8 @@ import { User } from '../../../core/models/user.model';
                         [title]="f.archived ? 'Désarchiver' : 'Archiver'">
                   {{ f.archived ? '📂' : '📦' }}
                 </button>
-                <!-- Delete (admin only) -->
-                <button *ngIf="isAdmin" (click)="$event.stopPropagation(); confirmDelete(f)"
+                <!-- Delete (admin or formateur owner) -->
+                <button *ngIf="canManage(f)" (click)="$event.stopPropagation(); confirmDelete(f)"
                         class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-sm transition-all" title="Supprimer">
                   🗑️
                 </button>
@@ -221,7 +221,7 @@ import { User } from '../../../core/models/user.model';
                       class="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
                       [class]="f.archived ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400'"
                       [title]="f.archived ? 'Désarchiver' : 'Archiver'">{{ f.archived ? '📂' : '📦' }}</button>
-              <button *ngIf="isAdmin && canManage(f)" (click)="confirmDelete(f)"
+              <button *ngIf="canManage(f)" (click)="confirmDelete(f)"
                       class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100" title="Supprimer">🗑️</button>
             </div>
           </div>
@@ -436,15 +436,8 @@ export class FormationsListComponent implements OnInit {
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   openEditModal(f: Formation): void {
-    this.editingFormation = f;
-    this.editForm = {
-      nom: f.nom,
-      description: f.description || '',
-      category: f.category || '',
-      totalPrice: f.totalPrice || 0,
-      status: f.status || 'PLANIFIEE'
-    };
-    this.showEditModal = true;
+    // Navigate to wizard mode for editing
+    this.router.navigate(['/dashboard/formations/new'], { queryParams: { editId: f.id } });
   }
 
   closeEditModal(): void {
