@@ -142,6 +142,34 @@
   color: white !important;
 }
 
+/* ─── Light Mode Input & Form Control Visibility Fix ─── */
+:root[data-theme='light'] input,
+:root[data-theme='light'] textarea,
+:root[data-theme='light'] select {
+  background-color: #FFFFFF !important;
+  color: #1A202C !important;
+  border: 1.5px solid #A0AEC0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+:root[data-theme='light'] input::placeholder,
+:root[data-theme='light'] textarea::placeholder {
+  color: #718096 !important;
+}
+
+:root[data-theme='light'] input:focus,
+:root[data-theme='light'] textarea:focus,
+:root[data-theme='light'] select:focus {
+  border-color: #C62761 !important;
+  box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.2) !important;
+  background-color: #FFFFFF !important;
+}
+
+:root[data-theme='light'] label {
+  color: #4A5568 !important;
+  font-weight: 600 !important;
+}
+
 /* ─── Reset & Base ─── */
 *, *::before, *::after {
   margin: 0;

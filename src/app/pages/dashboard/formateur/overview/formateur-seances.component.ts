@@ -438,7 +438,7 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private formationService: FormationService,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
