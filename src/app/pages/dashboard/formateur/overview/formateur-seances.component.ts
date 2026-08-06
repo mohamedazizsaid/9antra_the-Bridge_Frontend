@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormationService } from '../../../../core/services/formation.service';
 import { UserService } from '../../../../core/services/user.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { User } from '../../../../core/models/user.model';
 import { Formation, Seance, Presence } from '../../../../core/models/formation.model';
 import { Subscription, forkJoin } from 'rxjs';
@@ -382,7 +383,8 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private formationService: FormationService,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -611,9 +613,10 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
           if (this.selectedSeance) {
             this.selectedSeance.status = 'CLOTUREE';
           }
+          this.toastService.success('Séance clôturée avec succès ! Les progressions et certificats ont été mis à jour.', 'Clôture de Séance');
           this.closeAttendanceModal();
         },
-        error: (e) => alert(e?.error?.message || 'Erreur lors de la clôture.')
+        error: (e) => this.toastService.error(e?.error?.message || 'Erreur lors de la clôture de la séance.', 'Clôture de Séance')
       });
     }
   }

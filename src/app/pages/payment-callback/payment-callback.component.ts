@@ -47,7 +47,7 @@ import { PaiementService } from '../../core/services/paiement.service';
           </div>
           <div>
             <h2 class="text-2xl font-bold text-white font-syne">Paiement Non Validé</h2>
-            <p class="text-sm text-red-300/80 mt-2">{{ errorMessage || 'La transaction n\'a pas pu être confirmée par Stripe.' }}</p>
+            <p class="text-sm text-red-300/80 mt-2">{{ errorMessage ? errorMessage : 'La transaction n\'a pas pu être confirmée par Stripe.' }}</p>
           </div>
           <div class="pt-4 flex gap-3">
             <button (click)="goToDashboard()"

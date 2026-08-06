@@ -8,6 +8,7 @@ import { PaiementService } from '../../../../core/services/paiement.service';
 import { CertificatService } from '../../../../core/services/certificat.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EnrollmentService } from '../../../../core/services/enrollment.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { User } from '../../../../core/models/user.model';
 import { Formation, Seance } from '../../../../core/models/formation.model';
 import { Paiement } from '../../../../core/models/paiement.model';
@@ -79,7 +80,7 @@ Chart.register(...registerables);
 
         <!-- Formations inscrites -->
         <div class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(198,39,97,0.3)] transition-all duration-300 cursor-pointer"
-             (click)="setActiveTab('mes-formations')">
+             (click)="openMyFormations()">
           <div class="flex items-start justify-between">
             <div>
               <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold">Mes Formations</p>
@@ -179,85 +180,271 @@ Chart.register(...registerables);
       <!-- ═══════════════════════════════ TAB: CATALOGUE FORMATIONS ═══════════════════════════════ -->
       <div *ngIf="activeTab === 'catalogue'" class="space-y-6">
 
-        <!-- Search & Filter -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <div class="relative flex-1">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]">🔍</span>
-            <input [(ngModel)]="catalogSearch" (ngModelChange)="filterCatalogue()"
-                   placeholder="Rechercher une formation..."
-                   class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#C62761] transition-all">
+        <!-- ── Sub-filter toggle + Search ── -->
+        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+
+          <!-- View toggle: Toutes / Mes formations -->
+          <div class="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/8 gap-1 flex-shrink-0">
+            <button (click)="catalogView = 'all'"
+                    class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap"
+                    [class]="catalogView === 'all'
+                      ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-md'
+                      : 'text-[var(--bridge-text-muted)] hover:text-white'">
+              🔎 Toutes
+            </button>
+            <button (click)="catalogView = 'mine'"
+                    class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-1.5"
+                    [class]="catalogView === 'mine'
+                      ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-md'
+                      : 'text-[var(--bridge-text-muted)] hover:text-white'">
+              📚 Mes formations
+              <span class="text-[10px] font-mono opacity-75">({{ myFormations.length }})</span>
+            </button>
           </div>
-          <select [(ngModel)]="catalogCategory" (ngModelChange)="filterCatalogue()"
-                  class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all min-w-[160px]">
-            <option value="">Toutes les catégories</option>
-            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-          </select>
+
+          <!-- Search (only shown for 'all' view) -->
+          <ng-container *ngIf="catalogView === 'all'">
+            <div class="relative flex-1">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]">🔍</span>
+              <input [(ngModel)]="catalogSearch" (ngModelChange)="filterCatalogue()"
+                     placeholder="Rechercher une formation..."
+                     class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#C62761] transition-all">
+            </div>
+            <select [(ngModel)]="catalogCategory" (ngModelChange)="filterCatalogue()"
+                    class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all min-w-[160px]">
+              <option value="">Toutes les catégories</option>
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </ng-container>
         </div>
 
-        <!-- Formations grid -->
-        <div *ngIf="filteredCatalogue.length > 0" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-          <div *ngFor="let f of filteredCatalogue"
-               class="glass-card border border-[var(--bridge-border)] overflow-hidden group hover:border-[rgba(198,39,97,0.4)] hover:-translate-y-1 transition-all duration-300">
-            <!-- Card Top -->
-            <div class="h-2 bg-gradient-to-r from-[#C62761] to-[#F5A623]"></div>
-            <div class="p-5">
-              <!-- Category badge -->
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]">
-                  {{ f.category || 'Général' }}
-                </span>
-                <span *ngIf="isEnrolled(f.id)"
-                      class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ✓ Inscrit
-                </span>
-              </div>
-              <!-- Title -->
-              <h3 class="font-syne font-bold text-white text-base leading-tight group-hover:text-[#F5A623] transition-colors">{{ f.nom }}</h3>
-              <p class="text-[var(--bridge-text-muted)] text-xs mt-2 line-clamp-2 leading-relaxed">{{ f.description }}</p>
-              <!-- Stats -->
-              <div class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-[var(--bridge-text-muted)]">
-                <span class="flex items-center gap-1">👨‍🏫 {{ f.formateurNom }}</span>
-                <span class="flex items-center gap-1">📋 {{ f.phases.length }} phase(s)</span>
-              </div>
-              <!-- Price & Enroll -->
-              <div class="flex items-center justify-between mt-4">
-                <div>
-                  <span class="text-xs text-[var(--bridge-text-muted)]">Prix total</span>
-                  <p class="font-mono font-bold text-[#F5A623] text-lg">{{ f.totalPrice || 0 }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
+        <!-- ════════ VUE : TOUTES LES FORMATIONS ════════ -->
+        <ng-container *ngIf="catalogView === 'all'">
+
+          <!-- Formations grid -->
+          <div *ngIf="filteredCatalogue.length > 0" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div *ngFor="let f of filteredCatalogue"
+                 class="glass-card border border-[var(--bridge-border)] overflow-hidden group hover:border-[rgba(198,39,97,0.4)] hover:-translate-y-1 transition-all duration-300">
+              <div class="h-2 bg-gradient-to-r from-[#C62761] to-[#F5A623]"></div>
+              <div class="p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]">
+                    {{ f.category || 'Général' }}
+                  </span>
+                  <span *ngIf="isEnrolled(f.id)" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ Inscrit</span>
                 </div>
-                <button *ngIf="!isEnrolled(f.id)" (click)="enrollFormation(f)"
-                        [disabled]="enrollingId === f.id"
-                        class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]">
-                  {{ enrollingId === f.id ? '⏳...' : "S'inscrire →" }}
-                </button>
-                <button *ngIf="isEnrolled(f.id)" (click)="goToFormationDetail(f)"
-                        class="px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
-                  Voir détails →
-                </button>
+                <h3 class="font-syne font-bold text-white text-base leading-tight group-hover:text-[#F5A623] transition-colors">{{ f.nom }}</h3>
+                <p class="text-[var(--bridge-text-muted)] text-xs mt-2 line-clamp-2 leading-relaxed">{{ f.description }}</p>
+                <div class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-[var(--bridge-text-muted)]">
+                  <span class="flex items-center gap-1">👨‍🏫 {{ f.formateurNom }}</span>
+                  <span class="flex items-center gap-1">📋 {{ f.phases.length }} phase(s)</span>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                  <div>
+                    <span class="text-xs text-[var(--bridge-text-muted)]">Prix total</span>
+                    <p class="font-mono font-bold text-[#F5A623] text-lg">{{ f.totalPrice || 0 }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
+                  </div>
+                  <button *ngIf="!isEnrolled(f.id)" (click)="enrollFormation(f)"
+                          [disabled]="enrollingId === f.id"
+                          class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]">
+                    {{ enrollingId === f.id ? '⏳...' : "S'inscrire →" }}
+                  </button>
+                  <button *ngIf="isEnrolled(f.id)" (click)="goToFormationDetail(f)"
+                          class="px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
+                    Voir détails →
+                  </button>
+                </div>
+                <p *ngIf="enrollSuccessId === f.id" class="text-[10px] text-emerald-400 mt-2 text-center font-semibold">✓ Inscription confirmée !</p>
+                <p *ngIf="enrollErrorId === f.id" class="text-[10px] text-red-400 mt-2 text-center">{{ enrollError }}</p>
               </div>
-              <!-- Enroll success/error messages -->
-              <p *ngIf="enrollSuccessId === f.id" class="text-[10px] text-emerald-400 mt-2 text-center font-semibold">✓ Inscription confirmée !</p>
-              <p *ngIf="enrollErrorId === f.id" class="text-[10px] text-red-400 mt-2 text-center">{{ enrollError }}</p>
             </div>
           </div>
-        </div>
 
-        <!-- Empty catalogue -->
-        <div *ngIf="filteredCatalogue.length === 0 && !loadingCatalogue" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
-          <div class="text-5xl mb-4">🔍</div>
-          <p class="font-syne font-bold text-lg text-white">Aucune formation trouvée</p>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-2">Essayez une autre recherche ou catégorie.</p>
-        </div>
-
-        <!-- Loading -->
-        <div *ngIf="loadingCatalogue" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-          <div *ngFor="let _ of [1,2,3,4,5,6]" class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse">
-            <div class="h-2 bg-white/10 rounded mb-4"></div>
-            <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-            <div class="h-3 bg-white/5 rounded w-full mb-1"></div>
-            <div class="h-3 bg-white/5 rounded w-4/5"></div>
+          <!-- Empty catalogue -->
+          <div *ngIf="filteredCatalogue.length === 0 && !loadingCatalogue" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+            <div class="text-5xl mb-4">🔍</div>
+            <p class="font-syne font-bold text-lg text-white">Aucune formation trouvée</p>
+            <p class="text-[var(--bridge-text-muted)] text-sm mt-2">Essayez une autre recherche ou catégorie.</p>
           </div>
-        </div>
+
+          <!-- Loading skeleton -->
+          <div *ngIf="loadingCatalogue" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div *ngFor="let _ of [1,2,3,4,5,6]" class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse">
+              <div class="h-2 bg-white/10 rounded mb-4"></div>
+              <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+              <div class="h-3 bg-white/5 rounded w-full mb-1"></div>
+              <div class="h-3 bg-white/5 rounded w-4/5"></div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ════════ VUE : MES FORMATIONS INSCRITES ════════ -->
+        <ng-container *ngIf="catalogView === 'mine'">
+
+          <!-- Empty state -->
+          <div *ngIf="myFormations.length === 0 && !loadingMine" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+            <div class="text-5xl mb-4 animate-bounce">📚</div>
+            <p class="font-syne font-bold text-lg text-white">Aucune formation inscrite</p>
+            <p class="text-[var(--bridge-text-muted)] text-sm mt-2">Parcourez le catalogue et inscrivez-vous.</p>
+            <button (click)="catalogView = 'all'"
+                    class="mt-6 px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all">
+              Voir le catalogue →
+            </button>
+          </div>
+
+          <!-- Enrolled formations grid -->
+          <div *ngIf="myFormations.length > 0" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div *ngFor="let f of myFormations"
+                 class="glass-card border overflow-hidden transition-all duration-300"
+                 [class]="remboursementFormationId === f.id ? 'border-orange-500/40 shadow-lg shadow-orange-500/5' : 'border-[var(--bridge-border)] hover:border-emerald-500/30 hover:-translate-y-1'">
+
+              <!-- ── CARD STATE 1: FORMATION DETAILS ── -->
+              <ng-container *ngIf="remboursementFormationId !== f.id">
+                <div class="h-2 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+                <div class="p-5">
+                  <!-- Badges -->
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ Inscrit</span>
+                    <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]">
+                      {{ f.category || 'Général' }}
+                    </span>
+                  </div>
+                  <!-- Title -->
+                  <h3 class="font-syne font-bold text-white text-base leading-tight group-hover:text-[#F5A623] transition-colors">{{ f.nom }}</h3>
+                  <p class="text-[var(--bridge-text-muted)] text-xs mt-2 line-clamp-2 leading-relaxed">{{ f.description }}</p>
+                  <!-- Stats -->
+                  <div class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-[var(--bridge-text-muted)]">
+                    <span class="flex items-center gap-1">👨‍🏫 {{ f.formateurNom }}</span>
+                    <span class="flex items-center gap-1">📋 {{ f.phases.length }} phase(s)</span>
+                  </div>
+                  <!-- Progress bar -->
+                  <div class="mt-4">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[10px] text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider">Progression</span>
+                      <span class="text-[10px] font-mono font-bold text-[#F5A623]">{{ getFormationProgress(f) }}%</span>
+                    </div>
+                    <div class="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <div class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full transition-all duration-1000"
+                           [style.width]="getFormationProgress(f) + '%'"></div>
+                    </div>
+                  </div>
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2 mt-4">
+                    <button (click)="goToFormationDetail(f)"
+                            class="flex-1 px-3 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all text-center shadow-md shadow-[rgba(198,39,97,0.15)]">
+                      Voir détails →
+                    </button>
+                    <!-- Unenroll -->
+                    <div *ngIf="unenrollConfirmId !== f.id">
+                      <button (click)="unenrollConfirmId = f.id"
+                              title="Se désinscrire"
+                              class="px-3 py-2 text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all text-xs font-semibold">
+                        🚪
+                      </button>
+                    </div>
+                    <div *ngIf="unenrollConfirmId === f.id" class="flex items-center gap-1">
+                      <span class="text-[10px] text-red-300">Confirmer ?</span>
+                      <button (click)="unenrollFormation(f)" [disabled]="unenrollingId === f.id"
+                              class="text-[10px] font-bold px-2.5 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-all disabled:opacity-50">
+                        {{ unenrollingId === f.id ? '...' : 'Oui' }}
+                      </button>
+                      <button (click)="unenrollConfirmId = null"
+                              class="text-[10px] px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-lg transition-all">Non</button>
+                    </div>
+                    <!-- Remboursement toggle -->
+                    <button (click)="toggleRemboursement(f.id)"
+                            title="Demande de remboursement"
+                            class="px-3 py-2 rounded-xl text-xs font-semibold border transition-all text-orange-400 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20">
+                      🔙
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+
+              <!-- ── CARD STATE 2: DEMANDE DE REMBOURSEMENT ── -->
+              <ng-container *ngIf="remboursementFormationId === f.id">
+                <div class="h-2 bg-gradient-to-r from-orange-500 via-[#F5A623] to-[#C62761]"></div>
+                <div class="p-5 space-y-4 animate-fadein">
+
+                  <!-- Header -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-sm font-bold text-orange-400">
+                        🔙
+                      </div>
+                      <div>
+                        <h4 class="font-syne font-bold text-white text-sm">Demande de remboursement</h4>
+                        <p class="text-[10px] text-[var(--bridge-text-muted)] truncate max-w-[180px]">{{ f.nom }}</p>
+                      </div>
+                    </div>
+                    <button (click)="toggleRemboursement(null)" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center text-xs transition-all border border-white/5">
+                      ✕
+                    </button>
+                  </div>
+
+                  <!-- Success state -->
+                  <div *ngIf="remboursementSuccess === f.id" class="py-6 px-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-1">
+                    <span class="text-2xl">✅</span>
+                    <p class="text-emerald-400 font-bold text-xs">Demande envoyée !</p>
+                    <p class="text-[10px] text-emerald-300/70">Un responsable étudiera votre dossier sous 48h.</p>
+                  </div>
+
+                  <!-- Form view -->
+                  <ng-container *ngIf="remboursementSuccess !== f.id">
+                    <!-- Motif input -->
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--bridge-text-muted)] mb-1.5">
+                        Motif de la demande <span class="text-red-400">*</span>
+                      </label>
+                      <textarea [(ngModel)]="remboursementMotif" rows="3"
+                                placeholder="Raison de votre demande (ex: indisponibilité, changement de projet...)"
+                                class="w-full bg-white/5 border border-white/10 focus:border-[#F5A623] rounded-xl p-3 text-xs text-white placeholder-white/20 focus:outline-none transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Notice alert -->
+                    <div class="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-start gap-2">
+                      <span class="text-orange-400 text-xs mt-0.5">ℹ️</span>
+                      <p class="text-[10px] text-orange-200/80 leading-tight">
+                        Sous réserve d'éligibilité. Le remboursement n'est possible que si aucune phase n'a été complétée.
+                      </p>
+                    </div>
+
+                    <!-- Confirm checkbox -->
+                    <label class="flex items-start gap-2 cursor-pointer group">
+                      <input type="checkbox" [(ngModel)]="remboursementConfirm" class="mt-0.5 accent-[#F5A623]">
+                      <span class="text-[10px] text-[var(--bridge-text-muted)] group-hover:text-white transition-colors leading-tight">
+                        Je confirme vouloir initier la demande de désinscription et de remboursement.
+                      </span>
+                    </label>
+
+                    <!-- Buttons -->
+                    <div class="flex items-center gap-2 pt-1">
+                      <button (click)="toggleRemboursement(null)"
+                              class="flex-1 py-2 text-xs font-semibold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5">
+                        Annuler
+                      </button>
+                      <button (click)="submitRemboursement(f)"
+                              [disabled]="!remboursementMotif.trim() || !remboursementConfirm || remboursementSubmitting"
+                              class="flex-1 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-[rgba(198,39,97,0.2)]">
+                        <span *ngIf="remboursementSubmitting" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        {{ remboursementSubmitting ? 'Envoi...' : 'Envoyer' }}
+                      </button>
+                    </div>
+                  </ng-container>
+
+                </div>
+              </ng-container>
+
+            </div>
+          </div>
+        </ng-container>
+
+        <style>
+          @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+            to   { opacity: 1; transform: translateY(0);    max-height: 600px; }
+          }
+        </style>
       </div>
 
       <!-- ═══════════════════════════════ TAB: MES FORMATIONS ═══════════════════════════════ -->
@@ -745,10 +932,18 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
   user: User | null = null;
   activeTab: string = 'catalogue';
 
+  // Catalogue view toggle
+  catalogView: 'all' | 'mine' = 'all';
+
+  // Remboursement inline form state
+  remboursementFormationId: string | null = null;
+  remboursementMotif: string = '';
+  remboursementConfirm: boolean = false;
+  remboursementSubmitting: boolean = false;
+  remboursementSuccess: string | null = null;
 
   tabs = [
-    { key: 'catalogue', icon: '🔎', label: 'Catalogue' },
-    { key: 'mes-formations', icon: '📚', label: 'Mes Formations' },
+    { key: 'catalogue', icon: '🔎', label: 'Formations' },
     { key: 'paiements', icon: '💳', label: 'Paiements' },
     { key: 'certificats', icon: '🏆', label: 'Certificats' },
     { key: 'presence', icon: '📋', label: 'Présence & Éval.' },
@@ -797,17 +992,32 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
         if (res && res.url) {
           window.location.href = res.url;
         } else {
-          alert('Impossible d\'obtenir le lien de paiement Stripe.');
+          this.toastService.error('Impossible d\'obtenir le lien de paiement Stripe.', 'Paiement Stripe');
         }
       },
       error: (err: any) => {
         this.loadingStripePaiementId = null;
-        alert(err?.error?.message || 'Erreur lors de la connexion avec Stripe.');
+        this.toastService.error(err?.error?.message || 'Erreur lors de la connexion avec Stripe.', 'Paiement Stripe');
       }
     });
   }
 
+  getPaiementsCompletionRate(): string {
+    if (this.paiements.length === 0) return '100%';
+    const paid = this.paidPaymentsCount;
+    return `${Math.round((paid / this.paiements.length) * 100)}%`;
+  }
 
+  constructor(
+    private authService: AuthService,
+    private formationService: FormationService,
+    private paiementService: PaiementService,
+    private certificatService: CertificatService,
+    private notificationService: NotificationService,
+    private enrollmentService: EnrollmentService,
+    private toastService: ToastService,
+    private router: Router
+  ) { }
 
   // Certificates
   certificats: Certificat[] = [];
@@ -846,16 +1056,6 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
     const paid = this.paidPaymentsCount;
     return `${Math.round((paid / this.paiements.length) * 100)}%`;
   }
-
-  constructor(
-    private authService: AuthService,
-    private formationService: FormationService,
-    private paiementService: PaiementService,
-    private certificatService: CertificatService,
-    private notificationService: NotificationService,
-    private enrollmentService: EnrollmentService,
-    private router: Router
-  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -1124,9 +1324,7 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
 
   syncTabWithUrl(): void {
     const url = this.router.url;
-    if (url.includes('/formations')) {
-      this.activeTab = 'mes-formations';
-    } else if (url.includes('/paiements')) {
+    if (url.includes('/paiements')) {
       this.activeTab = 'paiements';
     } else if (url.includes('/certificats')) {
       this.activeTab = 'certificats';
@@ -1141,14 +1339,52 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
 
   setActiveTab(key: string): void {
     this.activeTab = key;
+    // catalogue tab stays at root URL — no navigation needed
+    if (key === 'catalogue') {
+      this.router.navigateByUrl('/dashboard/stagiaire');
+      return;
+    }
     let path = '/dashboard/stagiaire';
-    if (key === 'mes-formations') path += '/formations';
-    else if (key === 'paiements') path += '/paiements';
+    if (key === 'paiements') path += '/paiements';
     else if (key === 'certificats') path += '/certificats';
     else if (key === 'presence') path += '/presence';
     else if (key === 'notifications') path += '/notifications';
-
     this.router.navigateByUrl(path);
+  }
+
+  openMyFormations(): void {
+    this.activeTab = 'catalogue';
+    this.catalogView = 'mine';
+    this.router.navigateByUrl('/dashboard/stagiaire');
+  }
+
+  toggleRemboursement(formationId: string | null): void {
+    if (this.remboursementFormationId === formationId) {
+      this.remboursementFormationId = null;
+    } else {
+      this.remboursementFormationId = formationId;
+      this.remboursementMotif = '';
+      this.remboursementConfirm = false;
+      this.remboursementSuccess = null;
+      this.remboursementSubmitting = false;
+    }
+  }
+
+  submitRemboursement(formation: Formation): void {
+    if (!this.remboursementMotif.trim() || !this.remboursementConfirm) return;
+    this.remboursementSubmitting = true;
+    // Simulate API call — replace with real HTTP call when backend endpoint is ready
+    setTimeout(() => {
+      this.remboursementSubmitting = false;
+      this.remboursementSuccess = formation.id;
+      // Auto-close after 4 seconds
+      setTimeout(() => {
+        if (this.remboursementFormationId === formation.id) {
+          this.remboursementFormationId = null;
+        }
+        this.remboursementSuccess = null;
+      }, 4000);
+    }, 1200);
   }
 
   goToFormationDetail(formation: Formation): void {

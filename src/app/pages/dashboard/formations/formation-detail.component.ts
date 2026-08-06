@@ -5,7 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { FormationService } from '../../../core/services/formation.service';
 import { EvaluationService, Evaluation } from '../../../core/services/evaluation.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PaiementService } from '../../../core/services/paiement.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Formation, Phase, Seance, Presence } from '../../../core/models/formation.model';
+import { Paiement } from '../../../core/models/paiement.model';
 import { User } from '../../../core/models/user.model';
 import { Subscription, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -355,6 +358,131 @@ interface EnrollmentInfo {
           </div>
         </div>
 
+        <!-- Tab: Paiement (Stagiaire) -->
+        <div *ngIf="activeTab === 'paiement'" class="space-y-5">
+
+          <!-- Loading skeleton -->
+          <div *ngIf="loadingPaiements" class="space-y-3">
+            <div *ngFor="let _ of [1,2,3]" class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex-shrink-0"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-white/10 rounded w-1/3"></div>
+                  <div class="h-3 bg-white/5 rounded w-1/2"></div>
+                </div>
+                <div class="h-8 bg-white/10 rounded-xl w-28"></div>
+              </div>
+            </div>
+          </div>
+
+          <ng-container *ngIf="!loadingPaiements">
+
+            <!-- Summary bar -->
+            <div class="grid grid-cols-3 gap-4">
+              <div class="glass-card border border-emerald-500/20 p-4 text-center">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Payé</p>
+                <p class="text-xl font-mono font-bold text-emerald-400">{{ getTotalPaidFormation() }} TND</p>
+              </div>
+              <div class="glass-card border border-orange-500/20 p-4 text-center">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Restant</p>
+                <p class="text-xl font-mono font-bold text-[#F5A623]">{{ getTotalRemainingFormation() }} TND</p>
+              </div>
+              <div class="glass-card border border-[rgba(198,39,97,0.2)] p-4 text-center">
+                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Total</p>
+                <p class="text-xl font-mono font-bold text-white">{{ formation?.totalPrice || 0 }} TND</p>
+              </div>
+            </div>
+
+            <!-- No payments message -->
+            <div *ngIf="formationPaiements.length === 0" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+              <div class="text-5xl mb-4">💳</div>
+              <p class="font-syne font-bold text-lg text-white">Aucun paiement enregistré</p>
+              <p class="text-[var(--bridge-text-muted)] text-sm mt-2 max-w-sm mx-auto">
+                Vos échéances de paiement apparaîtront ici une fois générées par l'administration.
+              </p>
+            </div>
+
+            <!-- Phase payment cards -->
+            <div *ngIf="formationPaiements.length > 0" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
+              <div class="p-5 border-b border-[var(--bridge-border)] flex items-center justify-between">
+                <h3 class="font-syne font-bold text-base text-white">💳 Paiements par phase</h3>
+                <span class="text-xs text-[var(--bridge-text-muted)] font-mono">{{ formationPaiements.length }} phase(s)</span>
+              </div>
+
+              <div class="divide-y divide-white/[0.03]">
+                <div *ngFor="let p of formationPaiements"
+                     class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
+                     [class]="p.status === 'EN_RETARD' ? 'border-l-2 border-red-500/50 bg-red-500/[0.02]' : ''">
+
+                  <!-- Status icon -->
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl border"
+                       [class]="p.status === 'PAYE'
+                         ? 'bg-emerald-500/10 border-emerald-500/20'
+                         : p.status === 'EN_RETARD'
+                         ? 'bg-red-500/10 border-red-500/20 animate-pulse'
+                         : 'bg-orange-500/10 border-orange-500/20'">
+                    {{ p.status === 'PAYE' ? '✅' : p.status === 'EN_RETARD' ? '⚠️' : '⏳' }}
+                  </div>
+
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5">
+                      <p class="text-sm font-bold text-white">Phase {{ p.phaseNumero }}</p>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"
+                            [class]="p.status === 'PAYE' ? 'bg-emerald-500/10 text-emerald-400'
+                                   : p.status === 'EN_RETARD' ? 'bg-red-500/10 text-red-400'
+                                   : 'bg-orange-500/10 text-orange-400'">
+                        {{ p.status === 'PAYE' ? 'Payé' : p.status === 'EN_RETARD' ? 'En retard' : 'En attente' }}
+                      </span>
+                    </div>
+                    <p class="text-xs text-[var(--bridge-text-muted)] font-mono">
+                      {{ p.status === 'PAYE' ? 'Payé le ' + (p.datePaiement | date:'dd/MM/yyyy') : 'Échéance : ' + (p.dateEcheance | date:'dd/MM/yyyy') }}
+                    </p>
+                    <p *ngIf="p.status !== 'PAYE'" class="text-[10px] mt-0.5"
+                       [class]="p.status === 'EN_RETARD' ? 'text-red-400' : 'text-orange-400'">
+                      {{ p.methode || 'Méthode non définie' }}
+                    </p>
+                  </div>
+
+                  <!-- Amount + action -->
+                  <div class="flex-shrink-0 flex flex-col items-end gap-2">
+                    <p class="font-mono font-bold text-white text-lg">{{ p.montant }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
+                    <button *ngIf="p.status !== 'PAYE'"
+                            (click)="payPhaseWithStripe(p)"
+                            [disabled]="payingPhaseId === p.id"
+                            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md shadow-[rgba(198,39,97,0.2)]">
+                      <span *ngIf="payingPhaseId === p.id" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      {{ payingPhaseId === p.id ? 'Chargement...' : '💳 Payer Stripe' }}
+                    </button>
+                    <span *ngIf="p.status === 'PAYE'" class="text-[10px] px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-semibold">✓ Débloqué</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phases without payment yet (from formation) -->
+            <div *ngIf="formationPaiements.length === 0 && formation?.phases" class="space-y-3">
+              <div *ngFor="let phase of formation?.phases"
+                   class="glass-card border border-[var(--bridge-border)] p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold border-2 flex-shrink-0"
+                     [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                             : phase.status === 'EN_COURS' ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761]'
+                             : 'bg-white/5 border-white/10 text-white/20'">
+                  {{ phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒' }}
+                </div>
+                <div class="flex-1">
+                  <p class="font-syne font-bold text-sm" [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'">
+                    Phase {{ phase.numero }} — {{ phase.nom }}
+                  </p>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">{{ phase.description }}</p>
+                </div>
+                <span class="text-[10px] px-3 py-1.5 bg-white/5 text-white/40 border border-white/10 rounded-xl font-mono">Prix à définir</span>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+
         <!-- ══ FORMATEUR / ADMIN TABS ══ -->
 
         <!-- Tab: Phases & Séances -->
@@ -392,6 +520,12 @@ interface EnrollmentInfo {
                     <span class="text-[10px] font-mono text-white/40">{{ phase.progression }}%</span>
                   </div>
                 </div>
+                <!-- Unlock phase button for formateur/admin -->
+                <button *ngIf="canManage && phase.status === 'VERROUILLEE'"
+                        (click)="$event.stopPropagation(); unlockPhase(phase.id)"
+                        class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs rounded-xl hover:opacity-90 transition-all shadow-md">
+                  🔓 Débloquer la Phase
+                </button>
                 <span class="text-white/30 text-lg">{{ expandedPhase === phase.id ? '▲' : '▼' }}</span>
               </div>
             </button>
@@ -417,6 +551,10 @@ interface EnrollmentInfo {
                             class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">
                         🌐 EN LIGNE
                       </span>
+                      <span *ngIf="seance.status === 'CLOTUREE'"
+                            class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold">
+                        ✓ CLÔTURÉE
+                      </span>
                     </div>
                     <p class="text-xs text-white/50 mt-0.5">📍 {{ seance.salle }}</p>
                   </div>
@@ -424,13 +562,24 @@ interface EnrollmentInfo {
                     <span class="text-xs text-white/30 font-mono">
                       {{ getPresenceCount(seance) }}/{{ seance.presences?.length || 0 }} présents
                     </span>
-                    <button *ngIf="canManage && isToday(seance.date)"
-                            (click)="openAttendance(seance)"
-                            class="px-3 py-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg opacity-0 group-hover:opacity-100 transition-all">
-                      Appel →
-                    </button>
-                    <span *ngIf="isPast(seance.date)" class="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">✓</span>
-                    <span *ngIf="isToday(seance.date) && !isPast(seance.date)" class="text-[10px] px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full animate-pulse">AUJOURD'HUI</span>
+                    <!-- Today check for attendance -->
+                    <ng-container *ngIf="canManage">
+                      <button *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE'"
+                              (click)="openAttendance(seance)"
+                              class="px-3 py-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg transition-all shadow-md">
+                        📋 Faire l'Appel
+                      </button>
+                      <button *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE' && seance.presences && seance.presences.length > 0"
+                              (click)="closeSession(seance.id)"
+                              class="px-3 py-1.5 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all shadow-md">
+                        🔒 Clôturer séance
+                      </button>
+                      <span *ngIf="!isToday(seance.date) && seance.status !== 'CLOTUREE'"
+                            class="text-[10px] text-white/40 italic bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+                        Appel réservé le jour J
+                      </span>
+                    </ng-container>
+                    <span *ngIf="seance.status === 'CLOTUREE'" class="text-[10px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-semibold">Clôturée</span>
                   </div>
                 </div>
               </div>
@@ -775,6 +924,11 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   searchQuery = '';
   user: User | null = null;
 
+  // Payment tab state
+  formationPaiements: Paiement[] = [];
+  loadingPaiements = false;
+  payingPhaseId: string | null = null;
+
   showAttendanceModal = false;
   selectedSeance: Seance | null = null;
   activePresences: Presence[] = [];
@@ -797,7 +951,8 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
       return [
         { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
         { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
-        { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() }
+        { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() },
+        { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined }
       ];
     }
     return [
@@ -871,7 +1026,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     private formationService: FormationService,
     private evaluationService: EvaluationService,
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private paiementService: PaiementService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -881,6 +1038,7 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     // Set default tab for stagiaire
     if (this.user?.role === 'STAGIAIRE') {
       this.activeTab = 'my-progress';
+      this.loadPaiements();
     }
   }
 
@@ -1122,5 +1280,90 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     if (grade >= 12) return '✓ Bien';
     if (grade >= 10) return '○ Satisfaisant';
     return '✕ Insuffisant';
+  }
+
+  // ── Payment helpers ──────────────────────────────────────────────────────────
+  loadPaiements(): void {
+    if (!this.user || !this.formationId) return;
+    this.loadingPaiements = true;
+    this.sub.add(
+      this.paiementService.getPaiementsByStagiaire(this.user.id).subscribe({
+        next: (data) => {
+          // Filter by formation if formationId available on paiement
+          this.formationPaiements = data.filter(p =>
+            !p.formationId || p.formationId === this.formationId || p.formationId === ''
+          );
+          this.loadingPaiements = false;
+        },
+        error: () => { this.loadingPaiements = false; }
+      })
+    );
+  }
+
+  getPaiementForPhase(phase: Phase): Paiement | undefined {
+    return this.formationPaiements.find(p => p.phaseNumero === phase.numero);
+  }
+
+  getTotalPaidFormation(): number {
+    return this.formationPaiements.filter(p => p.status === 'PAYE').reduce((s, p) => s + p.montant, 0);
+  }
+
+  getTotalRemainingFormation(): number {
+    return this.formationPaiements.filter(p => p.status !== 'PAYE').reduce((s, p) => s + p.montant, 0);
+  }
+
+  unlockPhase(phaseId: string): void {
+    if (!phaseId) return;
+    this.sub.add(
+      this.formationService.unlockPhase(phaseId).subscribe({
+        next: () => {
+          this.toastService.success('Phase débloquée avec succès !', 'Déblocage de Phase');
+          this.loadFormationDetails();
+        },
+        error: (err) => { this.toastService.error(err?.error?.message || 'Erreur lors du déblocage de la phase', 'Erreur'); }
+      })
+    );
+  }
+
+  closeSession(sessionId: string): void {
+    if (!sessionId) return;
+    this.sub.add(
+      this.formationService.closeSession(sessionId).subscribe({
+        next: () => {
+          this.toastService.success('Séance clôturée ! Les calculs d\'assiduité et de progression ont été mis à jour.', 'Clôture de Séance');
+          this.loadFormationDetails();
+        },
+        error: (err) => { this.toastService.error(err?.error?.message || 'Erreur lors de la clôture de la séance', 'Erreur'); }
+      })
+    );
+  }
+
+  payPhaseWithStripe(paiement: Paiement): void {
+    if (!paiement) return;
+    this.payingPhaseId = paiement.id;
+    const enrollmentId = Number(paiement.id) || 1;
+    const phaseId = Number(paiement.phaseNumero) || 1;
+
+    localStorage.setItem('pending_stripe_enrollment_id', enrollmentId.toString());
+    localStorage.setItem('pending_stripe_phase_id', phaseId.toString());
+
+    this.paiementService.initiateStripePayment({
+      enrollmentId,
+      phaseId,
+      amount: paiement.montant
+    }).subscribe({
+      next: (res: any) => {
+        this.payingPhaseId = null;
+        if (res?.url) {
+          window.location.href = res.url;
+        } else {
+          this.toastService.error('Impossible d\'obtenir le lien de paiement Stripe.', 'Paiement Stripe');
+        }
+      },
+      error: (err: any) => {
+        this.payingPhaseId = null;
+        this.toastService.error(err?.error?.message || 'Erreur lors de la connexion avec Stripe.', 'Paiement Stripe');
+      }
+    });
   }
 }

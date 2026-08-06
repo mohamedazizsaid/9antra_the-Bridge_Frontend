@@ -5,13 +5,14 @@ export interface Formation {
   formateurId: string;
   formateurNom: string;
   formateurAvatar?: string;
-  dateDebut: Date;
-  dateFin: Date;
+  dateDebut?: Date;
+  dateFin?: Date;
   phases: Phase[];
-  stagiaires: string[];
+  stagiaires: string[];  // enrolled student IDs
   status: 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE';
   category?: string;
   totalPrice?: number;
+  archived?: boolean;
 }
 
 
@@ -52,4 +53,3 @@ export interface Presence {
   starRating?: number; // 1-5 stars
   sessionNote?: string; // custom feedback note
 }
-

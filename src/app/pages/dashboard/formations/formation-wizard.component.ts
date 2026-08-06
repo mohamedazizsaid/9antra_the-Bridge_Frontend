@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { FormationService } from '../../../core/services/formation.service';
 import { UserService } from '../../../core/services/user.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { User } from '../../../core/models/user.model';
 
 interface WizardPhase {
@@ -259,6 +260,7 @@ export class FormationWizardComponent implements OnInit {
   constructor(
     private formationService: FormationService,
     private userService: UserService,
+    private toastService: ToastService,
     private router: Router
   ) {}
 
@@ -342,22 +344,30 @@ export class FormationWizardComponent implements OnInit {
     if (this.step > 1) this.step--;
   }
 
+  get calculatedTotalPrice(): number {
+    if (!this.formation.phases || this.formation.phases.length === 0) {
+      return this.formation.totalPrice || 0;
+    }
+    return this.formation.phases.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+  }
+
   submit(): void {
     this.loading = true;
+    const computedTotal = this.calculatedTotalPrice > 0 ? this.calculatedTotalPrice : (this.formation.totalPrice || 0);
     const trainersMapped = this.selectedTrainers.map(id => ({ id: parseInt(id) }));
     const phasesMapped = this.formation.phases.map((p, idx) => ({
       phaseOrder: idx + 1,
       title: p.title,
       content: p.content,
-      price: p.price,
-      minimumAttendance: p.minimumAttendance,
-      minimumGrade: p.minimumGrade,
+      price: p.price || 0,
+      minimumAttendance: p.minimumAttendance || 75,
+      minimumGrade: p.minimumGrade || 10,
       sessions: p.sessions.map(s => ({
         sessionDate: s.sessionDate,
-        startTime: s.startTime + ':00', // standard LocalTime
-        duration: s.duration,
-        location: s.location,
-        meetingLink: s.meetingLink || null
+        startTime: s.startTime,
+        duration: s.duration || 2,
+        location: s.location || 'Salle Virtuelle',
+        meetingLink: s.meetingLink || ''
       }))
     }));
 
@@ -365,19 +375,18 @@ export class FormationWizardComponent implements OnInit {
       title: this.formation.title,
       category: this.formation.category,
       description: this.formation.description,
-      totalPrice: this.formation.totalPrice,
+      totalPrice: computedTotal,
       trainers: trainersMapped,
       phases: phasesMapped
     };
-
-    this.formationService.createFormation(payload).subscribe({
+    this.formationService.createFormation(payload as any).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/dashboard/formations']);
       },
-      error: (e) => {
+      error: (err: any) => {
         this.loading = false;
-        alert(e?.error?.message || 'Erreur lors de la création');
+        this.toastService.error(err?.error?.message || 'Erreur lors de la création de la formation', 'Création Formation');
       }
     });
   }

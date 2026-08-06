@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ToastService, ToastMessage } from '../../../core/services/toast.service';
 import { User, Role } from '../../../core/models/user.model';
 
 @Component({
@@ -216,6 +217,39 @@ import { User, Role } from '../../../core/models/user.model';
             </div>
           </div>
         </main>
+        <!-- Global Toast Container (Fixed Top Right) -->
+        <div class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 max-w-md w-full pointer-events-none">
+          <div *ngFor="let toast of toasts"
+               class="pointer-events-auto flex items-start gap-4 p-4 rounded-2xl border backdrop-blur-xl shadow-2xl transition-all duration-300 relative overflow-hidden"
+               [class]="toast.type === 'success'
+                 ? 'bg-[#10102A]/95 border-emerald-500/40 text-white'
+                 : toast.type === 'error'
+                 ? 'bg-[#10102A]/95 border-red-500/40 text-white'
+                 : toast.type === 'warning'
+                 ? 'bg-[#10102A]/95 border-amber-500/40 text-white'
+                 : 'bg-[#10102A]/95 border-blue-500/40 text-white'"
+               style="animation: slideInRight 0.3s cubic-bezier(0.34,1.15,0.64,1) both">
+
+            <!-- Type Icon -->
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                 [class]="toast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : toast.type === 'error' ? 'bg-red-500/20 text-red-400' : toast.type === 'warning' ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'">
+              {{ toast.type === 'success' ? '✅' : toast.type === 'error' ? '⚠️' : toast.type === 'warning' ? '🔔' : 'ℹ️' }}
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0 pr-6">
+              <h4 class="font-syne font-bold text-sm text-white mb-0.5">{{ toast.title }}</h4>
+              <p class="text-xs text-white/70 leading-relaxed">{{ toast.message }}</p>
+            </div>
+
+            <!-- Close Button -->
+            <button (click)="removeToast(toast.id)"
+                    class="absolute top-3 right-3 text-white/40 hover:text-white transition-colors text-xs p-1">
+              ✕
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   `
@@ -227,11 +261,13 @@ export class DashboardLayoutComponent implements OnInit {
   showNotifications = false;
   notifications: any[] = [];
   selectedNotif: any = null;
+  toasts: any[] = [];
   menuItems: { label?: string; route?: string; icon?: string; exact?: boolean; section?: string }[] = [];
 
   constructor(
     private authService: AuthService,
     private notificationService: NotificationService,
+    private toastService: ToastService,
     private router: Router
   ) { }
 
@@ -255,6 +291,14 @@ export class DashboardLayoutComponent implements OnInit {
     this.notificationService.notifications$.subscribe(notifs => {
       this.notifications = notifs;
     });
+
+    this.toastService.toasts$.subscribe(t => {
+      this.toasts = t;
+    });
+  }
+
+  removeToast(id: string): void {
+    this.toastService.remove(id);
   }
 
   private buildMenu(): void {
@@ -262,7 +306,8 @@ export class DashboardLayoutComponent implements OnInit {
     if (this.user.role === 'STAGIAIRE') {
       this.menuItems = [
         { section: 'Principal' },
-        { label: 'Mes Formations', route: '/dashboard/stagiaire/formations', icon: '📚' },
+        { label: 'Vue d\'ensemble', route: '/dashboard/stagiaire', icon: '🏠', exact: true },
+        { label: 'Formations', route: '/dashboard/stagiaire/formations', icon: '📚' },
         { section: 'Personnel' },
         { label: 'Certificats', route: '/dashboard/stagiaire/certificats', icon: '🏅' },
         { label: 'Paiements', route: '/dashboard/stagiaire/paiements', icon: '💳' },

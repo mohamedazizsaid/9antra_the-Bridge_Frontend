@@ -28,7 +28,7 @@ export class FormationService {
 
   private mapFormationDTO(f: any): Formation {
     const mainTrainer = f.trainers && f.trainers.length > 0 ? f.trainers[0] : null;
-    // Extract student IDs — try multiple possible field names from the API
+    // Extract student IDs — from backend `students` array (now enrolled student IDs)
     const rawStudents = f.students || f.enrolledStudents || f.stagiaires || f.trainees || [];
     const studentIds: string[] = rawStudents.map((s: any) =>
       typeof s === 'object' ? (s.id?.toString() || '') : (s?.toString() || '')
@@ -41,9 +41,10 @@ export class FormationService {
       formateurId: mainTrainer ? mainTrainer.id.toString() : '',
       formateurNom: mainTrainer ? `${mainTrainer.firstName} ${mainTrainer.lastName}` : 'Aucun formateur',
       formateurAvatar: mainTrainer ? mainTrainer.avatar : '',
-      dateDebut: f.startDate ? new Date(f.startDate) : new Date(),
-      dateFin: f.endDate ? new Date(f.endDate) : new Date(),
-      status: 'ACTIVE',
+      dateDebut: f.startDate ? new Date(f.startDate) : undefined,
+      dateFin: f.endDate ? new Date(f.endDate) : undefined,
+      status: (f.status as 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE') || 'PLANIFIEE',
+      archived: f.archived || false,
       stagiaires: studentIds,
       phases: f.phases ? f.phases.map((p: any) => this.mapPhaseDTO(p)) : [],
       category: f.category,
@@ -147,6 +148,7 @@ export class FormationService {
     );
   }
 
+
   savePresence(seanceId: string, presences: Presence[]): Observable<boolean> {
     const payload = presences.map(p => ({
       studentId: parseInt(p.stagiaireId),
@@ -181,5 +183,9 @@ export class FormationService {
 
   closeSession(sessionId: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/sessions/${sessionId}/close`, {});
+  }
+
+  unlockPhase(phaseId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/phases/${phaseId}/unlock`, {});
   }
 }

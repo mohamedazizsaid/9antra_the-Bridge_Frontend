@@ -7,6 +7,7 @@ import { FormationService } from '../../../../core/services/formation.service';
 import { EvaluationService } from '../../../../core/services/evaluation.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UserService } from '../../../../core/services/user.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { User } from '../../../../core/models/user.model';
 import { Formation, Phase, Seance, Presence } from '../../../../core/models/formation.model';
 import { Subscription } from 'rxjs';
@@ -676,6 +677,7 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
     private formationService: FormationService,
     private evaluationService: EvaluationService,
     private notificationService: NotificationService,
+    private toastService: ToastService,
     private router: Router
   ) {}
 
@@ -863,13 +865,12 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
     if (seance.presences && seance.presences.length > 0) {
       this.activePresences = JSON.parse(JSON.stringify(seance.presences));
     } else {
-      // Build from formation's students
+      // Build from formation's enrolled students only
       const formation = this.formations.find(f => f.nom === seance.formationNom || f.id === seance.formationId);
       let students: User[] = [];
-      if (formation && formation.stagiaires.length > 0) {
+      if (formation && formation.stagiaires && formation.stagiaires.length > 0) {
         students = this.allStudents.filter(s => formation.stagiaires.includes(s.id));
       }
-      if (students.length === 0) students = this.allStudents;
       this.activePresences = students.map(s => ({
         stagiaireId: s.id,
         stagiaireNom: `${s.prenom} ${s.nom}`,
@@ -933,13 +934,13 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
               },
               error: (e) => {
                 this.savingAttendance = false;
-                alert(e?.error?.message || 'Erreur lors de la clôture');
+                this.toastService.error(e?.error?.message || 'Erreur lors de la clôture de la séance.', 'Clôture');
               }
             });
           },
           error: (e) => {
             this.savingAttendance = false;
-            alert(e?.error?.message || 'Erreur lors de la sauvegarde des présences');
+            this.toastService.error(e?.error?.message || 'Erreur lors de la sauvegarde des présences.', 'Appel');
           }
         });
       }
