@@ -309,31 +309,26 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
 
-      <!-- ═══ DELETE CONFIRM MODAL ═══ -->
-      <div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" (click)="closeDeleteModal()">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-        <div class="relative z-10 w-full max-w-md" (click)="$event.stopPropagation()">
-          <div class="glass-card border border-red-500/30 overflow-hidden">
-            <div class="h-1 bg-gradient-to-r from-red-600 to-red-400"></div>
-            <div class="p-6 text-center">
-              <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
-              <h3 class="font-syne font-bold text-lg text-white">Supprimer la formation ?</h3>
-              <p class="text-white/50 text-sm mt-2 leading-relaxed">
-                <span class="text-[#F5A623] font-semibold">{{ formationToDelete?.nom }}</span><br>
-                Cette action est irréversible. Toutes les phases, séances et données associées seront supprimées.
-              </p>
-              <div class="flex gap-3 mt-6">
-                <button (click)="closeDeleteModal()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold text-sm transition-all border border-white/10">
-                  Annuler
-                </button>
-                <button (click)="executeDelete()" [disabled]="saving"
-                        class="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm disabled:opacity-60 transition-all flex items-center justify-center gap-2">
-                  <span *ngIf="saving" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-                  {{ saving ? 'Suppression…' : '🗑️ Supprimer définitivement' }}
-                </button>
-              </div>
-            </div>
-          </div>
+      <!-- ═══ INLINE DELETE CONFIRMATION TOAST BANNER ═══ -->
+      <div *ngIf="formationToDelete"
+           class="fixed top-6 right-6 z-50 animate-fadein p-5 rounded-2xl glass-card border border-red-500/40 shadow-[0_10px_40px_rgba(239,68,68,0.25)] flex flex-col sm:flex-row items-center gap-4 max-w-lg bg-[#12122b]">
+        <div class="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-2xl flex-shrink-0">
+          ⚠️
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-white">Supprimer "{{ formationToDelete.nom }}" ?</p>
+          <p class="text-xs text-white/50 mt-0.5">Cette action est irréversible et supprimera tout le contenu.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button (click)="closeDeleteModal()"
+                  class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-xs border border-white/10 transition-all">
+            Annuler
+          </button>
+          <button (click)="executeDelete()" [disabled]="saving"
+                  class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-1.5">
+            <span *ngIf="saving" class="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+            {{ saving ? 'Suppression…' : '🗑️ Supprimer' }}
+          </button>
         </div>
       </div>
 

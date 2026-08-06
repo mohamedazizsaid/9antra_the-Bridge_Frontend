@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormationService } from '../../../core/services/formation.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -258,21 +258,67 @@ export class FormationWizardComponent implements OnInit {
     phases: [] as WizardPhase[]
   };
 
+  editingId: string | null = null;
+
   constructor(
     private formationService: FormationService,
     private userService: UserService,
     private authService: AuthService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     this.userService.getAllUsers().subscribe(users => {
       this.trainersList = users.filter(u => u.role === 'FORMATEUR');
-      if (currentUser?.role === 'FORMATEUR') {
+      if (currentUser?.role === 'FORMATEUR' && !this.editingId) {
         // Automatically assign connected formateur
         this.selectedTrainers = [currentUser.id.toString()];
+      }
+    });
+
+    // Check if editId is provided in query params
+    this.route.queryParams.subscribe(params => {
+      if (params['editId']) {
+        this.editingId = params['editId'];
+        this.loadFormationForEditing(this.editingId!);
+      }
+    });
+  }
+
+  private loadFormationForEditing(id: string): void {
+    this.formationService.getFormationById(id).subscribe({
+      next: (f) => {
+        if (f) {
+          this.formation.title = f.nom || '';
+          this.formation.category = f.category || '';
+          this.formation.description = f.description || '';
+          this.formation.totalPrice = f.totalPrice || null;
+          if (f.formateurId) {
+            this.selectedTrainers = [f.formateurId];
+          }
+          if (f.phases && f.phases.length > 0) {
+            this.formation.phases = f.phases.map(p => ({
+              title: p.nom || '',
+              content: p.description || '',
+              price: 0,
+              minimumAttendance: 75,
+              minimumGrade: 10,
+              sessions: (p.seances || []).map(s => ({
+                sessionDate: s.date ? new Date(s.date).toISOString().split('T')[0] : '',
+                startTime: s.heureDebut || '',
+                duration: parseInt(s.duree) || 2,
+                location: s.salle || 'Salle Virtuelle',
+                meetingLink: ''
+              }))
+            }));
+          }
+        }
+      },
+      error: () => {
+        this.toastService.error('Erreur de chargement des données de la formation', 'Édition Formation');
       }
     });
   }
@@ -386,15 +432,36 @@ export class FormationWizardComponent implements OnInit {
       trainers: trainersMapped,
       phases: phasesMapped
     };
-    this.formationService.createFormation(payload as any).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/dashboard/formations']);
-      },
-      error: (err: any) => {
-        this.loading = false;
-        this.toastService.error(err?.error?.message || 'Erreur lors de la création de la formation', 'Création Formation');
-      }
-    });
+
+    if (this.editingId) {
+      this.formationService.updateFormation(this.editingId, {
+        nom: this.formation.title,
+        category: this.formation.category,
+        description: this.formation.description,
+        totalPrice: computedTotal
+      }).subscribe({
+        next: () => {
+          this.loading = false;
+          this.toastService.success('Formation mise à jour avec succès !', 'Édition Formation');
+          this.router.navigate(['/dashboard/formations']);
+        },
+        error: (err: any) => {
+          this.loading = false;
+          this.toastService.error(err?.error?.message || 'Erreur lors de la mise à jour', 'Édition Formation');
+        }
+      });
+    } else {
+      this.formationService.createFormation(payload as any).subscribe({
+        next: () => {
+          this.loading = false;
+          this.toastService.success('Formation créée avec succès !', 'Création Formation');
+          this.router.navigate(['/dashboard/formations']);
+        },
+        error: (err: any) => {
+          this.loading = false;
+          this.toastService.error(err?.error?.message || 'Erreur lors de la création de la formation', 'Création Formation');
+        }
+      });
+    }
   }
 }
