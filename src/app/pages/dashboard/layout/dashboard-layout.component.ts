@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { trigger, transition, style, animate, query } from '@angular/animations';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ToastService, ToastMessage } from '../../../core/services/toast.service';
@@ -10,12 +11,23 @@ import { User, Role } from '../../../core/models/user.model';
   selector: 'app-dashboard-layout',
   standalone: true,
   imports: [CommonModule, RouterModule],
+  animations: [
+    trigger('routeAnimations', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateX(28px)' }),
+          animate('320ms cubic-bezier(0.4, 0, 0.2, 1)',
+            style({ opacity: 1, transform: 'translateX(0)' }))
+        ], { optional: true })
+      ])
+    ])
+  ],
   template: `
-    <div class="min-h-screen bg-[#08081A] text-white font-inter flex">
+    <div class="h-screen w-screen bg-[#08081A] text-white font-inter flex overflow-hidden">
       
       <!-- Sidebar -->
       <aside [ngClass]="isSidebarCollapsed ? 'w-20' : 'w-64'" 
-             class="hidden md:flex flex-col bg-[#10102A] border-r border-[var(--bridge-border)] transition-all duration-300 relative z-30 flex-shrink-0">
+             class="hidden md:flex flex-col h-full bg-[#10102A] border-r border-[var(--bridge-border)] transition-all duration-300 relative z-30 flex-shrink-0">
         <!-- Sidebar Header -->
         <div class="h-16 flex items-center px-4 border-b border-[var(--bridge-border)] justify-between">
           <div class="flex items-center gap-3 overflow-hidden" *ngIf="!isSidebarCollapsed">
@@ -212,8 +224,8 @@ import { User, Role } from '../../../core/models/user.model';
         <!-- Main Content View -->
         <main class="flex-1 min-h-0 bg-[#08081A] relative">
           <div class="h-full overflow-y-auto">
-            <div class="p-6">
-              <router-outlet></router-outlet>
+            <div class="p-6" [@routeAnimations]="prepareRoute(outlet)">
+              <router-outlet #outlet="outlet"></router-outlet>
             </div>
           </div>
         </main>
@@ -432,5 +444,12 @@ export class DashboardLayoutComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+  prepareRoute(outlet: RouterOutlet): string | null {
+    return outlet?.isActivated
+      ? outlet.activatedRoute.snapshot.url.map(s => s.path).join('/') ||
+        outlet.activatedRoute.snapshot.routeConfig?.path || 'default'
+      : null;
   }
 }

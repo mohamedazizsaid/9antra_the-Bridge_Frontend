@@ -84,9 +84,14 @@ interface WizardSession {
             </div>
             <div>
               <label class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold">Prix total (TND)</label>
-              <input [(ngModel)]="formation.totalPrice" type="number"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
-                     placeholder="Ex: 1200" />
+              <div class="relative">
+                <input [value]="calculatedTotalPrice" type="number" readonly
+                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/70 cursor-not-allowed focus:outline-none"
+                       placeholder="Calculé automatiquement par la somme des phases" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#F5A623] font-bold bg-[#F5A623]/10 px-2 py-1 rounded-md border border-[#F5A623]/20">
+                  Somme des phases
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -94,7 +99,12 @@ interface WizardSession {
         <!-- STEP 2: Phases Configuration -->
         <div *ngIf="step === 2" class="space-y-6 animate-fadeIn">
           <div class="flex justify-between items-center">
-            <h2 class="font-syne font-bold text-xl text-white">🚀 Phases d'apprentissage</h2>
+            <div>
+              <h2 class="font-syne font-bold text-xl text-white">🚀 Phases d'apprentissage</h2>
+              <p class="text-xs text-[var(--bridge-text-muted)] mt-1">
+                Prix total calculé : <span class="font-mono font-bold text-[#F5A623]">{{ calculatedTotalPrice }} TND</span>
+              </p>
+            </div>
             <button (click)="addPhase()"
                     class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all">
               ＋ Ajouter une phase
@@ -377,7 +387,7 @@ export class FormationWizardComponent implements OnInit {
 
   isCurrentStepValid(): boolean {
     if (this.step === 1) {
-      return !!this.formation.title && !!this.formation.category && !!this.formation.totalPrice;
+      return !!this.formation.title && !!this.formation.category;
     }
     if (this.step === 2) {
       return this.formation.phases.length > 0 && this.formation.phases.every(p => !!p.title && !!p.content);
