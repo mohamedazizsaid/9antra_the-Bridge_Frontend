@@ -327,6 +327,7 @@ export class AdminOverviewComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private formationService: FormationService,
     private paiementService: PaiementService,
     private enrollmentService: EnrollmentService
   ) {}
@@ -335,9 +336,17 @@ export class AdminOverviewComponent implements OnInit, AfterViewInit, OnDestroy 
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
+    // Merge stats from both endpoints for full dynamic dashboard
     this.userService.getAdminStats().subscribe({
       next: s => {
-        this.stats = s;
+        this.stats = { ...this.stats, ...s };
+        this.renderAdminCharts();
+      }
+    });
+
+    this.formationService.getDashboardStats().subscribe({
+      next: ds => {
+        this.stats = { ...this.stats, ...ds };
         this.renderAdminCharts();
       }
     });

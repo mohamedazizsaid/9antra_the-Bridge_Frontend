@@ -414,13 +414,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
-    this.sub.add(
-      this.userService.getAllUsers().subscribe(users => {
-        this.allStudents = users.filter(u => u.role === 'STAGIAIRE');
-        this.buildCards();
-      })
-    );
-
+    // Load formations first — student IDs come from formation.stagiaires
     this.sub.add(
       this.formationService.getFormationsByFormateur(this.user.id).subscribe(data => {
         this.formations = data;
@@ -444,40 +438,53 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void { this.sub.unsubscribe(); }
 
   buildCards(): void {
-    if (!this.allStudents.length && !this.formations.length) return;
-    const studentIds = new Set<string>();
-    const studentFormations = new Map<string, { nom: string; id: string }[]>();
+    if (!this.formations.length) return;
+    const studentMap = new Map<string, { nom: string; id: string }[]>();
+    const allEnrolledIds = new Set<string>();
 
+    // Only use students explicitly enrolled in the trainer's formations
     this.formations.forEach(f => {
-      const ids = f.stagiaires.length > 0 ? f.stagiaires : this.allStudents.map(s => s.id);
-      ids.forEach(id => {
-        studentIds.add(id);
-        const existing = studentFormations.get(id) || [];
-        existing.push({ nom: f.nom, id: f.id });
-        studentFormations.set(id, existing);
-      });
+      if (f.stagiaires && f.stagiaires.length > 0) {
+        f.stagiaires.forEach(id => {
+          allEnrolledIds.add(id);
+          const existing = studentMap.get(id) || [];
+          existing.push({ nom: f.nom, id: f.id });
+          studentMap.set(id, existing);
+        });
+      }
     });
 
-    const students = studentIds.size > 0
-      ? this.allStudents.filter(s => studentIds.has(s.id))
-      : this.allStudents;
+    // Build cards using enrolled IDs; match with allStudents for user details if available
+    const usedStudents = allEnrolledIds.size > 0
+      ? this.allStudents.filter(s => allEnrolledIds.has(s.id))
+      : [];
 
-    this.stagiaireCards = students.map(student => {
+    // If no local user data yet but we have IDs, create placeholder cards
+    const idsWithoutUserData = [...allEnrolledIds].filter(id => !usedStudents.find(s => s.id === id));
+    const placeholders = idsWithoutUserData.map(id => ({
+      id,
+      prenom: 'Stagiaire',
+      nom: `#${id}`,
+      email: '',
+      role: 'STAGIAIRE' as any,
+      avatar: undefined,
+      telephone: '',
+      dateInscription: new Date(),
+      age: 0,
+      status: 'ACTIVE',
+      authProvider: 'LOCAL'
+    }));
+
+    const finalStudents = [...usedStudents, ...placeholders as any];
+
+    this.stagiaireCards = finalStudents.map(student => {
       const evals = this.evaluations.filter(e => e.studentId === student.id);
       const avgGrade = evals.length > 0
         ? evals.reduce((sum, e) => sum + (e.grade || 0), 0) / evals.length
         : null;
-
-      const forms = studentFormations.get(student.id) || [];
+      const forms = studentMap.get(student.id) || [];
       const progression = this.computeProgression(student.id);
-
-      return {
-        user: student,
-        formations: forms,
-        avgGrade,
-        evaluationCount: evals.length,
-        progression
-      };
+      return { user: student, formations: forms, avgGrade, evaluationCount: evals.length, progression };
     });
   }
 
@@ -573,12 +580,13 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
     const f = this.formations.find(f => f.id === this.evalForm.formationId);
     if (f) {
       this.availablePhases = f.phases || [];
+      // Only show enrolled students for this formation
       this.availableStudents = f.stagiaires.length > 0
         ? this.allStudents.filter(s => f.stagiaires.includes(s.id))
-        : this.allStudents;
+        : [];
     } else {
       this.availablePhases = [];
-      this.availableStudents = [...this.allStudents];
+      this.availableStudents = [];
     }
   }
 
