@@ -188,4 +188,30 @@ export class FormationService {
   unlockPhase(phaseId: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/phases/${phaseId}/unlock`, {});
   }
+
+  updateFormation(id: string, data: Partial<Formation>): Observable<Formation> {
+    const payload: any = {};
+    if (data.nom !== undefined) payload['title'] = data.nom;
+    if (data.description !== undefined) payload['description'] = data.description;
+    if (data.category !== undefined) payload['category'] = data.category;
+    if (data.totalPrice !== undefined) payload['totalPrice'] = data.totalPrice;
+    if (data.status !== undefined) payload['status'] = data.status;
+    return this.http.put<any>(`${this.apiUrl}/formations/${id}`, payload).pipe(
+      map(f => this.mapFormationDTO(f))
+    );
+  }
+
+  archiveFormation(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/formations/${id}/archive`, {});
+  }
+
+  deleteFormation(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/formations/${id}`);
+  }
+
+  getDashboardStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/stats/dashboard`).pipe(
+      catchError(() => of({ totalFormations: 0, totalUsers: 0, totalEnrollments: 0, totalFormateurs: 0, totalStagiaires: 0 }))
+    );
+  }
 }
