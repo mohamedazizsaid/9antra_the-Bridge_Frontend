@@ -142,6 +142,45 @@
   color: white !important;
 }
 
+/* ─── Light Mode: Presence Tab (2-col layout) ─── */
+
+/* Session cards use color-mix(var(--bridge-card)) via inline style — no override needed,
+   var(--bridge-card) is already #FFFFFF in light mode, so they render white correctly.     */
+
+/* SVG donut background track: override rgba(255,255,255,0.06) to a visible light tone */
+:root[data-theme='light'] .donut-track {
+  stroke: rgba(0,0,0,0.09) !important;
+}
+
+/* Legend text white/60 → bridge-text-muted */
+:root[data-theme='light'] .text-white\/60 {
+  color: var(--bridge-text-muted) !important;
+}
+
+/* Legend total label white/70 → bridge-text */
+:root[data-theme='light'] .text-white\/70 {
+  color: var(--bridge-text) !important;
+}
+
+/* border-white/5 dividers inside donut legend */
+:root[data-theme='light'] .border-white\/5 {
+  border-color: color-mix(in srgb, var(--bridge-border) 60%, transparent) !important;
+}
+
+/* Expand/collapse button background using color-mix var(--bridge-card) — inherits correctly */
+
+/* Ensure white/20 ratio separator stays readable */
+:root[data-theme='light'] .text-white\/20 {
+  color: var(--bridge-text-sub) !important;
+}
+
+/* Toggle button border-white/10 text-white/50 */
+:root[data-theme='light'] .text-white\/50 {
+  color: var(--bridge-text-muted) !important;
+}
+
+/* Session card background via inline style: color-mix(var(--bridge-card)) auto-resolves ✓ */
+
 /* ─── Light Mode Input & Form Control Visibility Fix ─── */
 :root[data-theme='light'] input,
 :root[data-theme='light'] textarea,

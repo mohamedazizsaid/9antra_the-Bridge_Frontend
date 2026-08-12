@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { trigger, transition, style, animate, query } from '@angular/animations';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -280,7 +280,8 @@ export class DashboardLayoutComponent implements OnInit {
     private authService: AuthService,
     private notificationService: NotificationService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -299,6 +300,12 @@ export class DashboardLayoutComponent implements OnInit {
 
     this.buildMenu();
 
+    this.authService.currentUser$.subscribe(u => {
+      if (u) {
+        this.user = u;
+      }
+    });
+
     this.notificationService.unreadCount$.subscribe(count => this.unreadCount = count);
     this.notificationService.notifications$.subscribe(notifs => {
       this.notifications = notifs;
@@ -306,6 +313,13 @@ export class DashboardLayoutComponent implements OnInit {
 
     this.toastService.toasts$.subscribe(t => {
       this.toasts = t;
+    });
+
+    // Fix NG0100: detectChanges after every navigation so animation state is stable
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.cdRef.detectChanges();
+      }
     });
   }
 
