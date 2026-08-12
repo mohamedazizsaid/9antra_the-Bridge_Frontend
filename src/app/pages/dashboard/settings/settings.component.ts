@@ -570,14 +570,8 @@ export class SettingsComponent implements OnInit {
         this.saving = false;
         this.successMsg = 'Profil mis à jour avec succès !';
         setTimeout(() => this.successMsg = '', 3500);
-        const current = this.authService.getCurrentUser();
-        if (current) {
-          current.prenom = updated.prenom;
-          current.nom = updated.nom;
-          current.telephone = updated.telephone;
-          current.avatar = updated.avatar;
-          this.user = { ...current };
-        }
+        this.user = updated;
+        this.authService.updateCurrentUser(updated);
       },
       error: (err) => {
         this.saving = false;

@@ -143,6 +143,16 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+    if (localStorage.getItem('bridge_user')) {
+      localStorage.setItem('bridge_user', JSON.stringify(user));
+    }
+    if (sessionStorage.getItem('bridge_user')) {
+      sessionStorage.setItem('bridge_user', JSON.stringify(user));
+    }
+  }
+
   getRedirectUrl(role: Role): string {
     switch (role) {
       case 'ADMIN': return '/dashboard/admin';
