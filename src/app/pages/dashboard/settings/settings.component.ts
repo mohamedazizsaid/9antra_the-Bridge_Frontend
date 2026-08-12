@@ -579,9 +579,9 @@ export class SettingsComponent implements OnInit {
           this.user = { ...current };
         }
       },
-      error: () => {
+      error: (err) => {
         this.saving = false;
-        this.errorMsg = 'Erreur lors de la sauvegarde';
+        this.errorMsg = err?.error?.message || 'Erreur lors de la sauvegarde';
       }
     });
   }

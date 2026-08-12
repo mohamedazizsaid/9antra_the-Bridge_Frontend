@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Evaluation {
   id?: string;
@@ -27,12 +28,28 @@ export class EvaluationService {
 
   constructor(private http: HttpClient) {}
 
+  /** Normalize all IDs to strings to avoid number vs string comparison bugs */
+  private mapEval(e: any): Evaluation {
+    return {
+      ...e,
+      id: e.id?.toString(),
+      studentId: e.studentId?.toString(),
+      trainerId: e.trainerId?.toString(),
+      phaseId: e.phaseId?.toString(),
+      formationId: e.formationId?.toString(),
+    };
+  }
+
   getEvaluationsByStudent(studentId: string): Observable<Evaluation[]> {
-    return this.http.get<Evaluation[]>(`${this.apiUrl}/student/${studentId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/student/${studentId}`).pipe(
+      map(list => list.map(e => this.mapEval(e)))
+    );
   }
 
   getEvaluationsByTrainer(trainerId: string): Observable<Evaluation[]> {
-    return this.http.get<Evaluation[]>(`${this.apiUrl}/trainer/${trainerId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/trainer/${trainerId}`).pipe(
+      map(list => list.map(e => this.mapEval(e)))
+    );
   }
 
   saveEvaluation(evaluation: Evaluation): Observable<Evaluation> {
@@ -44,10 +61,14 @@ export class EvaluationService {
       trainerId: parseInt(evaluation.trainerId),
       phaseId: parseInt(evaluation.phaseId)
     };
-    return this.http.post<Evaluation>(this.apiUrl, payload);
+    return this.http.post<any>(this.apiUrl, payload).pipe(
+      map(e => this.mapEval(e))
+    );
   }
 
   getEvaluationsByPhase(phaseId: string): Observable<Evaluation[]> {
-    return this.http.get<Evaluation[]>(`${this.apiUrl}/phase/${phaseId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/phase/${phaseId}`).pipe(
+      map(list => list.map(e => this.mapEval(e)))
+    );
   }
 }

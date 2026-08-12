@@ -503,7 +503,8 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
     const finalStudents = [...usedStudents, ...placeholders as any];
 
     this.stagiaireCards = finalStudents.map(student => {
-      const evals = this.evaluations.filter(e => e.studentId === student.id);
+      const sid = student.id?.toString();
+      const evals = this.evaluations.filter(e => e.studentId?.toString() === sid);
       const avgGrade = evals.length > 0
         ? evals.reduce((sum, e) => sum + (e.grade || 0), 0) / evals.length
         : null;
@@ -514,7 +515,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
   }
 
   computeProgression(studentId: string): number {
-    const evals = this.evaluations.filter(e => e.studentId === studentId);
+    const evals = this.evaluations.filter(e => e.studentId?.toString() === studentId?.toString());
     if (!evals.length) return 0;
     const passCount = evals.filter(e => (e.grade || 0) >= 10).length;
     return Math.round((passCount / evals.length) * 100);
@@ -569,7 +570,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
   }
 
   getStudentEvals(studentId: string): Evaluation[] {
-    return this.evaluations.filter(e => e.studentId === studentId);
+    return this.evaluations.filter(e => e.studentId?.toString() === studentId?.toString());
   }
 
   getGradeClass(grade: number | null): string {
