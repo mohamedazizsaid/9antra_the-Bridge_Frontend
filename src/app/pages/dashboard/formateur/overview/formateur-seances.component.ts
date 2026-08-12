@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormationService } from '../../../../core/services/formation.service';
+import { UserService } from '../../../../core/services/user.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { User } from '../../../../core/models/user.model';
 import { Formation, Seance, Presence } from '../../../../core/models/formation.model';
@@ -402,6 +403,7 @@ import { Subscription } from 'rxjs';
 export class FormateurSeancesComponent implements OnInit, OnDestroy {
   user: User | null = null;
   formations: Formation[] = [];
+  allStudents: User[] = [];
 
   todaySeances: Seance[] = [];
   upcomingSeances: Seance[] = [];
@@ -437,12 +439,18 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private formationService: FormationService,
+    private userService: UserService,
     private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
+
+    // Load all students so we can resolve IDs to real names in the attendance modal
+    this.userService.getAllUsers().subscribe(users => {
+      this.allStudents = users.filter(u => u.role === 'STAGIAIRE');
+    });
 
     this.sub.add(
       this.formationService.getFormationsByFormateur(this.user.id).subscribe(data => {
@@ -476,6 +484,28 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     );
 
     this.buildWeekDays();
+  }
+
+  /** Central method to reload all seance data from the backend */
+  loadSeances(): void {
+    if (!this.user) return;
+    this.loading = true;
+    this.formationService.getTodaySeances(this.user.id).subscribe(data => {
+      this.todaySeances = data;
+      this.tabs[0].count = data.length;
+      this.buildWeekDays();
+    });
+    this.formationService.getUpcomingSeances(this.user.id).subscribe(data => {
+      this.upcomingSeances = data;
+      this.tabs[1].count = data.length;
+      this.buildWeekDays();
+      this.loading = false;
+    });
+    this.formationService.getPastSeancesByFormateur(this.user.id).subscribe(data => {
+      this.pastSeances = data;
+      this.tabs[2].count = data.length;
+      this.buildWeekDays();
+    });
   }
 
   ngOnDestroy(): void { this.sub.unsubscribe(); }
@@ -593,16 +623,16 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
       // If already has presences, consider it was already validated
       this.attendanceValidated = true;
     } else {
-      // Build presences ONLY from students enrolled in this formation
+      // Build presences from students enrolled in this formation, resolving IDs to real names
       const formation = this.formations.find(f =>
         f.nom === seance.formationNom || f.id === seance.formationId
       );
       if (formation && formation.stagiaires.length > 0) {
-        // We have enrolled student IDs — create minimal presence entries
-        this.activePresences = formation.stagiaires.map(id => ({
-          stagiaireId: id,
-          stagiaireNom: `Stagiaire #${id}`,
-          stagiaireAvatar: undefined,
+        const enrolledStudents = this.allStudents.filter(s => formation.stagiaires.includes(s.id));
+        this.activePresences = enrolledStudents.map(s => ({
+          stagiaireId: s.id,
+          stagiaireNom: `${s.prenom} ${s.nom}`,
+          stagiaireAvatar: s.avatar,
           present: false,
           starRating: 0,
           sessionNote: ''
@@ -672,21 +702,10 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     this.savingAttendance = true;
     this.formationService.closeSession(this.selectedSeance.id).subscribe({
       next: () => {
-        if (this.selectedSeance) {
-          this.selectedSeance.status = 'CLOTUREE';
-          // Move from today to past in local state
-          const idx = this.todaySeances.findIndex(s => s.id === this.selectedSeance!.id);
-          if (idx !== -1) {
-            const closed = { ...this.todaySeances[idx], status: 'CLOTUREE' as const };
-            this.todaySeances.splice(idx, 1);
-            this.pastSeances.unshift(closed);
-            this.tabs[0].count = this.todaySeances.length;
-            this.tabs[2].count = this.pastSeances.length;
-          }
-          this.buildWeekDays();
-        }
         this.toastService.success('Séance clôturée ! Progressions et certificats mis à jour.', '🔒 Clôture');
         this.closeAttendanceModal();
+        // Reload all data from backend so status persists correctly after refresh
+        this.loadSeances();
       },
       error: (e) => {
         this.savingAttendance = false;

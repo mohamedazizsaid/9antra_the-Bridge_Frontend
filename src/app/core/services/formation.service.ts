@@ -80,7 +80,7 @@ export class FormationService {
       salle: s.location || '',
       formateurNom: s.trainerName || 'Formateur',
       type: s.meetingLink ? 'EN_LIGNE' : 'PRESENTIEL',
-      status: s.status === 'CLOSED' ? 'CLOTUREE' : 'OUVERTE',
+      status: s.closed ? 'CLOTUREE' : 'OUVERTE',
       presences: s.attendances ? s.attendances.map((a: any) => ({
         stagiaireId: a.studentId.toString(),
         stagiaireNom: `${a.studentFirstName} ${a.studentLastName}`,
