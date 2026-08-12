@@ -630,9 +630,19 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
       next: () => {
         this.evalSuccess = true;
         this.evalSaving = false;
+        // Reload evaluations from backend so grades/counts update instantly
+        this.evaluationService.getEvaluationsByTrainer(this.user!.id).subscribe(data => {
+          this.evaluations = data || [];
+          this.buildCards();
+          // Also refresh selectedStudent card if it's open
+          if (this.selectedStudent) {
+            const refreshed = this.stagiaireCards.find(c => c.user.id === this.selectedStudent!.user.id);
+            if (refreshed) this.selectedStudent = refreshed;
+          }
+        });
         setTimeout(() => {
           this.closeEvalModal();
-          this.evalForm = { formationId: '', studentId: null, phaseId: null, grade: 10, starRating: 5, skills: '', comment: '' };
+          this.evalForm = { formationId: this.evalForm.formationId, studentId: null, phaseId: null, grade: 10, starRating: 5, skills: '', comment: '' };
         }, 1500);
       },
       error: () => { this.evalSaving = false; }
