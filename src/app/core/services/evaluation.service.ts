@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface Evaluation {
   id?: string;
@@ -24,7 +25,7 @@ export interface Evaluation {
 
 @Injectable({ providedIn: 'root' })
 export class EvaluationService {
-  private apiUrl = 'http://localhost:8080/api/evaluations';
+  private apiUrl = `${environment.apiUrl}/evaluations`;
 
   constructor(private http: HttpClient) {}
 

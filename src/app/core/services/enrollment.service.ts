@@ -1,6 +1,7 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EnrollmentRequest {
   studentId: number;
@@ -21,7 +22,7 @@ export interface EnrollmentResponse {
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentService {
-  private apiUrl = 'http://localhost:8080/api/enrollments';
+  private apiUrl = `${environment.apiUrl}/enrollments`;
 
   constructor(private http: HttpClient) {}
 

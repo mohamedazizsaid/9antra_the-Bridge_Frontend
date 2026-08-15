@@ -12,6 +12,7 @@ import { Paiement } from '../../../core/models/paiement.model';
 import { User } from '../../../core/models/user.model';
 import { Subscription, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface EnrollmentInfo {
   id: string;
@@ -1063,7 +1064,7 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
 
   loadEnrollments(): void {
     this.sub.add(
-      this.http.get<EnrollmentInfo[]>(`http://localhost:8080/api/enrollments/formation/${this.formationId}`).subscribe({
+      this.http.get<EnrollmentInfo[]>(`${environment.apiUrl}/enrollments/formation/${this.formationId}`).subscribe({
         next: (data) => { this.enrollments = data || []; },
         error: () => {}
       })

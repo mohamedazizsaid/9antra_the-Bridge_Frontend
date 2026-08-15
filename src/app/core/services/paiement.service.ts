@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Paiement, PaiementStatus } from '../models/paiement.model';
+import { environment } from '../../../environments/environment';
 
 export interface RegisterPaymentRequest {
   enrollmentId: number;
@@ -13,7 +14,7 @@ export interface RegisterPaymentRequest {
 
 @Injectable({ providedIn: 'root' })
 export class PaiementService {
-  private apiUrl = 'http://localhost:8080/api/payments';
+  private apiUrl = `${environment.apiUrl}/payments`;
 
   constructor(private http: HttpClient) {}
 

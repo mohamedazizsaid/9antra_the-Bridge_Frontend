@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-stagiaire-historique',
@@ -697,7 +698,7 @@ export class StagiaireHistoriqueComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
-    this.http.get<any[]>('http://localhost:8080/api/evaluations/my').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/evaluations/my`).subscribe({
       next: (evals) => {
         this.evaluations = evals;
         this.loading = false;
@@ -705,7 +706,7 @@ export class StagiaireHistoriqueComponent implements OnInit {
       error: () => { this.loading = false; }
     });
 
-    this.http.get<any>('http://localhost:8080/api/attendance/my').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/attendance/my`).subscribe({
       next: (data) => {
         this.attendances = data.attendances || data || [];
         const total = this.attendances.length;
@@ -719,14 +720,14 @@ export class StagiaireHistoriqueComponent implements OnInit {
       error: () => {}
     });
 
-    this.http.get<any[]>('http://localhost:8080/api/progressions/my').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/progressions/my`).subscribe({
       next: (data) => { this.progressions = data; },
       error: () => {}
     });
 
     if (user.id) {
       this.certLoading = true;
-      this.http.get<any[]>(`http://localhost:8080/api/certificates/student/${user.id}`).subscribe({
+      this.http.get<any[]>(`${environment.apiUrl}/certificates/student/${user.id}`).subscribe({
         next: (data) => { this.certificates = data || []; this.certLoading = false; },
         error: () => { this.certLoading = false; }
       });
@@ -783,7 +784,7 @@ export class StagiaireHistoriqueComponent implements OnInit {
     if (this.certDownloading) return;
     this.certDownloading = true;
     this.http.get(
-      `http://localhost:8080/api/certificates/download/${cert.certificateNumber}`,
+      `${environment.apiUrl}/certificates/download/${cert.certificateNumber}`,
       { responseType: 'blob' }
     ).subscribe({
       next: (blob) => {

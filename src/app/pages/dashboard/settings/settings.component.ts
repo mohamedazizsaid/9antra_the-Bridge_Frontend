@@ -6,6 +6,7 @@ import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { AdminService } from '../../../core/services/admin.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-settings',
@@ -586,7 +587,7 @@ export class SettingsComponent implements OnInit {
     this.savingPwd = true;
     this.pwdSuccess = '';
     this.pwdError = '';
-    this.http.post('http://localhost:8080/api/users/change-password', {
+    this.http.post(`${environment.apiUrl}/users/change-password`, {
       currentPassword: this.passwordForm.current,
       newPassword: this.passwordForm.newPwd
     }).subscribe({

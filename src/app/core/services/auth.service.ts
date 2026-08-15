@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
 import { User, Role, LoginRequest, RegisterRequest, AuthResponse, VerifyEmailRequest, OAuthLoginRequest, ForgotPasswordRequest, ResetPasswordRequest, OAuthConfigResponse } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
 

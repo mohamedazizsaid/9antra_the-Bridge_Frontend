@@ -1,13 +1,14 @@
-﻿import { Injectable, Inject, forwardRef, OnDestroy } from '@angular/core';
+import { Injectable, Inject, forwardRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService implements OnDestroy {
-  private apiUrl = 'http://localhost:8080/api/notifications';
+  private apiUrl = `${environment.apiUrl}/notifications`;
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   notifications$ = this.notificationsSubject.asObservable();
 
