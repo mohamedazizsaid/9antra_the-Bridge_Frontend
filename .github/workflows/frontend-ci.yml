@@ -112,19 +112,16 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Build preview application
-        run: npm run build
-        env:
-          PROD_API_URL: ${{ secrets.PROD_API_URL }}
+      - name: Link Vercel Project
+        run: |
+          mkdir -p .vercel
+          echo '{"orgId":"${{ secrets.VERCEL_ORG_ID || 'team_HjTNyMogzPGSLCI4q0APTo2p' }}","projectId":"${{ secrets.VERCEL_PROJECT_ID || 'prj_2P4ElqlOIpzkZdv7DbYiyXWcKOFl' }}"}' > .vercel/project.json
 
       - name: Deploy to Vercel (Preview)
         id: deploy
         run: |
-          URL=$(vercel deploy dist/the_bridge_frontend/browser --token=${{ secrets.VERCEL_TOKEN }} --yes)
+          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --yes)
           echo "url=$URL" >> $GITHUB_OUTPUT
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
   # ── Job 3: E2E — Playwright smoke tests ───────────────────────────────────
   e2e:
@@ -254,13 +251,10 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Build production application
-        run: npm run build
-        env:
-          PROD_API_URL: ${{ secrets.PROD_API_URL }}
+      - name: Link Vercel Project
+        run: |
+          mkdir -p .vercel
+          echo '{"orgId":"${{ secrets.VERCEL_ORG_ID || 'team_HjTNyMogzPGSLCI4q0APTo2p' }}","projectId":"${{ secrets.VERCEL_PROJECT_ID || 'prj_2P4ElqlOIpzkZdv7DbYiyXWcKOFl' }}"}' > .vercel/project.json
 
       - name: Deploy to Vercel (Production)
-        run: vercel deploy dist/the_bridge_frontend/browser --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes

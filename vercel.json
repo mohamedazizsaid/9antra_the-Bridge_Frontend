@@ -2,6 +2,8 @@
   "git": {
     "deploymentEnabled": false
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/the_bridge_frontend/browser",
   "rewrites": [
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/favicon.ico", "destination": "/favicon.ico" },
