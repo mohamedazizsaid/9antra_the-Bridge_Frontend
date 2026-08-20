@@ -2,10 +2,8 @@
 
 > **Angular 18** · **Vercel** · **GitHub Actions CI/CD**
 
-[![CI](https://github.com/YOUR_ORG/the_bridge_frontend/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/YOUR_ORG/the_bridge_frontend/actions/workflows/frontend-ci.yml)
+[![CI/CD — The Bridge Frontend](https://github.com/YOUR_ORG/the_bridge_frontend/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/YOUR_ORG/the_bridge_frontend/actions/workflows/frontend-ci.yml)
 [![codecov](https://codecov.io/gh/YOUR_ORG/the_bridge_frontend/branch/main/graph/badge.svg?token=YOUR_CODECOV_TOKEN)](https://codecov.io/gh/YOUR_ORG/the_bridge_frontend)
-
-> **Replace** `YOUR_ORG` and `YOUR_CODECOV_TOKEN` with your actual GitHub organization/username and Codecov token.
 
 ---
 
@@ -19,7 +17,7 @@
 | Linting | ESLint (@angular-eslint) + Prettier |
 | Git hooks | Husky + lint-staged |
 | CI/CD | GitHub Actions |
-| Deploy | Vercel |
+| Deploy | Vercel (orchestrated exclusively via GitHub Actions) |
 | Coverage | Codecov |
 | Performance | Lighthouse CI |
 
@@ -54,7 +52,7 @@ npm run test:ci
 # E2E smoke tests against local dev server
 npm run e2e:local
 
-# E2E against a specific URL (CI style)
+# E2E against a specific URL
 E2E_BASE_URL=https://your-preview.vercel.app npm run e2e
 ```
 
@@ -76,62 +74,71 @@ npm run format:check
 
 ---
 
-## CI/CD Pipeline
+## CI/CD Pipeline Architecture
+
+Vercel automatic Git builds are **disabled**. Deployments are orchestrated **exclusively** by GitHub Actions **after** all quality checks pass.
 
 ```
-push / PR  ─────────────────────────────────────────────────────────────────────
+push / PR  ───────────────────────────────────────────────────────────────────────────
                 │
-                ├── quality ──── ESLint + Prettier check
-                │                └── ng test --browsers=ChromeHeadlessCI --code-coverage
-                │                    └── Upload to Codecov
-                │                └── ng build --configuration production
+                ├── quality ──────── ESLint + Prettier + Unit Tests (Karma Headless)
+                │                    └── Codecov Upload
                 │
-                ├── e2e ──────── Playwright smoke tests → Vercel preview URL
+                ├── deploy-preview ─ Vercel Preview Deploy (PRs only, after quality)
                 │
-                └── lighthouse ─ Lighthouse CI → Vercel preview URL
-                                  (perf≥80 · a11y≥90 · best-practices≥85 · seo≥80)
+                ├── e2e ──────────── Playwright smoke tests (after preview)
+                │
+                ├── lighthouse ───── Lighthouse CI audit (after preview)
+                │
+                └── deploy-prod ──── Vercel Production Deploy (main push only)
+                                     (ONLY if quality + e2e + lighthouse ALL pass)
 ```
-
-### Required GitHub Secrets & Variables
-
-| Name | Type | Description |
-|---|---|---|
-| `CODECOV_TOKEN` | Secret | Token from codecov.io for coverage upload |
-| `PROD_API_URL` | Secret | Production backend API URL (injected at build) |
-| `LHCI_GITHUB_APP_TOKEN` | Secret | Lighthouse CI GitHub App token (optional but recommended) |
-| `VERCEL_TEAM_SLUG` | Variable | Your Vercel team slug (for preview URL construction) |
-| `VERCEL_PROD_URL` | Variable | Production Vercel URL, e.g. `https://the-bridge.vercel.app` |
 
 ---
 
-## Vercel Configuration
+## Required GitHub Secrets & Variables
 
-The project already has a [`vercel.json`](./vercel.json) with SPA rewrite rules.
+### Secrets (encrypted)
 
-### Connect to Vercel (one-time setup)
+| Name | Description | Where to get |
+|---|---|---|
+| `VERCEL_TOKEN` | Vercel Personal Access Token | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID` | Vercel Team / Org ID | From `.vercel/project.json` after `npx vercel link` |
+| `VERCEL_PROJECT_ID` | Vercel Project ID | From `.vercel/project.json` after `npx vercel link` |
+| `PROD_API_URL` | Production Backend API URL | `https://nineantra-the-bridge-backend.onrender.com/api` |
+| `CODECOV_TOKEN` | Codecov Repository Token | [codecov.io](https://codecov.io) |
+| `LHCI_GITHUB_APP_TOKEN` | Lighthouse CI Token (optional) | [github.com/apps/lighthouse-ci](https://github.com/apps/lighthouse-ci) |
 
-1. Go to [vercel.com/new](https://vercel.com/new) → Import your GitHub repo
-2. Set **Framework Preset** to: `Other` (or Angular)
-3. Configure:
-   - **Build Command**: `npm run build:prod`
-   - **Output Directory**: `dist/the_bridge_frontend/browser`
-   - **Install Command**: `npm ci`
-   - **Node.js Version**: `20.x`
-4. Add **Environment Variables** in the Vercel dashboard:
-   - `PROD_API_URL` → `https://nineantra-the-bridge-backend.onrender.com/api`
+---
 
-> **Angular environment files vs Vercel env vars**: The `environment.prod.ts` file
-> currently has the API URL hardcoded. For a more flexible setup, you can use
-> `process.env['PROD_API_URL']` in `environment.prod.ts` — Angular CLI will
-> substitute it from `PROD_API_URL` defined in Vercel's environment variables.
+## How to Obtain Vercel Secrets (Step-by-Step)
 
-### Preview Deployments
+### 1. Get `VERCEL_TOKEN`
+1. Go to [vercel.com/account/tokens](https://vercel.com/account/tokens).
+2. Click **Create Token** → Name: `GitHub Actions CI`.
+3. Copy the token and add it as `VERCEL_TOKEN` in GitHub Secrets.
 
-Vercel automatically creates a preview deployment for every PR. The URL pattern is:
-```
-https://the-bridge-frontend-git-<branch-slug>-<team-slug>.vercel.app
-```
-Set `VERCEL_TEAM_SLUG` in GitHub Variables to match your Vercel team name.
+### 2. Get `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`
+1. Run in your terminal at the root of `the_bridge_frontend`:
+   ```bash
+   npx vercel link
+   ```
+2. Follow prompts to link your local project to your Vercel project.
+3. Open `.vercel/project.json` in your editor:
+   ```json
+   {
+     "orgId": "team_xxxxxxxxxxxxxxxxxxxx",
+     "projectId": "prj_xxxxxxxxxxxxxxxxxxxx"
+   }
+   ```
+4. Copy `orgId` → Save as `VERCEL_ORG_ID` in GitHub Secrets.
+5. Copy `projectId` → Save as `VERCEL_PROJECT_ID` in GitHub Secrets.
+
+### 3. Disable Vercel Automatic Git Deployments
+1. Go to **Vercel Dashboard → Project Settings → Git**.
+2. Under **Git Repository**:
+   - Turn **OFF** "Automatically deploy" OR
+   - The [`vercel.json`](./vercel.json) already sets `"git": { "deploymentEnabled": false }`.
 
 ---
 
@@ -139,29 +146,6 @@ Set `VERCEL_TEAM_SLUG` in GitHub Variables to match your Vercel team name.
 
 This project enforces [Conventional Commits](https://www.conventionalcommits.org/) via Husky:
 
-```
-feat(auth): add JWT refresh token logic
-fix(dashboard): correct chart data aggregation
-docs(readme): update Vercel setup instructions
-chore(deps): bump @angular/core to 18.3
-```
-
-Valid types: `feat` · `fix` · `docs` · `style` · `refactor` · `test` · `chore` · `perf` · `ci` · `build` · `revert`
-
----
-
-## First-time Setup (Local)
-
 ```bash
-# 1. Clone and install
-git clone https://github.com/YOUR_ORG/the_bridge_frontend.git
-cd the_bridge_frontend
-npm install        # also runs `prepare` to set up Husky hooks
-
-# 2. Copy and fill in environment
-cp .env.example .env
-# Edit .env: set DEV_API_URL=http://localhost:8080/api
-
-# 3. Start dev server
-npm start
+git commit -m "ci(setup): add vercel deployment jobs"
 ```

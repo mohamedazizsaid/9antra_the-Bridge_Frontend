@@ -1,13 +1,15 @@
-﻿# ──────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
 # The Bridge Frontend — CI/CD Pipeline
 # ──────────────────────────────────────────────────────────────────────────────
 # Pipeline stages:
-#  1. quality    → ESLint + Prettier check + unit tests (ChromeHeadless) + Codecov
-#  2. e2e        → Playwright smoke tests against Vercel preview URL
-#  3. lighthouse → Lighthouse CI audit on Vercel preview URL
+#  1. quality        → ESLint + Prettier check + unit tests (ChromeHeadless) + Codecov
+#  2. deploy-preview → Deploy Vercel preview (PRs only, after quality)
+#  3. e2e            → Playwright smoke tests (after preview deploy or quality)
+#  4. lighthouse     → Lighthouse CI audit (after preview deploy or quality)
+#  5. deploy-prod    → Deploy Vercel production (main branch push only, after quality + e2e + lighthouse)
 # ──────────────────────────────────────────────────────────────────────────────
 
-name: CI — The Bridge Frontend
+name: CI/CD — The Bridge Frontend
 
 on:
   push:
@@ -85,24 +87,56 @@ jobs:
           path: coverage/
           retention-days: 7
 
-      # ── Production Build ─────────────────────────────────────────────────────
-      - name: Build for production
-        run: npm run build:prod
+  # ── Job 2: Deploy Preview to Vercel (PRs only) ─────────────────────────────
+  deploy-preview:
+    name: Deploy to Vercel (Preview)
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != ''
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
         env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           PROD_API_URL: ${{ secrets.PROD_API_URL }}
 
-      - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 1
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-  # ── Job 2: E2E — Playwright smoke tests ───────────────────────────────────
+  # ── Job 3: E2E — Playwright smoke tests ───────────────────────────────────
   e2e:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: quality
+    if: always() && (needs.quality.result == 'success')
 
     steps:
       - name: Checkout source
@@ -120,19 +154,21 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # Resolve target URL (preview for PRs, production for main)
+      # Resolve target URL
       - name: Resolve target URL
         id: resolve-url
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ -n "${{ needs.deploy-preview.outputs.preview_url }}" ]; then
+            echo "E2E_URL=${{ needs.deploy-preview.outputs.preview_url }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BRANCH="${{ github.head_ref }}"
             SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
             echo "E2E_URL=https://the-bridge-frontend-git-${SLUG}-${{ vars.VERCEL_TEAM_SLUG }}.vercel.app" >> $GITHUB_OUTPUT
           else
-            echo "E2E_URL=${{ vars.VERCEL_PROD_URL }}" >> $GITHUB_OUTPUT
+            echo "E2E_URL=${{ vars.VERCEL_PROD_URL || 'https://the-bridge-frontend.vercel.app' }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Wait for Vercel deployment to be ready
+      - name: Wait for deployment to be ready
         run: |
           TARGET_URL="${{ steps.resolve-url.outputs.E2E_URL }}"
           echo "Waiting for: $TARGET_URL"
@@ -160,11 +196,12 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  # ── Job 3: Lighthouse CI — Performance & Accessibility audit ──────────────
+  # ── Job 4: Lighthouse CI — Performance & Accessibility audit ──────────────
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
     needs: quality
+    if: always() && (needs.quality.result == 'success')
 
     steps:
       - name: Checkout source
@@ -185,12 +222,14 @@ jobs:
       - name: Resolve Lighthouse target URL
         id: lh-url
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ -n "${{ needs.deploy-preview.outputs.preview_url }}" ]; then
+            echo "LH_URL=${{ needs.deploy-preview.outputs.preview_url }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BRANCH="${{ github.head_ref }}"
             SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
             echo "LH_URL=https://the-bridge-frontend-git-${SLUG}-${{ vars.VERCEL_TEAM_SLUG }}.vercel.app" >> $GITHUB_OUTPUT
           else
-            echo "LH_URL=${{ vars.VERCEL_PROD_URL }}" >> $GITHUB_OUTPUT
+            echo "LH_URL=${{ vars.VERCEL_PROD_URL || 'https://the-bridge-frontend.vercel.app' }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run Lighthouse CI
@@ -200,3 +239,43 @@ jobs:
             --collect.url="${{ steps.lh-url.outputs.LH_URL }}"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # ── Job 5: Deploy Production to Vercel (main branch push only) ─────────────
+  deploy-prod:
+    name: Deploy to Vercel (Production)
+    runs-on: ubuntu-latest
+    needs: [quality, e2e, lighthouse]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push' && secrets.VERCEL_TOKEN != ''
+    environment: production
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          PROD_API_URL: ${{ secrets.PROD_API_URL }}
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
