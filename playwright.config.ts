@@ -1,4 +1,4 @@
-﻿import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright E2E configuration for The Bridge Frontend.
@@ -16,7 +16,7 @@ export default defineConfig({
     ['github'],
   ],
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: process.env['E2E_BASE_URL'] || 'http://localhost:4200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -41,12 +41,12 @@ export default defineConfig({
 
   // ── Local dev only — starts ng serve automatically ─────────────────────────
   // Remove or comment out webServer when running against a live Vercel URL in CI
-  webServer: process.env.E2E_BASE_URL
-    ? undefined  // CI: use the live Vercel URL, don't spawn a dev server
+  webServer: process.env['E2E_BASE_URL']
+    ? undefined // CI: use the live Vercel URL, don't spawn a dev server
     : {
         command: 'npm start',
         url: 'http://localhost:4200',
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: !process.env['CI'],
         timeout: 120 * 1000,
       },
 });
