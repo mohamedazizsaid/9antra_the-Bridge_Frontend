@@ -12,7 +12,8 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
-  { path: '', component: SplashComponent },
+  { path: '', component: LandingComponent },
+  { path: 'splash', component: SplashComponent },
   { path: 'home', component: LandingComponent },
   { path: 'payment-success', component: PaymentCallbackComponent },
   { path: 'payment-fail', component: PaymentCallbackComponent },
