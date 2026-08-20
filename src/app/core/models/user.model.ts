@@ -69,4 +69,3 @@ export interface AuthResponse {
   createdAt: string;
   authProvider: string;
 }
-

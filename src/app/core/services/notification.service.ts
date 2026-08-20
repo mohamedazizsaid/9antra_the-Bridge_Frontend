@@ -19,14 +19,14 @@ export class NotificationService implements OnDestroy {
 
   constructor(
     private http: HttpClient,
-    @Inject(forwardRef(() => AuthService)) private authService: AuthService
+    @Inject(forwardRef(() => AuthService)) private authService: AuthService,
   ) {
     this.refreshNotifications();
     this.setupAuthSubscription();
   }
 
   private setupAuthSubscription(): void {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.startPolling();
       } else {
@@ -59,11 +59,21 @@ export class NotificationService implements OnDestroy {
     let type: any = 'ANNONCE';
     const t = (n.title || '').toLowerCase();
     if (t.includes('paiement') || t.includes('facture')) type = 'PAIEMENT_CONFIRME';
-    else if (t.includes('aujourd') || t.includes('seance') || t.includes('séance') || t.includes('cours')) type = 'SEANCE_PLANIFIEE';
-    else if (t.includes('certificat') || t.includes('blockchain') || t.includes('certification')) type = 'CERTIFICAT_GENERE';
-    else if (t.includes('phase') || t.includes('débloquée') || t.includes('debloquee')) type = 'PHASE_DEBLOQUEE';
-    else if (t.includes('évaluation') || t.includes('evaluation') || t.includes('note')) type = 'EVALUATION_PUBLIEE';
-    else if (t.includes('inscription') || t.includes('inscrit') || t.includes('bienvenu')) type = 'NOUVELLE_INSCRIPTION';
+    else if (
+      t.includes('aujourd') ||
+      t.includes('seance') ||
+      t.includes('séance') ||
+      t.includes('cours')
+    )
+      type = 'SEANCE_PLANIFIEE';
+    else if (t.includes('certificat') || t.includes('blockchain') || t.includes('certification'))
+      type = 'CERTIFICAT_GENERE';
+    else if (t.includes('phase') || t.includes('débloquée') || t.includes('debloquee'))
+      type = 'PHASE_DEBLOQUEE';
+    else if (t.includes('évaluation') || t.includes('evaluation') || t.includes('note'))
+      type = 'EVALUATION_PUBLIEE';
+    else if (t.includes('inscription') || t.includes('inscrit') || t.includes('bienvenu'))
+      type = 'NOUVELLE_INSCRIPTION';
     return {
       id: n.id.toString(),
       type: type,
@@ -71,7 +81,7 @@ export class NotificationService implements OnDestroy {
       body: n.message,
       timestamp: new Date(n.createdAt),
       read: n.readStatus,
-      actionUrl: '/dashboard'
+      actionUrl: '/dashboard',
     };
   }
 
@@ -80,26 +90,26 @@ export class NotificationService implements OnDestroy {
     if (!user) return;
     this.http.get<any[]>(`${this.apiUrl}/me`).subscribe({
       next: (list) => {
-        const mapped = list.map(n => this.mapNotification(n));
+        const mapped = list.map((n) => this.mapNotification(n));
         mapped.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         this.notificationsSubject.next(mapped);
-        this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
+        this.unreadCountSubject.next(mapped.filter((n) => !n.read).length);
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
   getNotifications(): Observable<Notification[]> {
     return this.http.get<any[]>(`${this.apiUrl}/me`).pipe(
-      map(list => {
-        const mapped = list.map(n => this.mapNotification(n));
+      map((list) => {
+        const mapped = list.map((n) => this.mapNotification(n));
         mapped.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         return mapped;
       }),
-      tap(mapped => {
+      tap((mapped) => {
         this.notificationsSubject.next(mapped);
-        this.unreadCountSubject.next(mapped.filter(n => !n.read).length);
-      })
+        this.unreadCountSubject.next(mapped.filter((n) => !n.read).length);
+      }),
     );
   }
 
@@ -107,13 +117,13 @@ export class NotificationService implements OnDestroy {
     this.http.put(`${this.apiUrl}/${id}/read`, {}).subscribe({
       next: () => {
         const current = this.notificationsSubject.value;
-        const found = current.find(n => n.id === id);
+        const found = current.find((n) => n.id === id);
         if (found) {
           found.read = true;
           this.notificationsSubject.next([...current]);
-          this.unreadCountSubject.next(current.filter(n => !n.read).length);
+          this.unreadCountSubject.next(current.filter((n) => !n.read).length);
         }
-      }
+      },
     });
   }
 
@@ -121,10 +131,10 @@ export class NotificationService implements OnDestroy {
     this.http.put(`${this.apiUrl}/read-all`, {}).subscribe({
       next: () => {
         const current = this.notificationsSubject.value;
-        current.forEach(n => n.read = true);
+        current.forEach((n) => (n.read = true));
         this.notificationsSubject.next([...current]);
         this.unreadCountSubject.next(0);
-      }
+      },
     });
   }
 }

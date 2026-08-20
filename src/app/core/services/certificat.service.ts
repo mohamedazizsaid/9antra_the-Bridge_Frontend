@@ -22,19 +22,19 @@ export class CertificatService {
       hashBlockchain: c.blockchainTransactionHash || c.hashValue || '',
       qrCodeUrl: '',
       pdfUrl: c.pdfUrl || '',
-      verified: true
+      verified: true,
     };
   }
 
   getCertificatsByStagiaire(stagiaireId: string): Observable<Certificat[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/student/${stagiaireId}`).pipe(
-      map(list => list.map(c => this.mapCertificateDTO(c)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/student/${stagiaireId}`)
+      .pipe(map((list) => list.map((c) => this.mapCertificateDTO(c))));
   }
 
   verifyCertificat(hash: string): Observable<Certificat | undefined> {
-    return this.http.get<any>(`${this.apiUrl}/verify/${hash}`).pipe(
-      map(c => this.mapCertificateDTO(c))
-    );
+    return this.http
+      .get<any>(`${this.apiUrl}/verify/${hash}`)
+      .pipe(map((c) => this.mapCertificateDTO(c)));
   }
 }

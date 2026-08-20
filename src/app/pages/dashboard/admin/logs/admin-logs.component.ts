@@ -12,9 +12,13 @@ import { AdminService } from '../../../../core/services/admin.service';
       <div class="flex items-center justify-between">
         <div>
           <h1 class="font-syne font-bold text-2xl text-white">🔍 Logs & Audit</h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">Historique de toutes les requêtes API</p>
+          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">
+            Historique de toutes les requêtes API
+          </p>
         </div>
-        <button (click)="loadLogs()" class="bridge-btn-secondary px-4 py-2 text-sm">🔄 Actualiser</button>
+        <button (click)="loadLogs()" class="bridge-btn-secondary px-4 py-2 text-sm">
+          🔄 Actualiser
+        </button>
       </div>
 
       <!-- Filters -->
@@ -32,20 +36,36 @@ import { AdminService } from '../../../../core/services/admin.service';
           </div>
           <div>
             <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Adresse IP</label>
-            <input [(ngModel)]="filters.ip" placeholder="ex: 127.0.0.1" class="bridge-input w-full text-sm">
+            <input
+              [(ngModel)]="filters.ip"
+              placeholder="ex: 127.0.0.1"
+              class="bridge-input w-full text-sm"
+            />
           </div>
           <div>
             <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">De</label>
-            <input [(ngModel)]="filters.from" type="datetime-local" class="bridge-input w-full text-sm">
+            <input
+              [(ngModel)]="filters.from"
+              type="datetime-local"
+              class="bridge-input w-full text-sm"
+            />
           </div>
           <div>
             <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">À</label>
-            <input [(ngModel)]="filters.to" type="datetime-local" class="bridge-input w-full text-sm">
+            <input
+              [(ngModel)]="filters.to"
+              type="datetime-local"
+              class="bridge-input w-full text-sm"
+            />
           </div>
         </div>
         <div class="flex gap-3 mt-4">
-          <button (click)="applyFilters()" class="bridge-btn-primary px-4 py-2 text-sm">Appliquer les filtres</button>
-          <button (click)="clearFilters()" class="bridge-btn-secondary px-4 py-2 text-sm">Réinitialiser</button>
+          <button (click)="applyFilters()" class="bridge-btn-primary px-4 py-2 text-sm">
+            Appliquer les filtres
+          </button>
+          <button (click)="clearFilters()" class="bridge-btn-secondary px-4 py-2 text-sm">
+            Réinitialiser
+          </button>
         </div>
       </div>
 
@@ -76,53 +96,100 @@ import { AdminService } from '../../../../core/services/admin.service';
             <table class="w-full text-sm">
               <thead class="border-b border-[var(--bridge-border)] sticky top-0 bg-[#10102A]">
                 <tr>
-                  <th class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">Horodatage</th>
-                  <th class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">Requête</th>
-                  <th class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">IP</th>
-                  <th class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">Utilisateur</th>
-                  <th class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">Status</th>
+                  <th
+                    class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                  >
+                    Horodatage
+                  </th>
+                  <th
+                    class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                  >
+                    Requête
+                  </th>
+                  <th
+                    class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                  >
+                    IP
+                  </th>
+                  <th
+                    class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                  >
+                    Utilisateur
+                  </th>
+                  <th
+                    class="text-left py-3 px-4 text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-white/5">
                 <tr *ngFor="let log of logs" class="hover:bg-white/[0.02] transition-colors">
-                  <td class="py-3 px-4 text-[var(--bridge-text-muted)] text-xs whitespace-nowrap">{{ formatDate(log.createdAt) }}</td>
+                  <td class="py-3 px-4 text-[var(--bridge-text-muted)] text-xs whitespace-nowrap">
+                    {{ formatDate(log.createdAt) }}
+                  </td>
                   <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
-                      <span [class]="getMethodClass(log.action)" class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono">
+                      <span
+                        [class]="getMethodClass(log.action)"
+                        class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono"
+                      >
                         {{ getMethod(log.action) }}
                       </span>
-                      <span class="text-white text-xs font-mono truncate max-w-xs">{{ getPath(log.action) }}</span>
+                      <span class="text-white text-xs font-mono truncate max-w-xs">{{
+                        getPath(log.action)
+                      }}</span>
                     </div>
                   </td>
-                  <td class="py-3 px-4 font-mono text-xs text-[var(--bridge-text-muted)]">{{ log.ipAddress }}</td>
-                  <td class="py-3 px-4 text-xs text-[var(--bridge-text-muted)]">{{ log.userName }}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-[var(--bridge-text-muted)]">
+                    {{ log.ipAddress }}
+                  </td>
+                  <td class="py-3 px-4 text-xs text-[var(--bridge-text-muted)]">
+                    {{ log.userName }}
+                  </td>
                   <td class="py-3 px-4">
-                    <span [class]="getStatusClass(log.action)" class="text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    <span
+                      [class]="getStatusClass(log.action)"
+                      class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    >
                       {{ getStatus(log.action) }}
                     </span>
                   </td>
                 </tr>
                 <tr *ngIf="logs.length === 0">
-                  <td colspan="5" class="text-center py-12 text-[var(--bridge-text-muted)]">Aucun log trouvé</td>
+                  <td colspan="5" class="text-center py-12 text-[var(--bridge-text-muted)]">
+                    Aucun log trouvé
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div class="px-4 py-3 border-t border-[var(--bridge-border)] flex items-center justify-between">
-          <span class="text-xs text-[var(--bridge-text-muted)]">{{ logs.length }} / {{ totalElements }} entrées</span>
+        <div
+          class="px-4 py-3 border-t border-[var(--bridge-border)] flex items-center justify-between"
+        >
+          <span class="text-xs text-[var(--bridge-text-muted)]"
+            >{{ logs.length }} / {{ totalElements }} entrées</span
+          >
           <div class="flex items-center gap-2">
-            <button (click)="expanded = !expanded" class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-white/5">
+            <button
+              (click)="expanded = !expanded"
+              class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-white/5"
+            >
               {{ expanded ? '▲ Réduire' : '▼ Tout afficher' }}
             </button>
-            <button *ngIf="currentPage < totalPages - 1" (click)="loadMore()" class="bridge-btn-secondary text-xs px-3 py-1.5">
+            <button
+              *ngIf="currentPage < totalPages - 1"
+              (click)="loadMore()"
+              class="bridge-btn-secondary text-xs px-3 py-1.5"
+            >
               Charger plus
             </button>
           </div>
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class AdminLogsComponent implements OnInit {
   logs: any[] = [];
@@ -134,22 +201,34 @@ export class AdminLogsComponent implements OnInit {
 
   constructor(private adminService: AdminService) {}
 
-  ngOnInit(): void { this.loadLogs(); }
-
-  loadLogs(): void {
-    this.adminService.getLogs(0, 100, this.filters.method || undefined, this.filters.ip || undefined,
-      this.filters.from || undefined, this.filters.to || undefined).subscribe({
-      next: (data) => {
-        this.logs = data.logs || [];
-        this.totalElements = data.totalElements || 0;
-        this.totalPages = data.totalPages || 0;
-        this.currentPage = 0;
-      },
-      error: () => {}
-    });
+  ngOnInit(): void {
+    this.loadLogs();
   }
 
-  applyFilters(): void { this.loadLogs(); }
+  loadLogs(): void {
+    this.adminService
+      .getLogs(
+        0,
+        100,
+        this.filters.method || undefined,
+        this.filters.ip || undefined,
+        this.filters.from || undefined,
+        this.filters.to || undefined,
+      )
+      .subscribe({
+        next: (data) => {
+          this.logs = data.logs || [];
+          this.totalElements = data.totalElements || 0;
+          this.totalPages = data.totalPages || 0;
+          this.currentPage = 0;
+        },
+        error: () => {},
+      });
+  }
+
+  applyFilters(): void {
+    this.loadLogs();
+  }
 
   clearFilters(): void {
     this.filters = { method: '', ip: '', from: '', to: '' };
@@ -159,12 +238,14 @@ export class AdminLogsComponent implements OnInit {
   loadMore(): void {
     this.currentPage++;
     this.adminService.getLogs(this.currentPage, 100).subscribe({
-      next: (data) => { this.logs = [...this.logs, ...(data.logs || [])]; }
+      next: (data) => {
+        this.logs = [...this.logs, ...(data.logs || [])];
+      },
     });
   }
 
   getCount(statusCode: string): number {
-    return this.logs.filter(l => l.action && l.action.includes('[' + statusCode + ']')).length;
+    return this.logs.filter((l) => l.action && l.action.includes('[' + statusCode + ']')).length;
   }
 
   getMethod(action: string): string {
@@ -187,10 +268,10 @@ export class AdminLogsComponent implements OnInit {
   getMethodClass(action: string): string {
     const m = this.getMethod(action);
     const classes: Record<string, string> = {
-      'GET': 'bg-blue-500/10 text-blue-400',
-      'POST': 'bg-emerald-500/10 text-emerald-400',
-      'PUT': 'bg-yellow-500/10 text-yellow-400',
-      'DELETE': 'bg-red-500/10 text-red-400',
+      GET: 'bg-blue-500/10 text-blue-400',
+      POST: 'bg-emerald-500/10 text-emerald-400',
+      PUT: 'bg-yellow-500/10 text-yellow-400',
+      DELETE: 'bg-red-500/10 text-red-400',
     };
     return classes[m] || 'bg-white/10 text-white';
   }

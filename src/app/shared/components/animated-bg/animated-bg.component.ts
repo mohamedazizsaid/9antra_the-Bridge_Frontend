@@ -16,73 +16,87 @@ import gsap from 'gsap';
       <div class="noise-overlay"></div>
     </div>
   `,
-  styles: [`
-    .animated-bg-root {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background: var(--bridge-bg);
-      overflow: hidden;
-      pointer-events: none;
-    }
+  styles: [
+    `
+      .animated-bg-root {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: var(--bridge-bg);
+        overflow: hidden;
+        pointer-events: none;
+      }
 
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.35;
-      will-change: transform;
-    }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+        will-change: transform;
+      }
 
-    .orb-1 {
-      width: 600px;
-      height: 600px;
-      background: var(--bridge-crimson);
-      top: -200px;
-      left: -100px;
-    }
+      .orb-1 {
+        width: 600px;
+        height: 600px;
+        background: var(--bridge-crimson);
+        top: -200px;
+        left: -100px;
+      }
 
-    .orb-2 {
-      width: 500px;
-      height: 500px;
-      background: var(--bridge-gold);
-      bottom: -150px;
-      right: -100px;
-    }
+      .orb-2 {
+        width: 500px;
+        height: 500px;
+        background: var(--bridge-gold);
+        bottom: -150px;
+        right: -100px;
+      }
 
-    .orb-3 {
-      width: 400px;
-      height: 400px;
-      background: color-mix(in srgb, var(--bridge-crimson) 35%, var(--bridge-gold) 25%, #5A64FF 40%);
-      top: 40%;
-      left: 30%;
-    }
+      .orb-3 {
+        width: 400px;
+        height: 400px;
+        background: color-mix(
+          in srgb,
+          var(--bridge-crimson) 35%,
+          var(--bridge-gold) 25%,
+          #5a64ff 40%
+        );
+        top: 40%;
+        left: 30%;
+      }
 
-    .particle-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
+      .particle-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
 
-    .grid-overlay {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px, transparent 1px),
-        linear-gradient(90deg, color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
+      .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(
+            color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--bridge-crimson) 6%, transparent) 1px,
+            transparent 1px
+          );
+        background-size: 60px 60px;
+      }
 
-    .noise-overlay {
-      position: absolute;
-      inset: 0;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-repeat: repeat;
-      background-size: 256px 256px;
-    }
-  `]
+      .noise-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: 256px 256px;
+      }
+    `,
+  ],
 })
 export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
   @ViewChild('orb1') orb1!: ElementRef;
@@ -178,8 +192,14 @@ export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
 
       // Pulse opacity
       p.opacity += p.opacityDir * 0.002;
-      if (p.opacity > 0.4) { p.opacity = 0.4; p.opacityDir = -1; }
-      if (p.opacity < 0.1) { p.opacity = 0.1; p.opacityDir = 1; }
+      if (p.opacity > 0.4) {
+        p.opacity = 0.4;
+        p.opacityDir = -1;
+      }
+      if (p.opacity < 0.1) {
+        p.opacity = 0.1;
+        p.opacityDir = 1;
+      }
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);

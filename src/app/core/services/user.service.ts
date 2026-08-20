@@ -23,20 +23,18 @@ export class UserService {
       dateInscription: new Date(u.createdAt),
       age: u.age,
       status: u.status,
-      authProvider: u.authProvider
+      authProvider: u.authProvider,
     };
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<any[]>(this.apiUrl).pipe(
-      map(list => list.map(u => this.mapUserDTO(u)))
-    );
+    return this.http
+      .get<any[]>(this.apiUrl)
+      .pipe(map((list) => list.map((u) => this.mapUserDTO(u))));
   }
 
   getMyProfile(): Observable<User> {
-    return this.http.get<any>(`${this.apiUrl}/me`).pipe(
-      map(u => this.mapUserDTO(u))
-    );
+    return this.http.get<any>(`${this.apiUrl}/me`).pipe(map((u) => this.mapUserDTO(u)));
   }
 
   updateProfile(profile: Partial<User>): Observable<User> {
@@ -45,11 +43,9 @@ export class UserService {
       lastName: profile.nom,
       phone: profile.telephone,
       age: profile.age,
-      avatar: profile.avatar
+      avatar: profile.avatar,
     };
-    return this.http.put<any>(`${this.apiUrl}/me`, payload).pipe(
-      map(u => this.mapUserDTO(u))
-    );
+    return this.http.put<any>(`${this.apiUrl}/me`, payload).pipe(map((u) => this.mapUserDTO(u)));
   }
 
   getAdminStats(): Observable<any> {

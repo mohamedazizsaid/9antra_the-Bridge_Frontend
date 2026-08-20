@@ -8,13 +8,12 @@ export interface Formation {
   dateDebut?: Date;
   dateFin?: Date;
   phases: Phase[];
-  stagiaires: string[];  // enrolled student IDs
+  stagiaires: string[]; // enrolled student IDs
   status: 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE';
   category?: string;
   totalPrice?: number;
   archived?: boolean;
 }
-
 
 export interface Phase {
   id: string;

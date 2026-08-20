@@ -25,7 +25,14 @@ export class AdminService {
     return this.http.post<any>(`${this.apiUrl}/formateurs`, formateur);
   }
 
-  getLogs(page = 0, size = 50, method?: string, ip?: string, from?: string, to?: string): Observable<any> {
+  getLogs(
+    page = 0,
+    size = 50,
+    method?: string,
+    ip?: string,
+    from?: string,
+    to?: string,
+  ): Observable<any> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (method) params = params.set('method', method);
     if (ip) params = params.set('ip', ip);

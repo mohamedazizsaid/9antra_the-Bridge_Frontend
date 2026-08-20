@@ -15,18 +15,22 @@ import { Subscription } from 'rxjs';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="space-y-8 animate-fadein">
-
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
-            📅 Agenda & <span class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent">Séances</span>
+            📅 Agenda &
+            <span class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
+              >Séances</span
+            >
           </h1>
           <p class="text-[var(--bridge-text-muted)] text-sm mt-1">
             Gérez vos séances, faites l'appel et clôturez vos sessions.
           </p>
         </div>
-        <div class="text-sm text-[var(--bridge-text-muted)] font-mono bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+        <div
+          class="text-sm text-[var(--bridge-text-muted)] font-mono bg-white/5 border border-white/10 px-4 py-2 rounded-xl"
+        >
           {{ todayLabel }}
         </div>
       </div>
@@ -36,36 +40,65 @@ import { Subscription } from 'rxjs';
         <div class="flex items-center justify-between mb-5">
           <h3 class="font-syne font-bold text-base text-white">📆 Semaine en cours</h3>
           <div class="flex items-center gap-2">
-            <button (click)="prevWeek()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all">‹</button>
-            <span class="text-xs font-mono text-white/50 min-w-[120px] text-center">{{ weekRangeLabel }}</span>
-            <button (click)="nextWeek()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all">›</button>
+            <button
+              (click)="prevWeek()"
+              class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
+            >
+              ‹
+            </button>
+            <span class="text-xs font-mono text-white/50 min-w-[120px] text-center">{{
+              weekRangeLabel
+            }}</span>
+            <button
+              (click)="nextWeek()"
+              class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
+            >
+              ›
+            </button>
           </div>
         </div>
         <div class="grid grid-cols-7 gap-2">
           <div *ngFor="let day of weekDays" class="flex flex-col items-center gap-2">
             <div class="text-center">
-              <p class="text-[9px] uppercase tracking-widest font-bold"
-                 [class]="day.isToday ? 'text-[#F5A623]' : 'text-white/30'">{{ day.label }}</p>
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono font-bold mt-1 transition-all"
-                   [class]="day.isToday
-                     ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.4)]'
-                     : 'bg-white/5 text-white/60'">
+              <p
+                class="text-[9px] uppercase tracking-widest font-bold"
+                [class]="day.isToday ? 'text-[#F5A623]' : 'text-white/30'"
+              >
+                {{ day.label }}
+              </p>
+              <div
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono font-bold mt-1 transition-all"
+                [class]="
+                  day.isToday
+                    ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.4)]'
+                    : 'bg-white/5 text-white/60'
+                "
+              >
                 {{ day.num }}
               </div>
             </div>
             <div class="w-full space-y-1 min-h-[40px]">
-              <div *ngFor="let s of day.seances"
-                   (click)="canDoAppel(s) || s.status === 'CLOTUREE' ? openAttendanceModal(s) : null"
-                   class="w-full px-1.5 py-1 rounded-lg text-[9px] font-bold transition-all"
-                   [class]="s.status === 'CLOTUREE'
-                     ? 'bg-white/5 text-white/30 line-through cursor-default'
-                     : canDoAppel(s)
-                     ? 'bg-gradient-to-r from-[rgba(198,39,97,0.25)] to-[rgba(245,166,35,0.15)] text-[#F5A623] border border-[rgba(245,166,35,0.2)] cursor-pointer hover:scale-105'
-                     : 'bg-white/5 text-white/40 cursor-not-allowed border border-white/5'">
+              <div
+                *ngFor="let s of day.seances"
+                (click)="canDoAppel(s) || s.status === 'CLOTUREE' ? openAttendanceModal(s) : null"
+                class="w-full px-1.5 py-1 rounded-lg text-[9px] font-bold transition-all"
+                [class]="
+                  s.status === 'CLOTUREE'
+                    ? 'bg-white/5 text-white/30 line-through cursor-default'
+                    : canDoAppel(s)
+                      ? 'bg-gradient-to-r from-[rgba(198,39,97,0.25)] to-[rgba(245,166,35,0.15)] text-[#F5A623] border border-[rgba(245,166,35,0.2)] cursor-pointer hover:scale-105'
+                      : 'bg-white/5 text-white/40 cursor-not-allowed border border-white/5'
+                "
+              >
                 <div class="truncate">{{ s.heureDebut }}</div>
-                <div class="truncate text-white/50 font-normal" style="font-size:8px">{{ s.formationNom | slice:0:12 }}…</div>
+                <div class="truncate text-white/50 font-normal" style="font-size:8px">
+                  {{ s.formationNom | slice: 0 : 12 }}…
+                </div>
               </div>
-              <div *ngIf="day.seances.length === 0" class="w-full h-8 rounded-lg border border-dashed border-white/5"></div>
+              <div
+                *ngIf="day.seances.length === 0"
+                class="w-full h-8 rounded-lg border border-dashed border-white/5"
+              ></div>
             </div>
           </div>
         </div>
@@ -73,12 +106,16 @@ import { Subscription } from 'rxjs';
 
       <!-- Tabs -->
       <div class="flex gap-1 p-1 bg-white/[0.03] rounded-2xl border border-white/5 w-fit">
-        <button *ngFor="let tab of tabs"
-                (click)="activeTab = tab.key; currentPage = 1"
-                class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                [class]="activeTab === tab.key
-                  ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.25)]'
-                  : 'text-white/50 hover:text-white hover:bg-white/5'">
+        <button
+          *ngFor="let tab of tabs"
+          (click)="activeTab = tab.key; currentPage = 1"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+          [class]="
+            activeTab === tab.key
+              ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.25)]'
+              : 'text-white/50 hover:text-white hover:bg-white/5'
+          "
+        >
           {{ tab.label }}
           <span class="ml-2 text-[10px] font-mono opacity-60">{{ tab.count }}</span>
         </button>
@@ -86,38 +123,72 @@ import { Subscription } from 'rxjs';
 
       <!-- Loading -->
       <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 space-y-4">
-        <div class="w-12 h-12 rounded-full border-2 border-[#C62761]/30 border-t-[#C62761] animate-spin"></div>
+        <div
+          class="w-12 h-12 rounded-full border-2 border-[#C62761]/30 border-t-[#C62761] animate-spin"
+        ></div>
         <p class="text-white/40 text-sm">Chargement des séances…</p>
       </div>
 
       <!-- Session List -->
       <div *ngIf="!loading" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
-        <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 border-b border-white/5 bg-white/[0.02]">
-          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold">Formation / Séance</span>
-          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold hidden sm:block">Date</span>
-          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold hidden md:block">Salle</span>
-          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-center">Présents</span>
-          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-right">Action</span>
+        <div
+          class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 border-b border-white/5 bg-white/[0.02]"
+        >
+          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold"
+            >Formation / Séance</span
+          >
+          <span
+            class="text-[10px] text-white/40 uppercase tracking-widest font-semibold hidden sm:block"
+            >Date</span
+          >
+          <span
+            class="text-[10px] text-white/40 uppercase tracking-widest font-semibold hidden md:block"
+            >Salle</span
+          >
+          <span
+            class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-center"
+            >Présents</span
+          >
+          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-right"
+            >Action</span
+          >
         </div>
 
         <div *ngIf="paginatedSeances.length > 0" class="divide-y divide-white/[0.03]">
-          <div *ngFor="let seance of paginatedSeances; let i = index"
-               class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors group items-center"
-               [style.animation-delay]="(i * 40) + 'ms'"
-               style="animation: fadeSlideIn 0.35s ease both">
-
+          <div
+            *ngFor="let seance of paginatedSeances; let i = index"
+            class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors group items-center"
+            [style.animation-delay]="i * 40 + 'ms'"
+            style="animation: fadeSlideIn 0.35s ease both"
+          >
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-white truncate group-hover:text-[#F5A623] transition-colors">{{ seance.formationNom }}</p>
+              <p
+                class="text-sm font-semibold text-white truncate group-hover:text-[#F5A623] transition-colors"
+              >
+                {{ seance.formationNom }}
+              </p>
               <div class="flex items-center gap-2 mt-0.5">
                 <span class="text-xs font-mono text-white/40">{{ seance.heureDebut }}</span>
-                <span *ngIf="seance.type === 'EN_LIGNE'" class="text-[9px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">🌐 EN LIGNE</span>
-                <span *ngIf="seance.status === 'CLOTUREE'" class="text-[9px] px-1.5 py-0.5 bg-white/5 text-white/30 rounded-full font-bold">🔒 CLÔTURÉE</span>
-                <span *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE'" class="text-[9px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold animate-pulse">AUJOURD'HUI</span>
+                <span
+                  *ngIf="seance.type === 'EN_LIGNE'"
+                  class="text-[9px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold"
+                  >🌐 EN LIGNE</span
+                >
+                <span
+                  *ngIf="seance.status === 'CLOTUREE'"
+                  class="text-[9px] px-1.5 py-0.5 bg-white/5 text-white/30 rounded-full font-bold"
+                  >🔒 CLÔTURÉE</span
+                >
+                <span
+                  *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE'"
+                  class="text-[9px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold animate-pulse"
+                  >AUJOURD'HUI</span
+                >
               </div>
             </div>
 
             <div class="hidden sm:flex flex-col justify-center">
-              <p class="text-sm text-white/70 font-mono">{{ seance.date | date:'dd/MM' }}</p>
+              <p class="text-sm text-white/70 font-mono">{{ seance.date | date: 'dd/MM' }}</p>
               <p class="text-[10px] text-white/30">{{ formatDayName(seance.date) }}</p>
             </div>
 
@@ -126,9 +197,11 @@ import { Subscription } from 'rxjs';
             </div>
 
             <div class="flex items-center justify-center">
-              <span class="text-sm font-mono font-bold px-3 py-1 rounded-xl"
-                    [class]="getPresentBadgeClass(seance)">
-                {{ getPresentCount(seance) }}/{{ (seance.presences?.length || 0) || '?' }}
+              <span
+                class="text-sm font-mono font-bold px-3 py-1 rounded-xl"
+                [class]="getPresentBadgeClass(seance)"
+              >
+                {{ getPresentCount(seance) }}/{{ seance.presences?.length || 0 || '?' }}
               </span>
             </div>
 
@@ -136,30 +209,42 @@ import { Subscription } from 'rxjs';
             <div class="flex items-center justify-end">
               <ng-container *ngIf="seance.status !== 'CLOTUREE'; else closedBadge">
                 <ng-container *ngIf="isToday(seance.date); else notToday">
-                  <button *ngIf="canDoAppel(seance)"
-                          (click)="openAttendanceModal(seance)"
-                          class="px-4 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white hover:opacity-90 hover:scale-105 shadow-[0_0_10px_rgba(198,39,97,0.2)] transition-all">
+                  <button
+                    *ngIf="canDoAppel(seance)"
+                    (click)="openAttendanceModal(seance)"
+                    class="px-4 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white hover:opacity-90 hover:scale-105 shadow-[0_0_10px_rgba(198,39,97,0.2)] transition-all"
+                  >
                     📋 Appel
                   </button>
-                  <div *ngIf="!canDoAppel(seance)"
-                       class="text-[10px] text-white/40 italic bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 text-center leading-tight">
-                    ⏰ Dispo à<br>{{ seance.heureDebut }}
+                  <div
+                    *ngIf="!canDoAppel(seance)"
+                    class="text-[10px] text-white/40 italic bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 text-center leading-tight"
+                  >
+                    ⏰ Dispo à<br />{{ seance.heureDebut }}
                   </div>
                 </ng-container>
                 <ng-template #notToday>
-                  <div class="text-[10px] text-white/25 italic bg-white/[0.02] px-2.5 py-1 rounded-lg border border-white/5">
+                  <div
+                    class="text-[10px] text-white/25 italic bg-white/[0.02] px-2.5 py-1 rounded-lg border border-white/5"
+                  >
                     📅 Jour J uniquement
                   </div>
                 </ng-template>
               </ng-container>
               <ng-template #closedBadge>
-                <span class="text-[10px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-semibold">✓ Clôturée</span>
+                <span
+                  class="text-[10px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-semibold"
+                  >✓ Clôturée</span
+                >
               </ng-template>
             </div>
           </div>
         </div>
 
-        <div *ngIf="paginatedSeances.length === 0" class="flex flex-col items-center py-16 text-white/30">
+        <div
+          *ngIf="paginatedSeances.length === 0"
+          class="flex flex-col items-center py-16 text-white/30"
+        >
           <span class="text-5xl mb-4">📅</span>
           <p class="text-base font-medium text-white/40">Aucune séance</p>
           <p class="text-sm mt-1">{{ emptyStateText }}</p>
@@ -169,77 +254,133 @@ import { Subscription } from 'rxjs';
       <!-- Pagination -->
       <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-between">
         <p class="text-xs text-white/40 font-mono">
-          {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, filteredSeances.length) }} sur {{ filteredSeances.length }}
+          {{ (currentPage - 1) * pageSize + 1 }}–{{
+            Math.min(currentPage * pageSize, filteredSeances.length)
+          }}
+          sur {{ filteredSeances.length }}
         </p>
         <div class="flex items-center gap-1">
-          <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
-                  class="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm">‹</button>
-          <button *ngFor="let p of pageNumbers" (click)="goToPage(p)"
-                  class="w-9 h-9 rounded-lg text-sm font-mono transition-all"
-                  [class]="p === currentPage ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold' : 'border border-white/10 text-white/50 hover:text-white hover:border-white/20'">
+          <button
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm"
+          >
+            ‹
+          </button>
+          <button
+            *ngFor="let p of pageNumbers"
+            (click)="goToPage(p)"
+            class="w-9 h-9 rounded-lg text-sm font-mono transition-all"
+            [class]="
+              p === currentPage
+                ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold'
+                : 'border border-white/10 text-white/50 hover:text-white hover:border-white/20'
+            "
+          >
             {{ p }}
           </button>
-          <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
-                  class="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm">›</button>
+          <button
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm"
+          >
+            ›
+          </button>
         </div>
       </div>
-
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- DRAWER MODAL — Feuille de présence (slide depuis droite)        -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <div *ngIf="showAttendanceModal"
-         class="fixed inset-0 z-50 flex items-stretch justify-end"
-         (click)="closeAttendanceModal()">
+    <div
+      *ngIf="showAttendanceModal"
+      class="fixed inset-0 z-50 flex items-stretch justify-end"
+      (click)="closeAttendanceModal()"
+    >
       <!-- Backdrop -->
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
       <!-- Drawer Panel -->
-      <div class="relative z-10 w-full max-w-lg h-full flex flex-col drawer-slide-in"
-           style="background: linear-gradient(135deg, #0e0e24 0%, #12122e 100%); border-left: 1px solid rgba(198,39,97,0.2);"
-           (click)="$event.stopPropagation()">
-
+      <div
+        class="relative z-10 w-full max-w-lg h-full flex flex-col drawer-slide-in"
+        style="background: linear-gradient(135deg, #0e0e24 0%, #12122e 100%); border-left: 1px solid rgba(198,39,97,0.2);"
+        (click)="$event.stopPropagation()"
+      >
         <!-- Top accent bar -->
-        <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] flex-shrink-0"></div>
+        <div
+          class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623] flex-shrink-0"
+        ></div>
 
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0">
+        <div
+          class="flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0"
+        >
           <div>
             <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
               {{ attendanceValidated ? '🔒 Clôturer la séance' : '📋 Feuille de Présence' }}
             </h3>
             <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5" *ngIf="selectedSeance">
-              {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date:'EEEE d MMMM' }} à {{ selectedSeance.heureDebut }}
+              {{ selectedSeance.formationNom }} · {{ selectedSeance.date | date: 'EEEE d MMMM' }} à
+              {{ selectedSeance.heureDebut }}
             </p>
           </div>
           <div class="flex items-center gap-3">
             <!-- Live counter -->
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl border"
-                 [class]="getPresentInModal() === activePresences.length
-                   ? 'bg-emerald-500/10 border-emerald-500/20'
-                   : getPresentInModal() > 0
-                   ? 'bg-amber-500/10 border-amber-500/20'
-                   : 'bg-red-500/10 border-red-500/20'">
-              <span class="text-xl font-mono font-bold leading-none"
-                    [class]="getPresentInModal() === activePresences.length ? 'text-emerald-400' : getPresentInModal() > 0 ? 'text-[#F5A623]' : 'text-red-400'">
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 rounded-2xl border"
+              [class]="
+                getPresentInModal() === activePresences.length
+                  ? 'bg-emerald-500/10 border-emerald-500/20'
+                  : getPresentInModal() > 0
+                    ? 'bg-amber-500/10 border-amber-500/20'
+                    : 'bg-red-500/10 border-red-500/20'
+              "
+            >
+              <span
+                class="text-xl font-mono font-bold leading-none"
+                [class]="
+                  getPresentInModal() === activePresences.length
+                    ? 'text-emerald-400'
+                    : getPresentInModal() > 0
+                      ? 'text-[#F5A623]'
+                      : 'text-red-400'
+                "
+              >
                 {{ getPresentInModal() }}
               </span>
               <div>
                 <p class="text-white/50 text-xs leading-none">/{{ activePresences.length }}</p>
-                <p class="text-[9px] text-white/30 uppercase tracking-wider mt-0.5 leading-none">présents</p>
+                <p class="text-[9px] text-white/30 uppercase tracking-wider mt-0.5 leading-none">
+                  présents
+                </p>
               </div>
             </div>
-            <button (click)="closeAttendanceModal()" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+            <button
+              (click)="closeAttendanceModal()"
+              class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
         <!-- Progress Bar -->
         <div class="px-6 pt-4 pb-2 flex-shrink-0" *ngIf="activePresences.length > 0">
           <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-            <div class="h-full rounded-full transition-all duration-500"
-                 [class]="getPresentInModal() === activePresences.length ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
-                 [style.width]="(activePresences.length > 0 ? (getPresentInModal() / activePresences.length) * 100 : 0) + '%'"></div>
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              [class]="
+                getPresentInModal() === activePresences.length
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                  : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'
+              "
+              [style.width]="
+                (activePresences.length > 0
+                  ? (getPresentInModal() / activePresences.length) * 100
+                  : 0) + '%'
+              "
+            ></div>
           </div>
           <div class="flex justify-between mt-1.5 text-[10px] text-white/30">
             <span>{{ getPresentInModal() }} présent(s)</span>
@@ -248,111 +389,195 @@ import { Subscription } from 'rxjs';
         </div>
 
         <!-- Quick actions (only when not yet validated) -->
-        <div *ngIf="!attendanceValidated" class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0">
+        <div
+          *ngIf="!attendanceValidated"
+          class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0"
+        >
           <span class="text-xs text-white/40">Action rapide :</span>
-          <button (click)="markAll('PRESENT')"
-                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all">
+          <button
+            (click)="markAll('PRESENT')"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 transition-all"
+          >
             ✓ Tous présents
           </button>
-          <button (click)="markAll('ABSENT')"
-                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all">
+          <button
+            (click)="markAll('ABSENT')"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all"
+          >
             ✗ Tous absents
           </button>
         </div>
 
         <!-- Validated banner -->
-        <div *ngIf="attendanceValidated" class="mx-6 mt-4 p-4 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/20 flex items-center gap-3 flex-shrink-0">
+        <div
+          *ngIf="attendanceValidated"
+          class="mx-6 mt-4 p-4 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/20 flex items-center gap-3 flex-shrink-0"
+        >
           <span class="text-2xl">✅</span>
           <div>
             <p class="text-emerald-400 font-semibold text-sm">Appel validé !</p>
-            <p class="text-emerald-400/60 text-xs mt-0.5">{{ getPresentInModal() }}/{{ activePresences.length }} présents enregistrés. Vous pouvez maintenant clôturer la séance.</p>
+            <p class="text-emerald-400/60 text-xs mt-0.5">
+              {{ getPresentInModal() }}/{{ activePresences.length }} présents enregistrés. Vous
+              pouvez maintenant clôturer la séance.
+            </p>
           </div>
         </div>
 
         <!-- Presences List — scrollable -->
         <div class="flex-1 overflow-y-auto px-6 py-4 space-y-2.5 custom-scroll">
-          <div *ngFor="let presence of activePresences; let i = index"
-               class="p-4 rounded-2xl border transition-all"
-               [class]="getPresenceCardClass(presence)"
-               [style.animation-delay]="(i * 25) + 'ms'"
-               style="animation: fadeSlideIn 0.3s ease both">
-
+          <div
+            *ngFor="let presence of activePresences; let i = index"
+            class="p-4 rounded-2xl border transition-all"
+            [class]="getPresenceCardClass(presence)"
+            [style.animation-delay]="i * 25 + 'ms'"
+            style="animation: fadeSlideIn 0.3s ease both"
+          >
             <div class="flex items-center justify-between gap-4">
               <!-- Student info -->
               <div class="flex items-center gap-3 min-w-0">
-                <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
-                     [class]="presence.present ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623]' : 'bg-white/10'">
-                  <img *ngIf="presence.stagiaireAvatar" [src]="presence.stagiaireAvatar" class="w-full h-full object-cover" />
-                  <span *ngIf="!presence.stagiaireAvatar">{{ (presence.stagiaireNom || 'S')[0] }}</span>
+                <div
+                  class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
+                  [class]="
+                    presence.present
+                      ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623]'
+                      : 'bg-white/10'
+                  "
+                >
+                  <img
+                    *ngIf="presence.stagiaireAvatar"
+                    [src]="presence.stagiaireAvatar"
+                    class="w-full h-full object-cover"
+                  />
+                  <span *ngIf="!presence.stagiaireAvatar">{{
+                    (presence.stagiaireNom || 'S')[0]
+                  }}</span>
                 </div>
                 <div class="min-w-0">
-                  <span class="text-sm font-semibold text-white block truncate">{{ presence.stagiaireNom }}</span>
+                  <span class="text-sm font-semibold text-white block truncate">{{
+                    presence.stagiaireNom
+                  }}</span>
                   <!-- Star rating when present -->
-                  <div class="flex items-center gap-0.5 mt-0.5" *ngIf="presence.present && !attendanceValidated">
-                    <button *ngFor="let star of [1,2,3,4,5]"
-                            (click)="presence.starRating = star"
-                            class="text-sm transition-transform hover:scale-125 focus:outline-none leading-none"
-                            [class]="(presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
+                  <div
+                    class="flex items-center gap-0.5 mt-0.5"
+                    *ngIf="presence.present && !attendanceValidated"
+                  >
+                    <button
+                      *ngFor="let star of [1, 2, 3, 4, 5]"
+                      (click)="presence.starRating = star"
+                      class="text-sm transition-transform hover:scale-125 focus:outline-none leading-none"
+                      [class]="
+                        (presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'
+                      "
+                    >
+                      ★
+                    </button>
                   </div>
-                  <div class="flex items-center gap-0.5 mt-0.5" *ngIf="presence.present && attendanceValidated">
-                    <span *ngFor="let star of [1,2,3,4,5]"
-                          class="text-sm leading-none"
-                          [class]="(presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</span>
+                  <div
+                    class="flex items-center gap-0.5 mt-0.5"
+                    *ngIf="presence.present && attendanceValidated"
+                  >
+                    <span
+                      *ngFor="let star of [1, 2, 3, 4, 5]"
+                      class="text-sm leading-none"
+                      [class]="
+                        (presence.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'
+                      "
+                      >★</span
+                    >
                   </div>
                 </div>
               </div>
 
               <!-- Status Buttons (only when not validated) -->
               <div *ngIf="!attendanceValidated" class="flex items-center gap-1.5 flex-shrink-0">
-                <button (click)="setPresenceStatus(presence, 'PRESENT')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="presence.present && !isRetard(presence)
-                          ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                          : 'bg-white/5 text-white/40 hover:bg-emerald-500/20 hover:text-emerald-400'">
+                <button
+                  (click)="setPresenceStatus(presence, 'PRESENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    presence.present && !isRetard(presence)
+                      ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                      : 'bg-white/5 text-white/40 hover:bg-emerald-500/20 hover:text-emerald-400'
+                  "
+                >
                   ✓
                 </button>
-                <button (click)="setPresenceStatus(presence, 'RETARD')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="presence.present && isRetard(presence)
-                          ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.3)]'
-                          : 'bg-white/5 text-white/40 hover:bg-amber-500/20 hover:text-amber-400'">
+                <button
+                  (click)="setPresenceStatus(presence, 'RETARD')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    presence.present && isRetard(presence)
+                      ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.3)]'
+                      : 'bg-white/5 text-white/40 hover:bg-amber-500/20 hover:text-amber-400'
+                  "
+                >
                   ⏰
                 </button>
-                <button (click)="setPresenceStatus(presence, 'ABSENT')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="!presence.present
-                          ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]'
-                          : 'bg-white/5 text-white/40 hover:bg-rose-500/20 hover:text-rose-400'">
+                <button
+                  (click)="setPresenceStatus(presence, 'ABSENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    !presence.present
+                      ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]'
+                      : 'bg-white/5 text-white/40 hover:bg-rose-500/20 hover:text-rose-400'
+                  "
+                >
                   ✗
                 </button>
               </div>
 
               <!-- Validated status badge -->
               <div *ngIf="attendanceValidated" class="flex-shrink-0">
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full border"
-                      [class]="presence.present && !isRetard(presence) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                               : presence.present && isRetard(presence) ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                               : 'bg-red-500/10 text-red-400 border-red-500/20'">
-                  {{ presence.present && !isRetard(presence) ? '✓ Présent' : presence.present && isRetard(presence) ? '⏰ Retard' : '✗ Absent' }}
+                <span
+                  class="text-xs font-bold px-2.5 py-1 rounded-full border"
+                  [class]="
+                    presence.present && !isRetard(presence)
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : presence.present && isRetard(presence)
+                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        : 'bg-red-500/10 text-red-400 border-red-500/20'
+                  "
+                >
+                  {{
+                    presence.present && !isRetard(presence)
+                      ? '✓ Présent'
+                      : presence.present && isRetard(presence)
+                        ? '⏰ Retard'
+                        : '✗ Absent'
+                  }}
                 </span>
               </div>
             </div>
 
             <!-- Note input -->
-            <div class="mt-3 pt-2.5 border-t border-white/5" *ngIf="presence.present && !attendanceValidated">
-              <input [(ngModel)]="presence.sessionNote" type="text"
-                     class="w-full bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
-                     placeholder="Remarque (optionnel…)" />
+            <div
+              class="mt-3 pt-2.5 border-t border-white/5"
+              *ngIf="presence.present && !attendanceValidated"
+            >
+              <input
+                [(ngModel)]="presence.sessionNote"
+                type="text"
+                class="w-full bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
+                placeholder="Remarque (optionnel…)"
+              />
             </div>
-            <div *ngIf="presence.present && attendanceValidated && presence.sessionNote" class="mt-2 text-xs text-white/40 italic">
+            <div
+              *ngIf="presence.present && attendanceValidated && presence.sessionNote"
+              class="mt-2 text-xs text-white/40 italic"
+            >
               "{{ presence.sessionNote }}"
             </div>
           </div>
 
           <div *ngIf="activePresences.length === 0" class="text-center py-12">
-            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl mx-auto mb-4">👥</div>
+            <div
+              class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl mx-auto mb-4"
+            >
+              👥
+            </div>
             <p class="text-white/50 font-medium">Aucun stagiaire inscrit</p>
-            <p class="text-white/30 text-xs mt-2">Les stagiaires inscrits à cette formation apparaîtront ici.</p>
+            <p class="text-white/30 text-xs mt-2">
+              Les stagiaires inscrits à cette formation apparaîtront ici.
+            </p>
           </div>
         </div>
 
@@ -360,21 +585,33 @@ import { Subscription } from 'rxjs';
         <div class="flex gap-3 px-6 py-5 border-t border-white/5 flex-shrink-0">
           <!-- Before validation: show Validate button -->
           <ng-container *ngIf="!attendanceValidated">
-            <button (click)="saveAttendance()"
-                    [disabled]="savingAttendance || activePresences.length === 0"
-                    class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm flex items-center justify-center gap-2">
-              <span *ngIf="savingAttendance" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
-              <span *ngIf="!savingAttendance">✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})</span>
+            <button
+              (click)="saveAttendance()"
+              [disabled]="savingAttendance || activePresences.length === 0"
+              class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm flex items-center justify-center gap-2"
+            >
+              <span
+                *ngIf="savingAttendance"
+                class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
+              ></span>
+              <span *ngIf="!savingAttendance"
+                >✓ Valider l'Appel ({{ getPresentInModal() }}/{{ activePresences.length }})</span
+              >
               <span *ngIf="savingAttendance">Enregistrement…</span>
             </button>
           </ng-container>
 
           <!-- After validation: show Close Session button only -->
           <ng-container *ngIf="attendanceValidated">
-            <button (click)="closeSession()"
-                    [disabled]="savingAttendance"
-                    class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-              <span *ngIf="savingAttendance" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+            <button
+              (click)="closeSession()"
+              [disabled]="savingAttendance"
+              class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+            >
+              <span
+                *ngIf="savingAttendance"
+                class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
+              ></span>
               <span *ngIf="!savingAttendance">🔒 Clôturer la Séance</span>
               <span *ngIf="savingAttendance">Clôture en cours…</span>
             </button>
@@ -385,20 +622,43 @@ import { Subscription } from 'rxjs';
 
     <style>
       @keyframes fadeSlideIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       @keyframes drawerSlideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
       }
-      .drawer-slide-in { animation: drawerSlideIn 0.35s cubic-bezier(0.34, 1.15, 0.64, 1) both; }
-      .animate-fadein { animation: fadeSlideIn 0.4s ease both; }
-      .custom-scroll::-webkit-scrollbar { width: 4px; }
-      .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-      .custom-scroll::-webkit-scrollbar-thumb { background: rgba(198,39,97,0.3); border-radius: 2px; }
+      .drawer-slide-in {
+        animation: drawerSlideIn 0.35s cubic-bezier(0.34, 1.15, 0.64, 1) both;
+      }
+      .animate-fadein {
+        animation: fadeSlideIn 0.4s ease both;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(198, 39, 97, 0.3);
+        border-radius: 2px;
+      }
     </style>
-  `
+  `,
 })
 export class FormateurSeancesComponent implements OnInit, OnDestroy {
   user: User | null = null;
@@ -428,7 +688,12 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   protected Math = Math;
   private sub = new Subscription();
 
-  todayLabel = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  todayLabel = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   tabs = [
     { key: 'today' as const, label: "Aujourd'hui", count: 0 },
@@ -440,47 +705,47 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private formationService: FormationService,
     private userService: UserService,
-    private toastService: ToastService
-  ) { }
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     if (!this.user) return;
 
     // Load all students so we can resolve IDs to real names in the attendance modal
-    this.userService.getAllUsers().subscribe(users => {
-      this.allStudents = users.filter(u => u.role === 'STAGIAIRE');
+    this.userService.getAllUsers().subscribe((users) => {
+      this.allStudents = users.filter((u) => u.role === 'STAGIAIRE');
     });
 
     this.sub.add(
-      this.formationService.getFormationsByFormateur(this.user.id).subscribe(data => {
+      this.formationService.getFormationsByFormateur(this.user.id).subscribe((data) => {
         this.formations = data;
-      })
+      }),
     );
 
     this.sub.add(
-      this.formationService.getTodaySeances(this.user.id).subscribe(data => {
+      this.formationService.getTodaySeances(this.user.id).subscribe((data) => {
         this.todaySeances = data;
         this.tabs[0].count = data.length;
         this.buildWeekDays();
-      })
+      }),
     );
 
     this.sub.add(
-      this.formationService.getUpcomingSeances(this.user.id).subscribe(data => {
+      this.formationService.getUpcomingSeances(this.user.id).subscribe((data) => {
         this.upcomingSeances = data;
         this.tabs[1].count = data.length;
         this.buildWeekDays();
         this.loading = false;
-      })
+      }),
     );
 
     this.sub.add(
-      this.formationService.getPastSeancesByFormateur(this.user.id).subscribe(data => {
+      this.formationService.getPastSeancesByFormateur(this.user.id).subscribe((data) => {
         this.pastSeances = data;
         this.tabs[2].count = data.length;
         this.buildWeekDays();
-      })
+      }),
     );
 
     this.buildWeekDays();
@@ -490,31 +755,33 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   loadSeances(): void {
     if (!this.user) return;
     this.loading = true;
-    this.formationService.getTodaySeances(this.user.id).subscribe(data => {
+    this.formationService.getTodaySeances(this.user.id).subscribe((data) => {
       this.todaySeances = data;
       this.tabs[0].count = data.length;
       this.buildWeekDays();
     });
-    this.formationService.getUpcomingSeances(this.user.id).subscribe(data => {
+    this.formationService.getUpcomingSeances(this.user.id).subscribe((data) => {
       this.upcomingSeances = data;
       this.tabs[1].count = data.length;
       this.buildWeekDays();
       this.loading = false;
     });
-    this.formationService.getPastSeancesByFormateur(this.user.id).subscribe(data => {
+    this.formationService.getPastSeancesByFormateur(this.user.id).subscribe((data) => {
       this.pastSeances = data;
       this.tabs[2].count = data.length;
       this.buildWeekDays();
     });
   }
 
-  ngOnDestroy(): void { this.sub.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
 
   buildWeekDays(): void {
     const today = new Date();
     const monday = new Date(today);
     const dayOfWeek = today.getDay() === 0 ? 6 : today.getDay() - 1;
-    monday.setDate(today.getDate() - dayOfWeek + (this.weekOffset * 7));
+    monday.setDate(today.getDate() - dayOfWeek + this.weekOffset * 7);
 
     const dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
     const allSeances = [...this.todaySeances, ...this.upcomingSeances, ...this.pastSeances];
@@ -523,13 +790,25 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
       const dateStr = date.toDateString();
-      const daySeances = allSeances.filter(s => new Date(s.date).toDateString() === dateStr);
-      return { label, num: date.getDate().toString().padStart(2, '0'), isToday: date.toDateString() === today.toDateString(), date, seances: daySeances };
+      const daySeances = allSeances.filter((s) => new Date(s.date).toDateString() === dateStr);
+      return {
+        label,
+        num: date.getDate().toString().padStart(2, '0'),
+        isToday: date.toDateString() === today.toDateString(),
+        date,
+        seances: daySeances,
+      };
     });
   }
 
-  prevWeek(): void { this.weekOffset--; this.buildWeekDays(); }
-  nextWeek(): void { this.weekOffset++; this.buildWeekDays(); }
+  prevWeek(): void {
+    this.weekOffset--;
+    this.buildWeekDays();
+  }
+  nextWeek(): void {
+    this.weekOffset++;
+    this.buildWeekDays();
+  }
 
   get weekRangeLabel(): string {
     if (!this.weekDays.length) return '';
@@ -541,9 +820,12 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
 
   get filteredSeances(): Seance[] {
     switch (this.activeTab) {
-      case 'today': return this.todaySeances;
-      case 'upcoming': return this.upcomingSeances;
-      case 'past': return this.pastSeances;
+      case 'today':
+        return this.todaySeances;
+      case 'upcoming':
+        return this.upcomingSeances;
+      case 'past':
+        return this.pastSeances;
     }
   }
 
@@ -552,7 +834,9 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     return this.filteredSeances.slice(start, start + this.pageSize);
   }
 
-  get totalPages(): number { return Math.ceil(this.filteredSeances.length / this.pageSize); }
+  get totalPages(): number {
+    return Math.ceil(this.filteredSeances.length / this.pageSize);
+  }
 
   get pageNumbers(): number[] {
     const pages: number[] = [];
@@ -564,14 +848,19 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
 
   get emptyStateText(): string {
     switch (this.activeTab) {
-      case 'today': return "Aucune séance prévue aujourd'hui";
-      case 'upcoming': return 'Aucune séance à venir planifiée';
-      case 'past': return 'Aucune séance passée enregistrée';
+      case 'today':
+        return "Aucune séance prévue aujourd'hui";
+      case 'upcoming':
+        return 'Aucune séance à venir planifiée';
+      case 'past':
+        return 'Aucune séance passée enregistrée';
     }
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) { this.currentPage = page; }
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   formatDayName(date: Date): string {
@@ -596,11 +885,11 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   }
 
   getPresentCount(seance: Seance): number {
-    return seance.presences?.filter(p => p.present).length || 0;
+    return seance.presences?.filter((p) => p.present).length || 0;
   }
 
   getPresentInModal(): number {
-    return this.activePresences.filter(p => p.present).length;
+    return this.activePresences.filter((p) => p.present).length;
   }
 
   getPresentBadgeClass(seance: Seance): string {
@@ -624,18 +913,20 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
       this.attendanceValidated = true;
     } else {
       // Build presences from students enrolled in this formation, resolving IDs to real names
-      const formation = this.formations.find(f =>
-        f.nom === seance.formationNom || f.id === seance.formationId
+      const formation = this.formations.find(
+        (f) => f.nom === seance.formationNom || f.id === seance.formationId,
       );
       if (formation && formation.stagiaires.length > 0) {
-        const enrolledStudents = this.allStudents.filter(s => formation.stagiaires.includes(s.id));
-        this.activePresences = enrolledStudents.map(s => ({
+        const enrolledStudents = this.allStudents.filter((s) =>
+          formation.stagiaires.includes(s.id),
+        );
+        this.activePresences = enrolledStudents.map((s) => ({
           stagiaireId: s.id,
           stagiaireNom: `${s.prenom} ${s.nom}`,
           stagiaireAvatar: s.avatar,
           present: false,
           starRating: 0,
-          sessionNote: ''
+          sessionNote: '',
         }));
       } else {
         this.activePresences = [];
@@ -654,7 +945,7 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
   }
 
   markAll(status: 'PRESENT' | 'ABSENT'): void {
-    this.activePresences.forEach(p => this.setPresenceStatus(p, status));
+    this.activePresences.forEach((p) => this.setPresenceStatus(p, status));
   }
 
   setPresenceStatus(p: Presence, status: 'PRESENT' | 'RETARD' | 'ABSENT'): void {
@@ -690,9 +981,14 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
         this.selectedSeance!.presences = [...this.activePresences];
         this.savingAttendance = false;
         this.attendanceValidated = true;
-        this.toastService.success(`Appel validé ! ${this.getPresentInModal()}/${this.activePresences.length} présents enregistrés.`, '📋 Appel');
+        this.toastService.success(
+          `Appel validé ! ${this.getPresentInModal()}/${this.activePresences.length} présents enregistrés.`,
+          '📋 Appel',
+        );
       },
-      error: () => { this.savingAttendance = false; }
+      error: () => {
+        this.savingAttendance = false;
+      },
     });
   }
 
@@ -702,7 +998,10 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
     this.savingAttendance = true;
     this.formationService.closeSession(this.selectedSeance.id).subscribe({
       next: () => {
-        this.toastService.success('Séance clôturée ! Progressions et certificats mis à jour.', '🔒 Clôture');
+        this.toastService.success(
+          'Séance clôturée ! Progressions et certificats mis à jour.',
+          '🔒 Clôture',
+        );
         this.closeAttendanceModal();
         // Reload all data from backend so status persists correctly after refresh
         this.loadSeances();
@@ -710,7 +1009,7 @@ export class FormateurSeancesComponent implements OnInit, OnDestroy {
       error: (e) => {
         this.savingAttendance = false;
         this.toastService.error(e?.error?.message || 'Erreur lors de la clôture.', 'Clôture');
-      }
+      },
     });
   }
 }

@@ -35,11 +35,13 @@ import { FooterComponent } from './footer/footer.component';
     </main>
     <app-footer></app-footer>
   `,
-  styles: [`
-    .landing-main {
-      position: relative;
-      z-index: 1;
-    }
-  `]
+  styles: [
+    `
+      .landing-main {
+        position: relative;
+        z-index: 1;
+      }
+    `,
+  ],
 })
 export class LandingComponent {}

@@ -2,7 +2,7 @@ import { Directive, ElementRef, OnInit, OnDestroy, Input } from '@angular/core';
 
 @Directive({
   selector: '[appReveal]',
-  standalone: true
+  standalone: true,
 })
 export class RevealDirective implements OnInit, OnDestroy {
   @Input() revealDelay = 0;
@@ -16,13 +16,13 @@ export class RevealDirective implements OnInit, OnDestroy {
 
     this.observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     this.observer.observe(this.el.nativeElement);

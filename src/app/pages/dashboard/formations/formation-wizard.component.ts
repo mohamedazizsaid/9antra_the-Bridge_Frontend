@@ -31,27 +31,42 @@ interface WizardSession {
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="max-w-4xl mx-auto space-y-8">
-      
       <!-- Top Title -->
       <div class="flex items-center justify-between border-b border-[var(--bridge-border)] pb-6">
         <div>
           <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
-            Wizard de <span class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent">Création</span>
+            Wizard de
+            <span class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
+              >Création</span
+            >
           </h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">Configurez pas à pas votre formation, ses phases et ses séances.</p>
+          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">
+            Configurez pas à pas votre formation, ses phases et ses séances.
+          </p>
         </div>
-        <button routerLink="/dashboard/formations" class="text-xs text-[var(--bridge-text-muted)] hover:text-white transition-colors">
+        <button
+          routerLink="/dashboard/formations"
+          class="text-xs text-[var(--bridge-text-muted)] hover:text-white transition-colors"
+        >
           ✕ Annuler
         </button>
       </div>
 
       <!-- Stepper Header -->
       <div class="grid grid-cols-4 gap-2 text-center text-xs">
-        <div *ngFor="let s of [1, 2, 3, 4]; let i = index"
-             class="py-3 rounded-lg font-bold border transition-all duration-300"
-             [class]="step === s ? 'bg-[rgba(198,39,97,0.15)] border-[#C62761] text-white' : 'bg-white/5 border-white/5 text-white/40'">
+        <div
+          *ngFor="let s of [1, 2, 3, 4]; let i = index"
+          class="py-3 rounded-lg font-bold border transition-all duration-300"
+          [class]="
+            step === s
+              ? 'bg-[rgba(198,39,97,0.15)] border-[#C62761] text-white'
+              : 'bg-white/5 border-white/5 text-white/40'
+          "
+        >
           Étape {{ s }}
-          <span class="block text-[10px] font-normal uppercase tracking-wider mt-1 text-[var(--bridge-text-muted)]">
+          <span
+            class="block text-[10px] font-normal uppercase tracking-wider mt-1 text-[var(--bridge-text-muted)]"
+          >
             {{ getStepLabel(s) }}
           </span>
         </div>
@@ -59,36 +74,62 @@ interface WizardSession {
 
       <!-- Main Step View -->
       <div class="glass-card border border-[var(--bridge-border)] p-8">
-        
         <!-- STEP 1: General Info -->
         <div *ngIf="step === 1" class="space-y-6 animate-fadeIn">
           <h2 class="font-syne font-bold text-xl text-white">📝 Informations générales</h2>
           <div class="grid md:grid-cols-2 gap-6">
             <div>
-              <label class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold">Titre du programme</label>
-              <input [(ngModel)]="formation.title" type="text"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
-                     placeholder="Ex: BootCamp FullStack Angular / Spring" />
+              <label
+                class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold"
+                >Titre du programme</label
+              >
+              <input
+                [(ngModel)]="formation.title"
+                type="text"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
+                placeholder="Ex: BootCamp FullStack Angular / Spring"
+              />
             </div>
             <div>
-              <label class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold">Catégorie</label>
-              <input [(ngModel)]="formation.category" type="text"
-                     class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
-                     placeholder="Ex: Web Development" />
+              <label
+                class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold"
+                >Catégorie</label
+              >
+              <input
+                [(ngModel)]="formation.category"
+                type="text"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
+                placeholder="Ex: Web Development"
+              />
             </div>
             <div class="md:col-span-2">
-              <label class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold">Description</label>
-              <textarea [(ngModel)]="formation.description" rows="4"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] resize-none"
-                        placeholder="Décrivez les compétences visées..."></textarea>
+              <label
+                class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold"
+                >Description</label
+              >
+              <textarea
+                [(ngModel)]="formation.description"
+                rows="4"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] resize-none"
+                placeholder="Décrivez les compétences visées..."
+              ></textarea>
             </div>
             <div>
-              <label class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold">Prix total (TND)</label>
+              <label
+                class="text-xs text-[var(--bridge-text-muted)] uppercase tracking-wider block mb-2 font-semibold"
+                >Prix total (TND)</label
+              >
               <div class="relative">
-                <input [value]="calculatedTotalPrice" type="number" readonly
-                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/70 cursor-not-allowed focus:outline-none"
-                       placeholder="Calculé automatiquement par la somme des phases" />
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#F5A623] font-bold bg-[#F5A623]/10 px-2 py-1 rounded-md border border-[#F5A623]/20">
+                <input
+                  [value]="calculatedTotalPrice"
+                  type="number"
+                  readonly
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/70 cursor-not-allowed focus:outline-none"
+                  placeholder="Calculé automatiquement par la somme des phases"
+                />
+                <span
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#F5A623] font-bold bg-[#F5A623]/10 px-2 py-1 rounded-md border border-[#F5A623]/20"
+                >
                   Somme des phases
                 </span>
               </div>
@@ -102,51 +143,76 @@ interface WizardSession {
             <div>
               <h2 class="font-syne font-bold text-xl text-white">🚀 Phases d'apprentissage</h2>
               <p class="text-xs text-[var(--bridge-text-muted)] mt-1">
-                Prix total calculé : <span class="font-mono font-bold text-[#F5A623]">{{ calculatedTotalPrice }} TND</span>
+                Prix total calculé :
+                <span class="font-mono font-bold text-[#F5A623]"
+                  >{{ calculatedTotalPrice }} TND</span
+                >
               </p>
             </div>
-            <button (click)="addPhase()"
-                    class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all">
+            <button
+              (click)="addPhase()"
+              class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all"
+            >
               ＋ Ajouter une phase
             </button>
           </div>
 
           <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-            <div *ngFor="let phase of formation.phases; let pi = index"
-                 class="p-5 border border-white/5 rounded-2xl bg-white/[0.01] space-y-4 relative">
-              <button (click)="removePhase(pi)"
-                      class="absolute top-4 right-4 text-xs text-red-400 hover:text-red-300 transition-colors">
+            <div
+              *ngFor="let phase of formation.phases; let pi = index"
+              class="p-5 border border-white/5 rounded-2xl bg-white/[0.01] space-y-4 relative"
+            >
+              <button
+                (click)="removePhase(pi)"
+                class="absolute top-4 right-4 text-xs text-red-400 hover:text-red-300 transition-colors"
+              >
                 Supprimer
               </button>
-              
+
               <h4 class="font-mono text-xs font-bold text-[#F5A623]">PHASE {{ pi + 1 }}</h4>
-              
+
               <div class="grid md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
-                  <input [(ngModel)]="phase.title" type="text"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
-                         placeholder="Titre de la phase (Ex: Fondamentaux d'Angular)" />
+                  <input
+                    [(ngModel)]="phase.title"
+                    type="text"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
+                    placeholder="Titre de la phase (Ex: Fondamentaux d'Angular)"
+                  />
                 </div>
                 <div class="md:col-span-2">
-                  <input [(ngModel)]="phase.content" type="text"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
-                         placeholder="Contenu / Curriculum de la phase" />
+                  <input
+                    [(ngModel)]="phase.content"
+                    type="text"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]"
+                    placeholder="Contenu / Curriculum de la phase"
+                  />
                 </div>
                 <div>
                   <label class="text-[10px] text-white/50 block mb-1">Prix de la phase (TND)</label>
-                  <input [(ngModel)]="phase.price" type="number"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
+                  <input
+                    [(ngModel)]="phase.price"
+                    type="number"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                  />
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
                     <label class="text-[10px] text-white/50 block mb-1">Note min (/20)</label>
-                    <input [(ngModel)]="phase.minimumGrade" type="number" step="0.5"
-                           class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
+                    <input
+                      [(ngModel)]="phase.minimumGrade"
+                      type="number"
+                      step="0.5"
+                      class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    />
                   </div>
                   <div>
                     <label class="text-[10px] text-white/50 block mb-1">Présence min (%)</label>
-                    <input [(ngModel)]="phase.minimumAttendance" type="number"
-                           class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
+                    <input
+                      [(ngModel)]="phase.minimumAttendance"
+                      type="number"
+                      class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -157,47 +223,74 @@ interface WizardSession {
         <!-- STEP 3: Sessions Config -->
         <div *ngIf="step === 3" class="space-y-6 animate-fadeIn">
           <h2 class="font-syne font-bold text-xl text-white">📅 Calendrier des Séances</h2>
-          
+
           <div class="space-y-6 max-h-[55vh] overflow-y-auto pr-2">
             <div *ngFor="let phase of formation.phases; let pi = index" class="space-y-3">
-              <div class="flex justify-between items-center bg-white/5 px-4 py-2.5 rounded-xl border border-white/5">
-                <span class="text-xs font-bold text-white">Phase {{ pi + 1 }} : {{ phase.title || 'Sans titre' }}</span>
-                <button (click)="addSession(pi)" class="text-[10px] bg-[#C62761]/10 hover:bg-[#C62761]/20 text-[#C62761] border border-[#C62761]/20 px-2.5 py-1 rounded-lg transition-all font-semibold">
+              <div
+                class="flex justify-between items-center bg-white/5 px-4 py-2.5 rounded-xl border border-white/5"
+              >
+                <span class="text-xs font-bold text-white"
+                  >Phase {{ pi + 1 }} : {{ phase.title || 'Sans titre' }}</span
+                >
+                <button
+                  (click)="addSession(pi)"
+                  class="text-[10px] bg-[#C62761]/10 hover:bg-[#C62761]/20 text-[#C62761] border border-[#C62761]/20 px-2.5 py-1 rounded-lg transition-all font-semibold"
+                >
                   ＋ Session
                 </button>
               </div>
 
-              <div *ngFor="let session of phase.sessions; let si = index"
-                   class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.01] items-end relative group">
-                
+              <div
+                *ngFor="let session of phase.sessions; let si = index"
+                class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.01] items-end relative group"
+              >
                 <div>
                   <label class="text-[9px] text-white/50 block mb-1">Date</label>
-                  <input [(ngModel)]="session.sessionDate" type="date"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]" />
+                  <input
+                    [(ngModel)]="session.sessionDate"
+                    type="date"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
+                  />
                 </div>
                 <div>
                   <label class="text-[9px] text-white/50 block mb-1">Heure début</label>
-                  <input [(ngModel)]="session.startTime" type="time"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]" />
+                  <input
+                    [(ngModel)]="session.startTime"
+                    type="time"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
+                  />
                 </div>
                 <div>
                   <label class="text-[9px] text-white/50 block mb-1">Durée (h)</label>
-                  <input [(ngModel)]="session.duration" type="number"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]" />
+                  <input
+                    [(ngModel)]="session.duration"
+                    type="number"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
+                  />
                 </div>
                 <div>
                   <label class="text-[9px] text-white/50 block mb-1">Lieu / Salle</label>
-                  <input [(ngModel)]="session.location" type="text"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
-                         placeholder="Ex: Salle 102" />
+                  <input
+                    [(ngModel)]="session.location"
+                    type="text"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
+                    placeholder="Ex: Salle 102"
+                  />
                 </div>
                 <div class="relative">
-                  <label class="text-[9px] text-white/50 block mb-1">Lien en ligne (optionnel)</label>
-                  <input [(ngModel)]="session.meetingLink" type="text"
-                         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
-                         placeholder="Ex: Zoom Link" />
-                  <button (click)="removeSession(pi, si)"
-                          class="absolute -top-6 -right-1 text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <label class="text-[9px] text-white/50 block mb-1"
+                    >Lien en ligne (optionnel)</label
+                  >
+                  <input
+                    [(ngModel)]="session.meetingLink"
+                    type="text"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-[#C62761]"
+                    placeholder="Ex: Zoom Link"
+                  />
+                  <button
+                    (click)="removeSession(pi, si)"
+                    class="absolute -top-6 -right-1 text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     Supprimer
                   </button>
                 </div>
@@ -209,50 +302,74 @@ interface WizardSession {
         <!-- STEP 4: Trainers Assignment -->
         <div *ngIf="step === 4" class="space-y-6 animate-fadeIn">
           <h2 class="font-syne font-bold text-xl text-white">👨‍🏫 Attribution des Formateurs</h2>
-          <p class="text-xs text-[var(--bridge-text-muted)]">Sélectionnez les formateurs habilités à encadrer et noter ce programme.</p>
-          
+          <p class="text-xs text-[var(--bridge-text-muted)]">
+            Sélectionnez les formateurs habilités à encadrer et noter ce programme.
+          </p>
+
           <div class="grid md:grid-cols-2 gap-3 max-h-[45vh] overflow-y-auto">
-            <div *ngFor="let trainer of trainersList"
-                 (click)="toggleTrainer(trainer.id)"
-                 class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
-                 [class]="isTrainerSelected(trainer.id) ? 'border-[#F5A623] bg-[rgba(245,166,35,0.05)]' : 'border-white/5 bg-white/[0.01] hover:bg-white/5'">
+            <div
+              *ngFor="let trainer of trainersList"
+              (click)="toggleTrainer(trainer.id)"
+              class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
+              [class]="
+                isTrainerSelected(trainer.id)
+                  ? 'border-[#F5A623] bg-[rgba(245,166,35,0.05)]'
+                  : 'border-white/5 bg-white/[0.01] hover:bg-white/5'
+              "
+            >
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold text-sm">
+                <div
+                  class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold text-sm"
+                >
                   {{ trainer.prenom[0] }}{{ trainer.nom[0] }}
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-white">{{ trainer.prenom }} {{ trainer.nom }}</p>
-                  <p class="text-xs text-[var(--bridge-text-muted)] font-mono">{{ trainer.email }}</p>
+                  <p class="text-sm font-semibold text-white">
+                    {{ trainer.prenom }} {{ trainer.nom }}
+                  </p>
+                  <p class="text-xs text-[var(--bridge-text-muted)] font-mono">
+                    {{ trainer.email }}
+                  </p>
                 </div>
               </div>
-              <span class="text-xs">{{ isTrainerSelected(trainer.id) ? '✓ Sélectionné' : '' }}</span>
+              <span class="text-xs">{{
+                isTrainerSelected(trainer.id) ? '✓ Sélectionné' : ''
+              }}</span>
             </div>
           </div>
         </div>
 
         <!-- Buttons navigation -->
         <div class="flex justify-between items-center border-t border-white/5 pt-6 mt-8">
-          <button (click)="prevStep()"
-                  [disabled]="step === 1"
-                  class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-all">
+          <button
+            (click)="prevStep()"
+            [disabled]="step === 1"
+            class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-all"
+          >
             ← Précédent
           </button>
-          
-          <button *ngIf="step < 4" (click)="nextStep()"
-                  [disabled]="!isCurrentStepValid()"
-                  class="px-5 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-sm font-bold disabled:opacity-40 transition-all">
+
+          <button
+            *ngIf="step < 4"
+            (click)="nextStep()"
+            [disabled]="!isCurrentStepValid()"
+            class="px-5 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-sm font-bold disabled:opacity-40 transition-all"
+          >
             Suivant →
           </button>
 
-          <button *ngIf="step === 4" (click)="submit()"
-                  [disabled]="loading"
-                  class="px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(198,39,97,0.3)] hover:scale-105 transition-all">
+          <button
+            *ngIf="step === 4"
+            (click)="submit()"
+            [disabled]="loading"
+            class="px-6 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(198,39,97,0.3)] hover:scale-105 transition-all"
+          >
             {{ loading ? 'Création...' : 'Créer la formation 🚀' }}
           </button>
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class FormationWizardComponent implements OnInit {
   step = 1;
@@ -265,7 +382,7 @@ export class FormationWizardComponent implements OnInit {
     category: '',
     description: '',
     totalPrice: null as number | null,
-    phases: [] as WizardPhase[]
+    phases: [] as WizardPhase[],
   };
 
   editingId: string | null = null;
@@ -276,13 +393,13 @@ export class FormationWizardComponent implements OnInit {
     private authService: AuthService,
     private toastService: ToastService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
-    this.userService.getAllUsers().subscribe(users => {
-      this.trainersList = users.filter(u => u.role === 'FORMATEUR');
+    this.userService.getAllUsers().subscribe((users) => {
+      this.trainersList = users.filter((u) => u.role === 'FORMATEUR');
       if (currentUser?.role === 'FORMATEUR' && !this.editingId) {
         // Automatically assign connected formateur
         this.selectedTrainers = [currentUser.id.toString()];
@@ -290,7 +407,7 @@ export class FormationWizardComponent implements OnInit {
     });
 
     // Check if editId is provided in query params
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['editId']) {
         this.editingId = params['editId'];
         this.loadFormationForEditing(this.editingId!);
@@ -310,36 +427,44 @@ export class FormationWizardComponent implements OnInit {
             this.selectedTrainers = [f.formateurId];
           }
           if (f.phases && f.phases.length > 0) {
-            this.formation.phases = f.phases.map(p => ({
+            this.formation.phases = f.phases.map((p) => ({
               title: p.nom || '',
               content: p.description || '',
               price: 0,
               minimumAttendance: 75,
               minimumGrade: 10,
-              sessions: (p.seances || []).map(s => ({
+              sessions: (p.seances || []).map((s) => ({
                 sessionDate: s.date ? new Date(s.date).toISOString().split('T')[0] : '',
                 startTime: s.heureDebut || '',
                 duration: parseInt(s.duree) || 2,
                 location: s.salle || 'Salle Virtuelle',
-                meetingLink: ''
-              }))
+                meetingLink: '',
+              })),
             }));
           }
         }
       },
       error: () => {
-        this.toastService.error('Erreur de chargement des données de la formation', 'Édition Formation');
-      }
+        this.toastService.error(
+          'Erreur de chargement des données de la formation',
+          'Édition Formation',
+        );
+      },
     });
   }
 
   getStepLabel(s: number): string {
     switch (s) {
-      case 1: return 'Informations';
-      case 2: return 'Phases';
-      case 3: return 'Séances';
-      case 4: return 'Formateurs';
-      default: return '';
+      case 1:
+        return 'Informations';
+      case 2:
+        return 'Phases';
+      case 3:
+        return 'Séances';
+      case 4:
+        return 'Formateurs';
+      default:
+        return '';
     }
   }
 
@@ -350,7 +475,7 @@ export class FormationWizardComponent implements OnInit {
       price: 0,
       minimumAttendance: 75,
       minimumGrade: 10,
-      sessions: []
+      sessions: [],
     });
   }
 
@@ -364,7 +489,7 @@ export class FormationWizardComponent implements OnInit {
       startTime: '',
       duration: 2,
       location: 'Salle Virtuelle',
-      meetingLink: ''
+      meetingLink: '',
     });
   }
 
@@ -390,11 +515,16 @@ export class FormationWizardComponent implements OnInit {
       return !!this.formation.title && !!this.formation.category;
     }
     if (this.step === 2) {
-      return this.formation.phases.length > 0 && this.formation.phases.every(p => !!p.title && !!p.content);
+      return (
+        this.formation.phases.length > 0 &&
+        this.formation.phases.every((p) => !!p.title && !!p.content)
+      );
     }
     if (this.step === 3) {
       // Sessions are optional but if present must have date and time
-      return this.formation.phases.every(p => p.sessions.every(s => !!s.sessionDate && !!s.startTime));
+      return this.formation.phases.every((p) =>
+        p.sessions.every((s) => !!s.sessionDate && !!s.startTime),
+      );
     }
     return true;
   }
@@ -416,8 +546,9 @@ export class FormationWizardComponent implements OnInit {
 
   submit(): void {
     this.loading = true;
-    const computedTotal = this.calculatedTotalPrice > 0 ? this.calculatedTotalPrice : (this.formation.totalPrice || 0);
-    const trainersMapped = this.selectedTrainers.map(id => ({ id: parseInt(id) }));
+    const computedTotal =
+      this.calculatedTotalPrice > 0 ? this.calculatedTotalPrice : this.formation.totalPrice || 0;
+    const trainersMapped = this.selectedTrainers.map((id) => ({ id: parseInt(id) }));
     const phasesMapped = this.formation.phases.map((p, idx) => ({
       phaseOrder: idx + 1,
       title: p.title,
@@ -425,13 +556,13 @@ export class FormationWizardComponent implements OnInit {
       price: p.price || 0,
       minimumAttendance: p.minimumAttendance || 75,
       minimumGrade: p.minimumGrade || 10,
-      sessions: p.sessions.map(s => ({
+      sessions: p.sessions.map((s) => ({
         sessionDate: s.sessionDate,
         startTime: s.startTime,
         duration: s.duration || 2,
         location: s.location || 'Salle Virtuelle',
-        meetingLink: s.meetingLink || ''
-      }))
+        meetingLink: s.meetingLink || '',
+      })),
     }));
 
     const payload = {
@@ -440,26 +571,31 @@ export class FormationWizardComponent implements OnInit {
       description: this.formation.description,
       totalPrice: computedTotal,
       trainers: trainersMapped,
-      phases: phasesMapped
+      phases: phasesMapped,
     };
 
     if (this.editingId) {
-      this.formationService.updateFormation(this.editingId, {
-        nom: this.formation.title,
-        category: this.formation.category,
-        description: this.formation.description,
-        totalPrice: computedTotal
-      }).subscribe({
-        next: () => {
-          this.loading = false;
-          this.toastService.success('Formation mise à jour avec succès !', 'Édition Formation');
-          this.router.navigate(['/dashboard/formations']);
-        },
-        error: (err: any) => {
-          this.loading = false;
-          this.toastService.error(err?.error?.message || 'Erreur lors de la mise à jour', 'Édition Formation');
-        }
-      });
+      this.formationService
+        .updateFormation(this.editingId, {
+          nom: this.formation.title,
+          category: this.formation.category,
+          description: this.formation.description,
+          totalPrice: computedTotal,
+        })
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.toastService.success('Formation mise à jour avec succès !', 'Édition Formation');
+            this.router.navigate(['/dashboard/formations']);
+          },
+          error: (err: any) => {
+            this.loading = false;
+            this.toastService.error(
+              err?.error?.message || 'Erreur lors de la mise à jour',
+              'Édition Formation',
+            );
+          },
+        });
     } else {
       this.formationService.createFormation(payload as any).subscribe({
         next: () => {
@@ -469,8 +605,11 @@ export class FormationWizardComponent implements OnInit {
         },
         error: (err: any) => {
           this.loading = false;
-          this.toastService.error(err?.error?.message || 'Erreur lors de la création de la formation', 'Création Formation');
-        }
+          this.toastService.error(
+            err?.error?.message || 'Erreur lors de la création de la formation',
+            'Création Formation',
+          );
+        },
       });
     }
   }

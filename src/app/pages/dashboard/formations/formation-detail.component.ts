@@ -30,11 +30,12 @@ interface EnrollmentInfo {
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="space-y-8 animate-fadein">
-
       <!-- Back Button -->
       <div class="flex items-center gap-3">
-        <button (click)="goBack()"
-                class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 hover:text-white transition-all group">
+        <button
+          (click)="goBack()"
+          class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 hover:text-white transition-all group"
+        >
           <span class="group-hover:-translate-x-1 transition-transform">←</span>
           <span>Retour aux formations</span>
         </button>
@@ -44,25 +45,32 @@ interface EnrollmentInfo {
 
       <!-- Loading State -->
       <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 space-y-4">
-        <div class="w-12 h-12 rounded-full border-2 border-[#C62761]/30 border-t-[#C62761] animate-spin"></div>
+        <div
+          class="w-12 h-12 rounded-full border-2 border-[#C62761]/30 border-t-[#C62761] animate-spin"
+        ></div>
         <p class="text-white/40 text-sm">Chargement de la formation...</p>
       </div>
 
       <ng-container *ngIf="!loading && formation">
-
         <!-- Formation Header -->
         <div class="glass-card border border-[var(--bridge-border)] p-8 relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.06)] to-[rgba(245,166,35,0.03)] pointer-events-none"></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.06)] to-[rgba(245,166,35,0.03)] pointer-events-none"
+          ></div>
           <div class="relative z-10">
             <div class="flex flex-col lg:flex-row lg:items-start gap-6">
               <!-- Title Block -->
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-3">
-                  <span class="text-[10px] px-3 py-1 bg-white/5 border border-white/10 rounded-full text-white/60 uppercase font-mono tracking-widest">
+                  <span
+                    class="text-[10px] px-3 py-1 bg-white/5 border border-white/10 rounded-full text-white/60 uppercase font-mono tracking-widest"
+                  >
                     {{ formation.category || 'Général' }}
                   </span>
-                  <span class="text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest border"
-                        [class]="getStatusClass(formation.status)">
+                  <span
+                    class="text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest border"
+                    [class]="getStatusClass(formation.status)"
+                  >
                     {{ getStatusLabel(formation.status) }}
                   </span>
                 </div>
@@ -77,15 +85,21 @@ interface EnrollmentInfo {
               <!-- Stats Block -->
               <div class="grid grid-cols-3 gap-4 lg:min-w-[280px]">
                 <div class="text-center p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                  <p class="text-2xl font-mono font-bold text-[#F5A623]">{{ formation.phases.length }}</p>
+                  <p class="text-2xl font-mono font-bold text-[#F5A623]">
+                    {{ formation.phases.length }}
+                  </p>
                   <p class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Phases</p>
                 </div>
                 <div class="text-center p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                  <p class="text-2xl font-mono font-bold text-[#C62761]">{{ enrollments.length }}</p>
+                  <p class="text-2xl font-mono font-bold text-[#C62761]">
+                    {{ enrollments.length }}
+                  </p>
                   <p class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Stagiaires</p>
                 </div>
                 <div class="text-center p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                  <p class="text-2xl font-mono font-bold text-emerald-400">{{ getTotalSessions() }}</p>
+                  <p class="text-2xl font-mono font-bold text-emerald-400">
+                    {{ getTotalSessions() }}
+                  </p>
                   <p class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Séances</p>
                 </div>
               </div>
@@ -93,8 +107,15 @@ interface EnrollmentInfo {
 
             <!-- Formateur Info -->
             <div class="flex items-center gap-3 mt-6 pt-6 border-t border-white/5">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-sm font-bold text-white overflow-hidden">
-                <img *ngIf="formation.formateurAvatar" [src]="formation.formateurAvatar" class="w-full h-full object-cover" [alt]="formation.formateurNom" />
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-sm font-bold text-white overflow-hidden"
+              >
+                <img
+                  *ngIf="formation.formateurAvatar"
+                  [src]="formation.formateurAvatar"
+                  class="w-full h-full object-cover"
+                  [alt]="formation.formateurNom"
+                />
                 <span *ngIf="!formation.formateurAvatar">{{ formation.formateurNom[0] }}</span>
               </div>
               <div>
@@ -102,7 +123,9 @@ interface EnrollmentInfo {
                 <p class="text-xs text-white/40">Formateur Principal</p>
               </div>
               <div class="ml-auto">
-                <span class="text-lg font-mono font-bold text-[#F5A623]">{{ formation.totalPrice | number }} TND</span>
+                <span class="text-lg font-mono font-bold text-[#F5A623]"
+                  >{{ formation.totalPrice | number }} TND</span
+                >
               </div>
             </div>
           </div>
@@ -110,15 +133,24 @@ interface EnrollmentInfo {
 
         <!-- Tab Navigation -->
         <div class="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl w-fit">
-          <button *ngFor="let tab of tabs" (click)="activeTab = tab.id"
-                  class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-                  [class]="activeTab === tab.id
-                    ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.3)]'
-                    : 'text-white/50 hover:text-white hover:bg-white/5'">
+          <button
+            *ngFor="let tab of tabs"
+            (click)="activeTab = tab.id"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+            [class]="
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.3)]'
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            "
+          >
             {{ tab.icon }} {{ tab.label }}
-            <span *ngIf="tab.count !== undefined"
-                  class="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-mono"
-                  [class]="activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-white/10 text-white/50'">
+            <span
+              *ngIf="tab.count !== undefined"
+              class="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-mono"
+              [class]="
+                activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-white/10 text-white/50'
+              "
+            >
               {{ tab.count }}
             </span>
           </button>
@@ -128,78 +160,152 @@ interface EnrollmentInfo {
 
         <!-- Tab: Ma Progression (Stagiaire) -->
         <div *ngIf="activeTab === 'my-progress'" class="space-y-5">
-
           <!-- Global progress card -->
           <div class="glass-card border border-[var(--bridge-border)] p-6 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.05)] to-transparent pointer-events-none"></div>
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.05)] to-transparent pointer-events-none"
+            ></div>
             <div class="relative z-10">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <h3 class="font-syne font-bold text-xl text-white">Ma Progression Globale</h3>
-                  <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">{{ formation?.formateurNom }}</p>
+                  <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
+                    {{ formation?.formateurNom }}
+                  </p>
                 </div>
                 <div class="text-center">
-                  <p class="text-4xl font-mono font-black bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent">{{ getMyFormationProgress() }}%</p>
-                  <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mt-1">Complété</p>
+                  <p
+                    class="text-4xl font-mono font-black bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
+                  >
+                    {{ getMyFormationProgress() }}%
+                  </p>
+                  <p
+                    class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mt-1"
+                  >
+                    Complété
+                  </p>
                 </div>
               </div>
               <div class="h-3 rounded-full bg-white/5 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full transition-all duration-1000"
-                     [style.width]="getMyFormationProgress() + '%'"></div>
+                <div
+                  class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full transition-all duration-1000"
+                  [style.width]="getMyFormationProgress() + '%'"
+                ></div>
               </div>
             </div>
           </div>
 
           <!-- Phases Timeline -->
           <div class="space-y-3">
-            <h4 class="text-xs font-bold text-[var(--bridge-text-muted)] uppercase tracking-wider">Phases de formation</h4>
-            <div *ngFor="let phase of formation?.phases; let i = index; let last = last" class="relative">
+            <h4 class="text-xs font-bold text-[var(--bridge-text-muted)] uppercase tracking-wider">
+              Phases de formation
+            </h4>
+            <div
+              *ngFor="let phase of formation?.phases; let i = index; let last = last"
+              class="relative"
+            >
               <!-- Connector -->
-              <div *ngIf="!last" class="absolute left-[27px] top-[56px] w-0.5 h-[calc(100%+12px)] bg-gradient-to-b from-white/10 to-transparent z-0"></div>
+              <div
+                *ngIf="!last"
+                class="absolute left-[27px] top-[56px] w-0.5 h-[calc(100%+12px)] bg-gradient-to-b from-white/10 to-transparent z-0"
+              ></div>
 
-              <div class="glass-card border overflow-hidden transition-all duration-300 relative z-10"
-                   [class]="phase.status === 'COMPLETEE' ? 'border-emerald-500/20 hover:border-emerald-500/40' : phase.status === 'EN_COURS' ? 'border-[rgba(198,39,97,0.2)] hover:border-[rgba(198,39,97,0.4)]' : 'border-[var(--bridge-border)]'">
+              <div
+                class="glass-card border overflow-hidden transition-all duration-300 relative z-10"
+                [class]="
+                  phase.status === 'COMPLETEE'
+                    ? 'border-emerald-500/20 hover:border-emerald-500/40'
+                    : phase.status === 'EN_COURS'
+                      ? 'border-[rgba(198,39,97,0.2)] hover:border-[rgba(198,39,97,0.4)]'
+                      : 'border-[var(--bridge-border)]'
+                "
+              >
                 <div class="p-5 flex items-center gap-4">
                   <!-- Status Circle -->
-                  <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0 border-2 shadow-lg"
-                       [class]="phase.status === 'COMPLETEE'
-                         ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/10'
-                         : phase.status === 'EN_COURS'
-                         ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761] shadow-[rgba(198,39,97,0.1)] animate-pulse'
-                         : 'bg-white/5 border-white/10 text-white/20'">
-                    {{ phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒' }}
+                  <div
+                    class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0 border-2 shadow-lg"
+                    [class]="
+                      phase.status === 'COMPLETEE'
+                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/10'
+                        : phase.status === 'EN_COURS'
+                          ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761] shadow-[rgba(198,39,97,0.1)] animate-pulse'
+                          : 'bg-white/5 border-white/10 text-white/20'
+                    "
+                  >
+                    {{
+                      phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒'
+                    }}
                   </div>
                   <!-- Info -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-3">
                       <div>
-                        <span class="text-[10px] text-[var(--bridge-text-muted)] font-mono">Phase {{ phase.numero }}</span>
-                        <h4 class="font-syne font-bold text-white"
-                            [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'">{{ phase.nom }}</h4>
+                        <span class="text-[10px] text-[var(--bridge-text-muted)] font-mono"
+                          >Phase {{ phase.numero }}</span
+                        >
+                        <h4
+                          class="font-syne font-bold text-white"
+                          [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'"
+                        >
+                          {{ phase.nom }}
+                        </h4>
                       </div>
                       <div class="text-right flex-shrink-0">
-                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wide"
-                              [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : phase.status === 'EN_COURS' ? 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'
-                                : 'bg-white/5 text-white/30 border-white/10'">
-                          {{ phase.status === 'COMPLETEE' ? 'Complétée' : phase.status === 'EN_COURS' ? 'En cours' : 'Verrouillée' }}
+                        <span
+                          class="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wide"
+                          [class]="
+                            phase.status === 'COMPLETEE'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : phase.status === 'EN_COURS'
+                                ? 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'
+                                : 'bg-white/5 text-white/30 border-white/10'
+                          "
+                        >
+                          {{
+                            phase.status === 'COMPLETEE'
+                              ? 'Complétée'
+                              : phase.status === 'EN_COURS'
+                                ? 'En cours'
+                                : 'Verrouillée'
+                          }}
                         </span>
-                        <p *ngIf="phase.status !== 'VERROUILLEE'" class="font-mono text-xs font-bold mt-1"
-                           [class]="phase.status === 'COMPLETEE' ? 'text-emerald-400' : 'text-[#F5A623]'">
+                        <p
+                          *ngIf="phase.status !== 'VERROUILLEE'"
+                          class="font-mono text-xs font-bold mt-1"
+                          [class]="
+                            phase.status === 'COMPLETEE' ? 'text-emerald-400' : 'text-[#F5A623]'
+                          "
+                        >
                           {{ phase.progression }}%
                         </p>
                       </div>
                     </div>
                     <!-- Progress bar -->
-                    <div *ngIf="phase.status !== 'VERROUILLEE'" class="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <div class="h-full rounded-full transition-all duration-1000"
-                           [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
-                           [style.width]="phase.progression + '%'"></div>
+                    <div
+                      *ngIf="phase.status !== 'VERROUILLEE'"
+                      class="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden"
+                    >
+                      <div
+                        class="h-full rounded-full transition-all duration-1000"
+                        [class]="
+                          phase.status === 'COMPLETEE'
+                            ? 'bg-emerald-500'
+                            : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'
+                        "
+                        [style.width]="phase.progression + '%'"
+                      ></div>
                     </div>
                     <!-- Meta -->
-                    <div *ngIf="phase.status !== 'VERROUILLEE'" class="flex items-center gap-4 mt-2 text-[10px] text-[var(--bridge-text-muted)]">
+                    <div
+                      *ngIf="phase.status !== 'VERROUILLEE'"
+                      class="flex items-center gap-4 mt-2 text-[10px] text-[var(--bridge-text-muted)]"
+                    >
                       <span>📅 {{ phase.seances?.length || 0 }} séances</span>
-                      <span *ngIf="phase.status === 'COMPLETEE'" class="text-emerald-400 font-semibold">✓ Phase complétée</span>
+                      <span
+                        *ngIf="phase.status === 'COMPLETEE'"
+                        class="text-emerald-400 font-semibold"
+                        >✓ Phase complétée</span
+                      >
                     </div>
                   </div>
                 </div>
@@ -210,72 +316,140 @@ interface EnrollmentInfo {
 
         <!-- Tab: Mes Présences (Stagiaire) -->
         <div *ngIf="activeTab === 'my-presence'" class="space-y-5">
-
           <!-- Attendance Rate Card -->
           <div class="glass-card border border-[var(--bridge-border)] p-6">
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-syne font-bold text-lg text-white">Mon Assiduité</h3>
-              <span class="font-mono text-2xl font-black"
-                    [class]="getMyAttendanceRate() >= 75 ? 'text-emerald-400' : 'text-red-400'">{{ getMyAttendanceRate() }}%</span>
+              <span
+                class="font-mono text-2xl font-black"
+                [class]="getMyAttendanceRate() >= 75 ? 'text-emerald-400' : 'text-red-400'"
+                >{{ getMyAttendanceRate() }}%</span
+              >
             </div>
             <div class="relative h-3 rounded-full bg-white/5 overflow-hidden mb-2">
-              <div class="h-full rounded-full transition-all duration-1000"
-                   [class]="getMyAttendanceRate() >= 75 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-red-500 to-orange-500'"
-                   [style.width]="getMyAttendanceRate() + '%'"></div>
+              <div
+                class="h-full rounded-full transition-all duration-1000"
+                [class]="
+                  getMyAttendanceRate() >= 75
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                    : 'bg-gradient-to-r from-red-500 to-orange-500'
+                "
+                [style.width]="getMyAttendanceRate() + '%'"
+              ></div>
               <div class="absolute top-0 bottom-0 w-0.5 bg-white/30" style="left: 75%"></div>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-[var(--bridge-text-muted)]">Seuil requis: 75%</span>
-              <span [class]="getMyAttendanceRate() >= 75 ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'">
-                {{ getMyAttendanceRate() >= 75 ? '✓ Éligible aux certificats' : '⚠ Seuil non atteint' }}
+              <span
+                [class]="
+                  getMyAttendanceRate() >= 75
+                    ? 'text-emerald-400 font-semibold'
+                    : 'text-red-400 font-semibold'
+                "
+              >
+                {{
+                  getMyAttendanceRate() >= 75 ? '✓ Éligible aux certificats' : '⚠ Seuil non atteint'
+                }}
               </span>
             </div>
           </div>
 
           <!-- Presences per phase -->
-          <div *ngFor="let phase of formation?.phases" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
+          <div
+            *ngFor="let phase of formation?.phases"
+            class="glass-card border border-[var(--bridge-border)] overflow-hidden"
+          >
             <div class="p-4 border-b border-[var(--bridge-border)] flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white">{{ phase.numero }}</div>
+              <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white"
+              >
+                {{ phase.numero }}
+              </div>
               <div>
                 <h4 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h4>
-                <p class="text-xs text-[var(--bridge-text-muted)]">{{ phase.seances?.length || 0 }} séance(s)</p>
+                <p class="text-xs text-[var(--bridge-text-muted)]">
+                  {{ phase.seances?.length || 0 }} séance(s)
+                </p>
               </div>
             </div>
             <div class="divide-y divide-white/[0.03]">
-              <div *ngFor="let seance of phase.seances"
-                   class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all">
+              <div
+                *ngFor="let seance of phase.seances"
+                class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
+              >
                 <!-- Date -->
                 <div class="text-center w-12 flex-shrink-0">
-                  <div class="text-[10px] font-bold uppercase text-[#F5A623]">{{ formatDay(seance.date) }}</div>
-                  <div class="text-lg font-mono font-bold text-white">{{ formatDayNum(seance.date) }}</div>
+                  <div class="text-[10px] font-bold uppercase text-[#F5A623]">
+                    {{ formatDay(seance.date) }}
+                  </div>
+                  <div class="text-lg font-mono font-bold text-white">
+                    {{ formatDayNum(seance.date) }}
+                  </div>
                 </div>
                 <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
                 <!-- Session info -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-white">{{ seance.heureDebut || '—' }}</span>
-                    <span *ngIf="seance.type === 'EN_LIGNE'" class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">🌐 EN LIGNE</span>
-                    <span *ngIf="seance.type !== 'EN_LIGNE'" class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">🏫 PRÉSENTIEL</span>
+                    <span class="text-sm font-semibold text-white">{{
+                      seance.heureDebut || '—'
+                    }}</span>
+                    <span
+                      *ngIf="seance.type === 'EN_LIGNE'"
+                      class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full"
+                      >🌐 EN LIGNE</span
+                    >
+                    <span
+                      *ngIf="seance.type !== 'EN_LIGNE'"
+                      class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full"
+                      >🏫 PRÉSENTIEL</span
+                    >
                   </div>
-                  <p class="text-xs text-white/40 mt-0.5">📍 {{ seance.salle || 'Salle non définie' }}</p>
+                  <p class="text-xs text-white/40 mt-0.5">
+                    📍 {{ seance.salle || 'Salle non définie' }}
+                  </p>
                   <!-- My presence status -->
-                  <div *ngIf="getMyPresenceForSeance(seance) as pres" class="flex items-center gap-3 mt-2">
-                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border"
-                          [class]="pres.present ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'">
+                  <div
+                    *ngIf="getMyPresenceForSeance(seance) as pres"
+                    class="flex items-center gap-3 mt-2"
+                  >
+                    <span
+                      class="text-[11px] font-bold px-2.5 py-1 rounded-full border"
+                      [class]="
+                        pres.present
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : 'bg-red-500/10 text-red-400 border-red-500/20'
+                      "
+                    >
                       {{ pres.present ? '✓ Présent' : '✗ Absent' }}
                     </span>
                     <div *ngIf="pres.starRating" class="flex items-center gap-0.5">
-                      <span *ngFor="let s of [1,2,3,4,5]"
-                            [class]="s <= pres.starRating ? 'text-[#F5A623]' : 'text-white/15'"
-                            class="text-sm">★</span>
+                      <span
+                        *ngFor="let s of [1, 2, 3, 4, 5]"
+                        [class]="s <= pres.starRating ? 'text-[#F5A623]' : 'text-white/15'"
+                        class="text-sm"
+                        >★</span
+                      >
                     </div>
-                    <p *ngIf="pres.sessionNote" class="text-xs text-white/40 italic truncate max-w-xs">"{{ pres.sessionNote }}"</p>
+                    <p
+                      *ngIf="pres.sessionNote"
+                      class="text-xs text-white/40 italic truncate max-w-xs"
+                    >
+                      "{{ pres.sessionNote }}"
+                    </p>
                   </div>
-                  <p *ngIf="!getMyPresenceForSeance(seance)" class="text-xs text-white/20 italic mt-1">Non enregistrée</p>
+                  <p
+                    *ngIf="!getMyPresenceForSeance(seance)"
+                    class="text-xs text-white/20 italic mt-1"
+                  >
+                    Non enregistrée
+                  </p>
                 </div>
               </div>
             </div>
-            <div *ngIf="!phase.seances || phase.seances.length === 0" class="p-6 text-center text-xs text-white/30 italic">
+            <div
+              *ngIf="!phase.seances || phase.seances.length === 0"
+              class="p-6 text-center text-xs text-white/30 italic"
+            >
               Aucune séance dans cette phase
             </div>
           </div>
@@ -283,75 +457,136 @@ interface EnrollmentInfo {
 
         <!-- Tab: Mon Évaluation (Stagiaire) -->
         <div *ngIf="activeTab === 'my-eval'" class="space-y-4">
-
           <!-- Empty state -->
-          <div *ngIf="getMyEvals().length === 0" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+          <div
+            *ngIf="getMyEvals().length === 0"
+            class="glass-card border border-[var(--bridge-border)] p-16 text-center"
+          >
             <div class="text-6xl mb-4">⭐</div>
             <p class="font-syne font-bold text-xl text-white">Aucune évaluation reçue</p>
             <p class="text-white/40 text-sm mt-2 max-w-sm mx-auto">
-              Vos évaluations apparaîtront ici après la complétion de chaque phase.
-              Une note ≥ 14/20 génère un certificat blockchain.
+              Vos évaluations apparaîtront ici après la complétion de chaque phase. Une note ≥ 14/20
+              génère un certificat blockchain.
             </p>
           </div>
 
           <!-- My evaluations -->
-          <div *ngFor="let ev of getMyEvals(); let i = index"
-               class="glass-card border border-[var(--bridge-border)] overflow-hidden transition-all hover:border-[rgba(198,39,97,0.3)]">
-            <div class="h-1" [class]="ev.grade >= 14 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"></div>
+          <div
+            *ngFor="let ev of getMyEvals(); let i = index"
+            class="glass-card border border-[var(--bridge-border)] overflow-hidden transition-all hover:border-[rgba(198,39,97,0.3)]"
+          >
+            <div
+              class="h-1"
+              [class]="
+                ev.grade >= 14
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                  : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'
+              "
+            ></div>
             <div class="p-6">
               <div class="flex items-start gap-5">
                 <!-- Grade circle -->
                 <div class="flex-shrink-0">
-                  <div class="w-16 h-16 rounded-2xl border-2 flex items-center justify-center"
-                       [class]="ev.grade >= 16 ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-400' : ev.grade >= 14 ? 'border-blue-500/60 bg-blue-500/10 text-blue-400' : 'border-[rgba(198,39,97,0.4)] bg-[rgba(198,39,97,0.1)] text-[#C62761]'">
+                  <div
+                    class="w-16 h-16 rounded-2xl border-2 flex items-center justify-center"
+                    [class]="
+                      ev.grade >= 16
+                        ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-400'
+                        : ev.grade >= 14
+                          ? 'border-blue-500/60 bg-blue-500/10 text-blue-400'
+                          : 'border-[rgba(198,39,97,0.4)] bg-[rgba(198,39,97,0.1)] text-[#C62761]'
+                    "
+                  >
                     <span class="font-mono font-black text-xl">{{ ev.grade }}</span>
                   </div>
-                  <p class="text-[10px] text-center text-[var(--bridge-text-muted)] mt-1 font-mono">/20</p>
+                  <p class="text-[10px] text-center text-[var(--bridge-text-muted)] mt-1 font-mono">
+                    /20
+                  </p>
                 </div>
                 <!-- Details -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <h3 class="font-syne font-bold text-white text-base">{{ ev.phaseTitle }}</h3>
-                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">Évalué par {{ ev.trainerName }}</p>
+                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                        Évalué par {{ ev.trainerName }}
+                      </p>
                     </div>
                     <div class="text-right flex-shrink-0">
-                      <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border"
-                            [class]="ev.grade >= 14 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'">
-                        {{ ev.grade >= 16 ? 'Excellent' : ev.grade >= 14 ? 'Très bien' : ev.grade >= 12 ? 'Bien' : ev.grade >= 10 ? 'Passable' : 'Insuffisant' }}
+                      <span
+                        class="text-[10px] font-bold px-2.5 py-1 rounded-full border"
+                        [class]="
+                          ev.grade >= 14
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]'
+                        "
+                      >
+                        {{
+                          ev.grade >= 16
+                            ? 'Excellent'
+                            : ev.grade >= 14
+                              ? 'Très bien'
+                              : ev.grade >= 12
+                                ? 'Bien'
+                                : ev.grade >= 10
+                                  ? 'Passable'
+                                  : 'Insuffisant'
+                        }}
                       </span>
-                      <p class="text-[10px] text-white/30 mt-1">{{ ev.evaluationDate | date:'dd/MM/yyyy' }}</p>
+                      <p class="text-[10px] text-white/30 mt-1">
+                        {{ ev.evaluationDate | date: 'dd/MM/yyyy' }}
+                      </p>
                     </div>
                   </div>
                   <!-- Stars -->
                   <div class="flex items-center gap-1 mb-3">
-                    <span *ngFor="let s of [1,2,3,4,5]"
-                          [class]="s <= gradeToStars(ev.grade) ? 'text-[#F5A623]' : 'text-white/15'"
-                          class="text-lg">★</span>
-                    <span class="text-xs text-[var(--bridge-text-muted)] ml-1 font-mono">{{ gradeToStars(ev.grade) }}/5</span>
+                    <span
+                      *ngFor="let s of [1, 2, 3, 4, 5]"
+                      [class]="s <= gradeToStars(ev.grade) ? 'text-[#F5A623]' : 'text-white/15'"
+                      class="text-lg"
+                      >★</span
+                    >
+                    <span class="text-xs text-[var(--bridge-text-muted)] ml-1 font-mono"
+                      >{{ gradeToStars(ev.grade) }}/5</span
+                    >
                   </div>
                   <!-- Progress bar -->
                   <div class="h-1.5 rounded-full bg-white/5 overflow-hidden mb-3">
-                    <div class="h-full rounded-full transition-all duration-1000"
-                         [class]="ev.grade >= 14 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'"
-                         [style.width]="((ev.grade / 20) * 100) + '%'"></div>
+                    <div
+                      class="h-full rounded-full transition-all duration-1000"
+                      [class]="
+                        ev.grade >= 14
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                          : 'bg-gradient-to-r from-[#C62761] to-[#F5A623]'
+                      "
+                      [style.width]="(ev.grade / 20) * 100 + '%'"
+                    ></div>
                   </div>
                   <!-- Comment -->
-                  <blockquote *ngIf="ev.comment"
-                              class="border-l-2 border-[rgba(198,39,97,0.4)] pl-3 text-sm text-[var(--bridge-text-muted)] italic leading-relaxed mb-3">
+                  <blockquote
+                    *ngIf="ev.comment"
+                    class="border-l-2 border-[rgba(198,39,97,0.4)] pl-3 text-sm text-[var(--bridge-text-muted)] italic leading-relaxed mb-3"
+                  >
                     "{{ ev.comment }}"
                   </blockquote>
                   <!-- Skills -->
                   <div *ngIf="ev.skills" class="flex flex-wrap gap-1.5">
-                    <span *ngFor="let skill of ev.skills.split(',')"
-                          class="text-[11px] bg-[rgba(245,166,35,0.08)] text-[#F5A623] px-2.5 py-1 rounded-full border border-[rgba(245,166,35,0.2)] font-medium">
+                    <span
+                      *ngFor="let skill of ev.skills.split(',')"
+                      class="text-[11px] bg-[rgba(245,166,35,0.08)] text-[#F5A623] px-2.5 py-1 rounded-full border border-[rgba(245,166,35,0.2)] font-medium"
+                    >
                       ✦ {{ skill.trim() }}
                     </span>
                   </div>
                   <!-- Certificate notice -->
-                  <div *ngIf="ev.grade >= 14" class="mt-4 flex items-center gap-3 p-3 rounded-xl bg-emerald-500/[0.07] border border-emerald-500/20">
+                  <div
+                    *ngIf="ev.grade >= 14"
+                    class="mt-4 flex items-center gap-3 p-3 rounded-xl bg-emerald-500/[0.07] border border-emerald-500/20"
+                  >
                     <span class="text-emerald-400 text-lg">🏅</span>
-                    <p class="text-emerald-400 text-xs font-semibold">Certificat blockchain généré pour cette phase</p>
+                    <p class="text-emerald-400 text-xs font-semibold">
+                      Certificat blockchain généré pour cette phase
+                    </p>
                   </div>
                 </div>
               </div>
@@ -361,10 +596,12 @@ interface EnrollmentInfo {
 
         <!-- Tab: Paiement (Stagiaire) -->
         <div *ngIf="activeTab === 'paiement'" class="space-y-5">
-
           <!-- Loading skeleton -->
           <div *ngIf="loadingPaiements" class="space-y-3">
-            <div *ngFor="let _ of [1,2,3]" class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse">
+            <div
+              *ngFor="let _ of [1, 2, 3]"
+              class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse"
+            >
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-white/10 rounded-2xl flex-shrink-0"></div>
                 <div class="flex-1 space-y-2">
@@ -377,25 +614,45 @@ interface EnrollmentInfo {
           </div>
 
           <ng-container *ngIf="!loadingPaiements">
-
             <!-- Summary bar -->
             <div class="grid grid-cols-3 gap-4">
               <div class="glass-card border border-emerald-500/20 p-4 text-center">
-                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Payé</p>
-                <p class="text-xl font-mono font-bold text-emerald-400">{{ getTotalPaidFormation() }} TND</p>
+                <p
+                  class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1"
+                >
+                  Payé
+                </p>
+                <p class="text-xl font-mono font-bold text-emerald-400">
+                  {{ getTotalPaidFormation() }} TND
+                </p>
               </div>
               <div class="glass-card border border-orange-500/20 p-4 text-center">
-                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Restant</p>
-                <p class="text-xl font-mono font-bold text-[#F5A623]">{{ getTotalRemainingFormation() }} TND</p>
+                <p
+                  class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1"
+                >
+                  Restant
+                </p>
+                <p class="text-xl font-mono font-bold text-[#F5A623]">
+                  {{ getTotalRemainingFormation() }} TND
+                </p>
               </div>
               <div class="glass-card border border-[rgba(198,39,97,0.2)] p-4 text-center">
-                <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1">Total</p>
-                <p class="text-xl font-mono font-bold text-white">{{ formation?.totalPrice || 0 }} TND</p>
+                <p
+                  class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1"
+                >
+                  Total
+                </p>
+                <p class="text-xl font-mono font-bold text-white">
+                  {{ formation?.totalPrice || 0 }} TND
+                </p>
               </div>
             </div>
 
             <!-- No payments message -->
-            <div *ngIf="formationPaiements.length === 0" class="glass-card border border-[var(--bridge-border)] p-16 text-center">
+            <div
+              *ngIf="formationPaiements.length === 0"
+              class="glass-card border border-[var(--bridge-border)] p-16 text-center"
+            >
               <div class="text-5xl mb-4">💳</div>
               <p class="font-syne font-bold text-lg text-white">Aucun paiement enregistré</p>
               <p class="text-[var(--bridge-text-muted)] text-sm mt-2 max-w-sm mx-auto">
@@ -404,24 +661,38 @@ interface EnrollmentInfo {
             </div>
 
             <!-- Phase payment cards -->
-            <div *ngIf="formationPaiements.length > 0" class="glass-card border border-[var(--bridge-border)] overflow-hidden">
-              <div class="p-5 border-b border-[var(--bridge-border)] flex items-center justify-between">
+            <div
+              *ngIf="formationPaiements.length > 0"
+              class="glass-card border border-[var(--bridge-border)] overflow-hidden"
+            >
+              <div
+                class="p-5 border-b border-[var(--bridge-border)] flex items-center justify-between"
+              >
                 <h3 class="font-syne font-bold text-base text-white">💳 Paiements par phase</h3>
-                <span class="text-xs text-[var(--bridge-text-muted)] font-mono">{{ formationPaiements.length }} phase(s)</span>
+                <span class="text-xs text-[var(--bridge-text-muted)] font-mono"
+                  >{{ formationPaiements.length }} phase(s)</span
+                >
               </div>
 
               <div class="divide-y divide-white/[0.03]">
-                <div *ngFor="let p of formationPaiements"
-                     class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
-                     [class]="p.status === 'EN_RETARD' ? 'border-l-2 border-red-500/50 bg-red-500/[0.02]' : ''">
-
+                <div
+                  *ngFor="let p of formationPaiements"
+                  class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
+                  [class]="
+                    p.status === 'EN_RETARD' ? 'border-l-2 border-red-500/50 bg-red-500/[0.02]' : ''
+                  "
+                >
                   <!-- Status icon -->
-                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl border"
-                       [class]="p.status === 'PAYE'
-                         ? 'bg-emerald-500/10 border-emerald-500/20'
-                         : p.status === 'EN_RETARD'
-                         ? 'bg-red-500/10 border-red-500/20 animate-pulse'
-                         : 'bg-orange-500/10 border-orange-500/20'">
+                  <div
+                    class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl border"
+                    [class]="
+                      p.status === 'PAYE'
+                        ? 'bg-emerald-500/10 border-emerald-500/20'
+                        : p.status === 'EN_RETARD'
+                          ? 'bg-red-500/10 border-red-500/20 animate-pulse'
+                          : 'bg-orange-500/10 border-orange-500/20'
+                    "
+                  >
                     {{ p.status === 'PAYE' ? '✅' : p.status === 'EN_RETARD' ? '⚠️' : '⏳' }}
                   </div>
 
@@ -429,33 +700,64 @@ interface EnrollmentInfo {
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-0.5">
                       <p class="text-sm font-bold text-white">Phase {{ p.phaseNumero }}</p>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"
-                            [class]="p.status === 'PAYE' ? 'bg-emerald-500/10 text-emerald-400'
-                                   : p.status === 'EN_RETARD' ? 'bg-red-500/10 text-red-400'
-                                   : 'bg-orange-500/10 text-orange-400'">
-                        {{ p.status === 'PAYE' ? 'Payé' : p.status === 'EN_RETARD' ? 'En retard' : 'En attente' }}
+                      <span
+                        class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"
+                        [class]="
+                          p.status === 'PAYE'
+                            ? 'bg-emerald-500/10 text-emerald-400'
+                            : p.status === 'EN_RETARD'
+                              ? 'bg-red-500/10 text-red-400'
+                              : 'bg-orange-500/10 text-orange-400'
+                        "
+                      >
+                        {{
+                          p.status === 'PAYE'
+                            ? 'Payé'
+                            : p.status === 'EN_RETARD'
+                              ? 'En retard'
+                              : 'En attente'
+                        }}
                       </span>
                     </div>
                     <p class="text-xs text-[var(--bridge-text-muted)] font-mono">
-                      {{ p.status === 'PAYE' ? 'Payé le ' + (p.datePaiement | date:'dd/MM/yyyy') : 'Échéance : ' + (p.dateEcheance | date:'dd/MM/yyyy') }}
+                      {{
+                        p.status === 'PAYE'
+                          ? 'Payé le ' + (p.datePaiement | date: 'dd/MM/yyyy')
+                          : 'Échéance : ' + (p.dateEcheance | date: 'dd/MM/yyyy')
+                      }}
                     </p>
-                    <p *ngIf="p.status !== 'PAYE'" class="text-[10px] mt-0.5"
-                       [class]="p.status === 'EN_RETARD' ? 'text-red-400' : 'text-orange-400'">
+                    <p
+                      *ngIf="p.status !== 'PAYE'"
+                      class="text-[10px] mt-0.5"
+                      [class]="p.status === 'EN_RETARD' ? 'text-red-400' : 'text-orange-400'"
+                    >
                       {{ p.methode || 'Méthode non définie' }}
                     </p>
                   </div>
 
                   <!-- Amount + action -->
                   <div class="flex-shrink-0 flex flex-col items-end gap-2">
-                    <p class="font-mono font-bold text-white text-lg">{{ p.montant }} <span class="text-xs text-[var(--bridge-text-muted)]">TND</span></p>
-                    <button *ngIf="p.status !== 'PAYE'"
-                            (click)="payPhaseWithStripe(p)"
-                            [disabled]="payingPhaseId === p.id"
-                            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md shadow-[rgba(198,39,97,0.2)]">
-                      <span *ngIf="payingPhaseId === p.id" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <p class="font-mono font-bold text-white text-lg">
+                      {{ p.montant }}
+                      <span class="text-xs text-[var(--bridge-text-muted)]">TND</span>
+                    </p>
+                    <button
+                      *ngIf="p.status !== 'PAYE'"
+                      (click)="payPhaseWithStripe(p)"
+                      [disabled]="payingPhaseId === p.id"
+                      class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md shadow-[rgba(198,39,97,0.2)]"
+                    >
+                      <span
+                        *ngIf="payingPhaseId === p.id"
+                        class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"
+                      ></span>
                       {{ payingPhaseId === p.id ? 'Chargement...' : '💳 Payer Stripe' }}
                     </button>
-                    <span *ngIf="p.status === 'PAYE'" class="text-[10px] px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-semibold">✓ Débloqué</span>
+                    <span
+                      *ngIf="p.status === 'PAYE'"
+                      class="text-[10px] px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-semibold"
+                      >✓ Débloqué</span
+                    >
                   </div>
                 </div>
               </div>
@@ -463,24 +765,41 @@ interface EnrollmentInfo {
 
             <!-- Phases without payment yet (from formation) -->
             <div *ngIf="formationPaiements.length === 0 && formation?.phases" class="space-y-3">
-              <div *ngFor="let phase of formation?.phases"
-                   class="glass-card border border-[var(--bridge-border)] p-5 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold border-2 flex-shrink-0"
-                     [class]="phase.status === 'COMPLETEE' ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
-                             : phase.status === 'EN_COURS' ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761]'
-                             : 'bg-white/5 border-white/10 text-white/20'">
-                  {{ phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒' }}
+              <div
+                *ngFor="let phase of formation?.phases"
+                class="glass-card border border-[var(--bridge-border)] p-5 flex items-center gap-4"
+              >
+                <div
+                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold border-2 flex-shrink-0"
+                  [class]="
+                    phase.status === 'COMPLETEE'
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                      : phase.status === 'EN_COURS'
+                        ? 'bg-[rgba(198,39,97,0.15)] border-[rgba(198,39,97,0.4)] text-[#C62761]'
+                        : 'bg-white/5 border-white/10 text-white/20'
+                  "
+                >
+                  {{
+                    phase.status === 'COMPLETEE' ? '✓' : phase.status === 'EN_COURS' ? '▶' : '🔒'
+                  }}
                 </div>
                 <div class="flex-1">
-                  <p class="font-syne font-bold text-sm" [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'">
+                  <p
+                    class="font-syne font-bold text-sm"
+                    [class]="phase.status === 'VERROUILLEE' ? 'text-white/30' : 'text-white'"
+                  >
                     Phase {{ phase.numero }} — {{ phase.nom }}
                   </p>
-                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">{{ phase.description }}</p>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                    {{ phase.description }}
+                  </p>
                 </div>
-                <span class="text-[10px] px-3 py-1.5 bg-white/5 text-white/40 border border-white/10 rounded-xl font-mono">Prix à définir</span>
+                <span
+                  class="text-[10px] px-3 py-1.5 bg-white/5 text-white/40 border border-white/10 rounded-xl font-mono"
+                  >Prix à définir</span
+                >
               </div>
             </div>
-
           </ng-container>
         </div>
 
@@ -488,23 +807,30 @@ interface EnrollmentInfo {
 
         <!-- Tab: Phases & Séances -->
         <div *ngIf="activeTab === 'phases'" class="space-y-4">
-          <div *ngFor="let phase of formation.phases; let pi = index"
-               class="glass-card border border-[var(--bridge-border)] overflow-hidden transition-all duration-300 hover:border-[rgba(198,39,97,0.2)]"
-               [style.animation-delay]="(pi * 80) + 'ms'"
-               style="animation: fadeSlideIn 0.4s ease both">
-
+          <div
+            *ngFor="let phase of formation.phases; let pi = index"
+            class="glass-card border border-[var(--bridge-border)] overflow-hidden transition-all duration-300 hover:border-[rgba(198,39,97,0.2)]"
+            [style.animation-delay]="pi * 80 + 'ms'"
+            style="animation: fadeSlideIn 0.4s ease both"
+          >
             <!-- Phase Header -->
-            <button (click)="togglePhase(phase.id)"
-                    class="w-full flex items-center gap-4 p-5 hover:bg-white/[0.02] transition-colors text-left">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm flex-shrink-0"
-                   [class]="getPhaseStatusBg(phase.status)">
+            <button
+              (click)="togglePhase(phase.id)"
+              class="w-full flex items-center gap-4 p-5 hover:bg-white/[0.02] transition-colors text-left"
+            >
+              <div
+                class="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm flex-shrink-0"
+                [class]="getPhaseStatusBg(phase.status)"
+              >
                 {{ phase.numero }}
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <h3 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h3>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border"
-                        [class]="getPhaseStatusBadge(phase.status)">
+                  <span
+                    class="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border"
+                    [class]="getPhaseStatusBadge(phase.status)"
+                  >
                     {{ getPhaseStatusText(phase.status) }}
                   </span>
                 </div>
@@ -512,48 +838,75 @@ interface EnrollmentInfo {
               </div>
               <div class="flex items-center gap-4 flex-shrink-0">
                 <div class="text-right hidden sm:block">
-                  <p class="text-xs text-white/40">{{ phase.seances ? phase.seances.length : 0 }} séances</p>
+                  <p class="text-xs text-white/40">
+                    {{ phase.seances ? phase.seances.length : 0 }} séances
+                  </p>
                   <div class="flex items-center gap-2 mt-1">
                     <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div class="h-full rounded-full bg-gradient-to-r from-[#C62761] to-[#F5A623] transition-all duration-700"
-                           [style.width]="(phase.progression || 0) + '%'"></div>
+                      <div
+                        class="h-full rounded-full bg-gradient-to-r from-[#C62761] to-[#F5A623] transition-all duration-700"
+                        [style.width]="(phase.progression || 0) + '%'"
+                      ></div>
                     </div>
-                    <span class="text-[10px] font-mono text-white/40">{{ phase.progression }}%</span>
+                    <span class="text-[10px] font-mono text-white/40"
+                      >{{ phase.progression }}%</span
+                    >
                   </div>
                 </div>
                 <!-- Unlock phase button for formateur/admin -->
-                <button *ngIf="canManage && phase.status === 'VERROUILLEE'"
-                        (click)="$event.stopPropagation(); unlockPhase(phase.id)"
-                        class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs rounded-xl hover:opacity-90 transition-all shadow-md">
+                <button
+                  *ngIf="canManage && phase.status === 'VERROUILLEE'"
+                  (click)="$event.stopPropagation(); unlockPhase(phase.id)"
+                  class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs rounded-xl hover:opacity-90 transition-all shadow-md"
+                >
                   🔓 Débloquer la Phase
                 </button>
-                <span class="text-white/30 text-lg">{{ expandedPhase === phase.id ? '▲' : '▼' }}</span>
+                <span class="text-white/30 text-lg">{{
+                  expandedPhase === phase.id ? '▲' : '▼'
+                }}</span>
               </div>
             </button>
 
             <!-- Phase Expanded: Sessions -->
-            <div *ngIf="expandedPhase === phase.id" class="border-t border-white/5 p-5 space-y-3 bg-black/20">
+            <div
+              *ngIf="expandedPhase === phase.id"
+              class="border-t border-white/5 p-5 space-y-3 bg-black/20"
+            >
               <p class="text-xs text-white/50 leading-relaxed mb-4">{{ phase.description }}</p>
               <div *ngIf="phase.seances && phase.seances.length > 0" class="space-y-3">
-                <h4 class="text-[11px] text-white/40 uppercase tracking-widest font-semibold">Séances</h4>
-                <div *ngFor="let seance of phase.seances; let si = index"
-                     class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:border-[rgba(198,39,97,0.2)] transition-all group">
+                <h4 class="text-[11px] text-white/40 uppercase tracking-widest font-semibold">
+                  Séances
+                </h4>
+                <div
+                  *ngFor="let seance of phase.seances; let si = index"
+                  class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:border-[rgba(198,39,97,0.2)] transition-all group"
+                >
                   <div class="flex-shrink-0 text-center w-14">
-                    <div class="text-[10px] font-bold uppercase text-[#F5A623]">{{ formatDay(seance.date) }}</div>
-                    <div class="text-lg font-mono font-bold text-white">{{ formatDayNum(seance.date) }}</div>
+                    <div class="text-[10px] font-bold uppercase text-[#F5A623]">
+                      {{ formatDay(seance.date) }}
+                    </div>
+                    <div class="text-lg font-mono font-bold text-white">
+                      {{ formatDayNum(seance.date) }}
+                    </div>
                   </div>
                   <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                      <span class="text-xs font-mono font-bold text-[#F5A623]">{{ seance.heureDebut }}</span>
+                      <span class="text-xs font-mono font-bold text-[#F5A623]">{{
+                        seance.heureDebut
+                      }}</span>
                       <span class="text-white/20">·</span>
                       <span class="text-xs text-white/40">{{ seance.duree }}</span>
-                      <span *ngIf="seance.type === 'EN_LIGNE'"
-                            class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">
+                      <span
+                        *ngIf="seance.type === 'EN_LIGNE'"
+                        class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold"
+                      >
                         🌐 EN LIGNE
                       </span>
-                      <span *ngIf="seance.status === 'CLOTUREE'"
-                            class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold">
+                      <span
+                        *ngIf="seance.status === 'CLOTUREE'"
+                        class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold"
+                      >
                         ✓ CLÔTURÉE
                       </span>
                     </div>
@@ -565,27 +918,44 @@ interface EnrollmentInfo {
                     </span>
                     <!-- Today check for attendance -->
                     <ng-container *ngIf="canManage">
-                      <button *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE'"
-                              (click)="openAttendance(seance)"
-                              class="px-3 py-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg transition-all shadow-md">
+                      <button
+                        *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE'"
+                        (click)="openAttendance(seance)"
+                        class="px-3 py-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-lg transition-all shadow-md"
+                      >
                         📋 Faire l'Appel
                       </button>
-                      <button *ngIf="isToday(seance.date) && seance.status !== 'CLOTUREE' && seance.presences && seance.presences.length > 0"
-                              (click)="closeSession(seance.id)"
-                              class="px-3 py-1.5 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all shadow-md">
+                      <button
+                        *ngIf="
+                          isToday(seance.date) &&
+                          seance.status !== 'CLOTUREE' &&
+                          seance.presences &&
+                          seance.presences.length > 0
+                        "
+                        (click)="closeSession(seance.id)"
+                        class="px-3 py-1.5 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all shadow-md"
+                      >
                         🔒 Clôturer séance
                       </button>
-                      <span *ngIf="!isToday(seance.date) && seance.status !== 'CLOTUREE'"
-                            class="text-[10px] text-white/40 italic bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+                      <span
+                        *ngIf="!isToday(seance.date) && seance.status !== 'CLOTUREE'"
+                        class="text-[10px] text-white/40 italic bg-white/5 px-2.5 py-1 rounded-lg border border-white/5"
+                      >
                         Appel réservé le jour J
                       </span>
                     </ng-container>
-                    <span *ngIf="seance.status === 'CLOTUREE'" class="text-[10px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-semibold">Clôturée</span>
+                    <span
+                      *ngIf="seance.status === 'CLOTUREE'"
+                      class="text-[10px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-semibold"
+                      >Clôturée</span
+                    >
                   </div>
                 </div>
               </div>
-              <div *ngIf="!phase.seances || phase.seances.length === 0"
-                   class="text-center py-6 text-white/30 text-xs">
+              <div
+                *ngIf="!phase.seances || phase.seances.length === 0"
+                class="text-center py-6 text-white/30 text-xs"
+              >
                 📅 Aucune séance dans cette phase
               </div>
             </div>
@@ -598,36 +968,57 @@ interface EnrollmentInfo {
             <!-- Search Bar -->
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">🔍</span>
-              <input [(ngModel)]="searchQuery" type="text" placeholder="Rechercher un stagiaire..."
-                     class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors" />
+              <input
+                [(ngModel)]="searchQuery"
+                type="text"
+                placeholder="Rechercher un stagiaire..."
+                class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
+              />
             </div>
 
             <!-- Student Cards -->
             <div class="grid md:grid-cols-2 gap-4">
-              <div *ngFor="let e of filteredEnrollments; let i = index"
-                   class="glass-card border border-[var(--bridge-border)] p-5 hover:border-[rgba(198,39,97,0.3)] transition-all group"
-                   [style.animation-delay]="(i * 60) + 'ms'"
-                   style="animation: fadeSlideIn 0.4s ease both">
+              <div
+                *ngFor="let e of filteredEnrollments; let i = index"
+                class="glass-card border border-[var(--bridge-border)] p-5 hover:border-[rgba(198,39,97,0.3)] transition-all group"
+                [style.animation-delay]="i * 60 + 'ms'"
+                style="animation: fadeSlideIn 0.4s ease both"
+              >
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
-                  <div class="w-12 h-12 rounded-full flex-shrink-0 overflow-hidden ring-2 ring-white/10 group-hover:ring-[#C62761]/40 transition-all">
-                    <img *ngIf="e.studentAvatar" [src]="e.studentAvatar" class="w-full h-full object-cover" [alt]="e.studentFirstName" />
-                    <div *ngIf="!e.studentAvatar"
-                         class="w-full h-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold text-white text-sm">
+                  <div
+                    class="w-12 h-12 rounded-full flex-shrink-0 overflow-hidden ring-2 ring-white/10 group-hover:ring-[#C62761]/40 transition-all"
+                  >
+                    <img
+                      *ngIf="e.studentAvatar"
+                      [src]="e.studentAvatar"
+                      class="w-full h-full object-cover"
+                      [alt]="e.studentFirstName"
+                    />
+                    <div
+                      *ngIf="!e.studentAvatar"
+                      class="w-full h-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center font-bold text-white text-sm"
+                    >
                       {{ e.studentFirstName[0] }}{{ e.studentLastName[0] }}
                     </div>
                   </div>
                   <!-- Info -->
                   <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-white text-sm">{{ e.studentFirstName }} {{ e.studentLastName }}</p>
+                    <p class="font-semibold text-white text-sm">
+                      {{ e.studentFirstName }} {{ e.studentLastName }}
+                    </p>
                     <p class="text-xs text-white/40 truncate">{{ e.studentEmail }}</p>
-                    <p class="text-[10px] text-white/30 mt-1">Inscrit le {{ e.enrollmentDate | date:'d MMM y' }}</p>
+                    <p class="text-[10px] text-white/30 mt-1">
+                      Inscrit le {{ e.enrollmentDate | date: 'd MMM y' }}
+                    </p>
                   </div>
                   <!-- Actions -->
                   <div class="flex flex-col items-end gap-2">
-                    <button *ngIf="canManage && canEvaluate()"
-                            (click)="openEvalForStudent(e)"
-                            class="px-3 py-1.5 text-[11px] font-bold bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                    <button
+                      *ngIf="canManage && canEvaluate()"
+                      (click)="openEvalForStudent(e)"
+                      class="px-3 py-1.5 text-[11px] font-bold bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    >
                       ⭐ Évaluer
                     </button>
                   </div>
@@ -635,8 +1026,10 @@ interface EnrollmentInfo {
               </div>
             </div>
           </div>
-          <div *ngIf="enrollments.length === 0"
-               class="glass-card border border-[var(--bridge-border)] p-12 text-center">
+          <div
+            *ngIf="enrollments.length === 0"
+            class="glass-card border border-[var(--bridge-border)] p-12 text-center"
+          >
             <div class="text-5xl mb-4">👥</div>
             <p class="font-syne font-bold text-lg text-white">Aucun stagiaire inscrit</p>
             <p class="text-white/40 text-sm mt-2">Les inscriptions n'ont pas encore commencé.</p>
@@ -646,212 +1039,340 @@ interface EnrollmentInfo {
         <!-- Tab: Évaluations -->
         <div *ngIf="activeTab === 'evaluations'" class="space-y-4">
           <div *ngIf="phaseEvaluations.length > 0" class="space-y-3">
-            <div *ngFor="let ev of phaseEvaluations; let i = index"
-                 class="glass-card border border-[var(--bridge-border)] p-5 hover:border-[rgba(198,39,97,0.2)] transition-all"
-                 [style.animation-delay]="(i * 60) + 'ms'"
-                 style="animation: fadeSlideIn 0.4s ease both">
+            <div
+              *ngFor="let ev of phaseEvaluations; let i = index"
+              class="glass-card border border-[var(--bridge-border)] p-5 hover:border-[rgba(198,39,97,0.2)] transition-all"
+              [style.animation-delay]="i * 60 + 'ms'"
+              style="animation: fadeSlideIn 0.4s ease both"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold overflow-hidden">
-                    <img *ngIf="ev.studentAvatar" [src]="ev.studentAvatar" class="w-full h-full object-cover" />
-                    <span *ngIf="!ev.studentAvatar">{{ ev.studentFirstName?.[0] }}{{ ev.studentLastName?.[0] }}</span>
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold overflow-hidden"
+                  >
+                    <img
+                      *ngIf="ev.studentAvatar"
+                      [src]="ev.studentAvatar"
+                      class="w-full h-full object-cover"
+                    />
+                    <span *ngIf="!ev.studentAvatar"
+                      >{{ ev.studentFirstName?.[0] }}{{ ev.studentLastName?.[0] }}</span
+                    >
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-white">{{ ev.studentFirstName }} {{ ev.studentLastName }}</p>
-                    <p class="text-xs text-white/40">{{ ev.phaseTitle }} · {{ ev.evaluationDate | date:'d MMM y' }}</p>
+                    <p class="text-sm font-semibold text-white">
+                      {{ ev.studentFirstName }} {{ ev.studentLastName }}
+                    </p>
+                    <p class="text-xs text-white/40">
+                      {{ ev.phaseTitle }} · {{ ev.evaluationDate | date: 'd MMM y' }}
+                    </p>
                     <p class="text-xs text-white/30 mt-1 max-w-sm line-clamp-1">{{ ev.comment }}</p>
                   </div>
                 </div>
                 <div class="text-right flex-shrink-0">
-                  <span class="text-lg font-mono font-bold px-4 py-2 rounded-xl"
-                        [class]="getGradeClass(ev.grade)">
+                  <span
+                    class="text-lg font-mono font-bold px-4 py-2 rounded-xl"
+                    [class]="getGradeClass(ev.grade)"
+                  >
                     {{ ev.grade }}/20
                   </span>
                   <p class="text-[10px] text-white/30 mt-1">{{ getGradeLabel(ev.grade) }}</p>
                 </div>
               </div>
-              <div *ngIf="ev.skills" class="mt-3 pt-3 border-t border-white/5 flex flex-wrap gap-1.5">
-                <span *ngFor="let skill of ev.skills.split(',')"
-                      class="text-[10px] px-2 py-0.5 bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)] rounded-full font-medium">
+              <div
+                *ngIf="ev.skills"
+                class="mt-3 pt-3 border-t border-white/5 flex flex-wrap gap-1.5"
+              >
+                <span
+                  *ngFor="let skill of ev.skills.split(',')"
+                  class="text-[10px] px-2 py-0.5 bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)] rounded-full font-medium"
+                >
                   {{ skill.trim() }}
                 </span>
               </div>
             </div>
           </div>
-          <div *ngIf="phaseEvaluations.length === 0"
-               class="glass-card border border-[var(--bridge-border)] p-12 text-center">
+          <div
+            *ngIf="phaseEvaluations.length === 0"
+            class="glass-card border border-[var(--bridge-border)] p-12 text-center"
+          >
             <div class="text-5xl mb-4">📝</div>
             <p class="font-syne font-bold text-lg text-white">Aucune évaluation saisie</p>
-            <p class="text-white/40 text-sm mt-2">Commencez à évaluer vos stagiaires pour chaque phase.</p>
+            <p class="text-white/40 text-sm mt-2">
+              Commencez à évaluer vos stagiaires pour chaque phase.
+            </p>
           </div>
         </div>
 
         <!-- CTA Banner: Evaluate (if formation terminée) -->
-        <div *ngIf="canEvaluate() && canManage && activeTab !== 'evaluations'"
-             class="glass-card border border-purple-500/30 bg-purple-500/5 p-6 flex flex-col sm:flex-row items-center gap-4">
+        <div
+          *ngIf="canEvaluate() && canManage && activeTab !== 'evaluations'"
+          class="glass-card border border-purple-500/30 bg-purple-500/5 p-6 flex flex-col sm:flex-row items-center gap-4"
+        >
           <div class="flex items-center gap-4 flex-1">
             <span class="text-3xl">🏅</span>
             <div>
-              <p class="font-syne font-bold text-white">Formation terminée — Évaluations disponibles</p>
+              <p class="font-syne font-bold text-white">
+                Formation terminée — Évaluations disponibles
+              </p>
               <p class="text-sm text-white/50 mt-1">
                 Toutes les phases sont complètes. Vous pouvez maintenant évaluer chaque stagiaire.
                 Une note ≥ 14/20 génèrera automatiquement le certificat blockchain.
               </p>
             </div>
           </div>
-          <button (click)="activeTab = 'evaluations'"
-                  class="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(147,51,234,0.3)]">
+          <button
+            (click)="activeTab = 'evaluations'"
+            class="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(147,51,234,0.3)]"
+          >
             Voir les Évaluations →
           </button>
         </div>
-
       </ng-container>
 
       <!-- ─── Inline : Feuille de Présence ─── -->
       <div *ngIf="showAttendanceModal" class="bridge-card overflow-hidden inline-view-card">
         <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+        <div
+          class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]"
+        >
           <div>
             <h3 class="font-syne font-bold text-sm text-white">📋 Feuille de Présence — Appel</h3>
             <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
-              {{ selectedSeance?.formationNom }} · {{ selectedSeance?.date | date:'EEEE d MMMM y' }}
+              {{ selectedSeance?.formationNom }} ·
+              {{ selectedSeance?.date | date: 'EEEE d MMMM y' }}
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl border bg-white/5 border-white/10">
-              <span class="text-xl font-mono font-bold text-emerald-400">{{ getPresentInModal() }}</span>
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 rounded-2xl border bg-white/5 border-white/10"
+            >
+              <span class="text-xl font-mono font-bold text-emerald-400">{{
+                getPresentInModal()
+              }}</span>
               <span class="text-white/30">/</span>
               <span class="text-base font-mono text-white/50">{{ activePresences.length }}</span>
               <p class="text-[9px] text-white/40 uppercase tracking-wider ml-1">présents</p>
             </div>
-            <button (click)="closeAttendance()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+            <button
+              (click)="closeAttendance()"
+              class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
+            >
+              ✕
+            </button>
           </div>
         </div>
         <!-- Presence list -->
         <div class="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-          <div *ngFor="let p of activePresences; let i = index"
-               class="p-4 rounded-xl border transition-all"
-               [class]="getPresenceCardClass(p)"
-               [style.animation-delay]="(i * 40) + 'ms'"
-               style="animation: fadeSlideIn 0.3s ease both">
+          <div
+            *ngFor="let p of activePresences; let i = index"
+            class="p-4 rounded-xl border transition-all"
+            [class]="getPresenceCardClass(p)"
+            [style.animation-delay]="i * 40 + 'ms'"
+            style="animation: fadeSlideIn 0.3s ease both"
+          >
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                <div
+                  class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                >
                   {{ p.stagiaireNom?.[0] || 'S' }}
                 </div>
                 <div>
                   <p class="font-semibold text-white text-sm">{{ p.stagiaireNom }}</p>
                   <div class="flex items-center gap-1 mt-1" *ngIf="p.present">
-                    <button *ngFor="let star of [1,2,3,4,5]"
-                            (click)="p.starRating = star"
-                            class="text-base transition-transform hover:scale-125 focus:outline-none"
-                            [class]="(p.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'">★</button>
+                    <button
+                      *ngFor="let star of [1, 2, 3, 4, 5]"
+                      (click)="p.starRating = star"
+                      class="text-base transition-transform hover:scale-125 focus:outline-none"
+                      [class]="(p.starRating || 0) >= star ? 'text-[#F5A623]' : 'text-white/15'"
+                    >
+                      ★
+                    </button>
                   </div>
                 </div>
               </div>
               <!-- 3 States Buttons -->
               <div class="flex items-center gap-1.5 self-end sm:self-center">
-                <button (click)="setPresenceStatus(p, 'PRESENT')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="p.present && !isRetard(p)
-                          ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                          : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-400'">
+                <button
+                  (click)="setPresenceStatus(p, 'PRESENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    p.present && !isRetard(p)
+                      ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                      : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-400'
+                  "
+                >
                   ✓ Présent
                 </button>
-                <button (click)="setPresenceStatus(p, 'RETARD')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="p.present && isRetard(p)
-                          ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.4)]'
-                          : 'bg-white/5 text-white/50 hover:bg-amber-500/20 hover:text-amber-400'">
+                <button
+                  (click)="setPresenceStatus(p, 'RETARD')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    p.present && isRetard(p)
+                      ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,166,35,0.4)]'
+                      : 'bg-white/5 text-white/50 hover:bg-amber-500/20 hover:text-amber-400'
+                  "
+                >
                   ⏰ Retard
                 </button>
-                <button (click)="setPresenceStatus(p, 'ABSENT')"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                        [class]="!p.present
-                          ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                          : 'bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-400'">
+                <button
+                  (click)="setPresenceStatus(p, 'ABSENT')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  [class]="
+                    !p.present
+                      ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                      : 'bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-400'
+                  "
+                >
                   ✗ Absent
                 </button>
               </div>
             </div>
             <div class="mt-2.5 pt-2 border-t border-white/5" *ngIf="p.present">
-              <input [(ngModel)]="p.sessionNote" type="text"
-                     class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
-                     placeholder="Remarque ou appréciation rapide..." />
+              <input
+                [(ngModel)]="p.sessionNote"
+                type="text"
+                class="w-full bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#C62761]/50 transition-colors"
+                placeholder="Remarque ou appréciation rapide..."
+              />
             </div>
           </div>
         </div>
         <!-- Footer -->
         <div class="flex gap-3 px-5 py-4 border-t border-[var(--bridge-border)]">
-          <button (click)="closeAttendance()" class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all">
+          <button
+            (click)="closeAttendance()"
+            class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all"
+          >
             Annuler
           </button>
-          <button (click)="saveAttendance()"
-                  [disabled]="savingAttendance"
-                  class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 transition-all">
-            {{ savingAttendance ? 'Enregistrement...' : 'Valider l\'Appel (' + getPresentInModal() + '/' + activePresences.length + ')' }}
+          <button
+            (click)="saveAttendance()"
+            [disabled]="savingAttendance"
+            class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 transition-all"
+          >
+            {{ savingAttendance ? 'Enregistrement...' : 'Valider l'Appel (' + getPresentInModal() + '/' + activePresences.length + ')' }}
           </button>
         </div>
       </div>
 
       <!-- ─── Inline : Évaluation Stagiaire ─── -->
-      <div *ngIf="showEvalModal && selectedEnrollment" class="bridge-card overflow-hidden inline-view-card">
+      <div
+        *ngIf="showEvalModal && selectedEnrollment"
+        class="bridge-card overflow-hidden inline-view-card"
+      >
         <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]">
+        <div
+          class="flex items-center justify-between px-5 py-4 border-b border-[var(--bridge-border)]"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base">⭐</div>
+            <div
+              class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base"
+            >
+              ⭐
+            </div>
             <div>
               <h3 class="font-syne font-bold text-sm text-white">Évaluation Stagiaire</h3>
-              <p class="text-[10px] text-[var(--bridge-text-muted)] mt-0.5">Saisie des notes &amp; appréciation</p>
+              <p class="text-[10px] text-[var(--bridge-text-muted)] mt-0.5">
+                Saisie des notes &amp; appréciation
+              </p>
             </div>
           </div>
-          <button (click)="closeEvalModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm">✕</button>
+          <button
+            (click)="closeEvalModal()"
+            class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
+          >
+            ✕
+          </button>
         </div>
         <!-- Body (2-col on md+) -->
         <div class="p-5 space-y-4">
           <!-- Student Info -->
           <div class="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/5">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
-              <img *ngIf="selectedEnrollment.studentAvatar" [src]="selectedEnrollment.studentAvatar" class="w-full h-full object-cover" />
-              <span *ngIf="!selectedEnrollment.studentAvatar">{{ selectedEnrollment.studentFirstName?.[0] || 'S' }}</span>
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0"
+            >
+              <img
+                *ngIf="selectedEnrollment.studentAvatar"
+                [src]="selectedEnrollment.studentAvatar"
+                class="w-full h-full object-cover"
+              />
+              <span *ngIf="!selectedEnrollment.studentAvatar">{{
+                selectedEnrollment.studentFirstName?.[0] || 'S'
+              }}</span>
             </div>
             <div>
-              <p class="font-semibold text-white">{{ selectedEnrollment.studentFirstName }} {{ selectedEnrollment.studentLastName }}</p>
-              <p class="text-xs text-[var(--bridge-text-muted)]">{{ selectedEnrollment.studentEmail }}</p>
+              <p class="font-semibold text-white">
+                {{ selectedEnrollment.studentFirstName }} {{ selectedEnrollment.studentLastName }}
+              </p>
+              <p class="text-xs text-[var(--bridge-text-muted)]">
+                {{ selectedEnrollment.studentEmail }}
+              </p>
             </div>
           </div>
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-4">
               <!-- Phase -->
               <div>
-                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Phase évaluée</label>
-                <select [(ngModel)]="evalForm.phaseId"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors">
+                <label
+                  class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold"
+                  >Phase évaluée</label
+                >
+                <select
+                  [(ngModel)]="evalForm.phaseId"
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
+                >
                   <option value="" class="bg-[#10102A]">Sélectionner une phase par nom...</option>
-                  <option *ngFor="let phase of formation!.phases" [value]="phase.id" class="bg-[#10102A]">
+                  <option
+                    *ngFor="let phase of formation!.phases"
+                    [value]="phase.id"
+                    class="bg-[#10102A]"
+                  >
                     Phase {{ phase.numero }} — {{ phase.nom }}
                   </option>
                 </select>
               </div>
               <!-- Stars -->
               <div>
-                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne">Étoiles</label>
+                <label
+                  class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne"
+                  >Étoiles</label
+                >
                 <div class="flex items-center gap-2">
-                  <button *ngFor="let star of [1,2,3,4,5]"
-                          (click)="evalStarRating = star"
-                          class="text-2xl transition-transform hover:scale-125 focus:outline-none"
-                          [class]="(evalStarRating || 5) >= star ? 'text-[#F5A623]' : 'text-white/20'">★</button>
+                  <button
+                    *ngFor="let star of [1, 2, 3, 4, 5]"
+                    (click)="evalStarRating = star"
+                    class="text-2xl transition-transform hover:scale-125 focus:outline-none"
+                    [class]="(evalStarRating || 5) >= star ? 'text-[#F5A623]' : 'text-white/20'"
+                  >
+                    ★
+                  </button>
                   <span class="text-xs text-white/40 font-mono ml-2">{{ evalStarRating }}/5</span>
                 </div>
               </div>
               <!-- Grade -->
               <div>
-                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne">Note (/20)</label>
+                <label
+                  class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold font-syne"
+                  >Note (/20)</label
+                >
                 <div class="flex items-center gap-4">
-                  <input [(ngModel)]="evalForm.grade" type="range" min="0" max="20" step="0.5" class="flex-1 accent-[#C62761]" />
-                  <span class="text-2xl font-mono font-bold w-16 text-right" [class]="getGradeClass(evalForm.grade)">{{ evalForm.grade }}</span>
+                  <input
+                    [(ngModel)]="evalForm.grade"
+                    type="range"
+                    min="0"
+                    max="20"
+                    step="0.5"
+                    class="flex-1 accent-[#C62761]"
+                  />
+                  <span
+                    class="text-2xl font-mono font-bold w-16 text-right"
+                    [class]="getGradeClass(evalForm.grade)"
+                    >{{ evalForm.grade }}</span
+                  >
                 </div>
                 <div class="flex justify-between text-[10px] text-white/30 mt-1 px-1">
                   <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
@@ -861,25 +1382,43 @@ interface EnrollmentInfo {
             <div class="space-y-4">
               <!-- Skills -->
               <div>
-                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Compétences acquises</label>
-                <input [(ngModel)]="evalForm.skills" type="text"
-                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
-                       placeholder="Ex: Angular, TypeScript, RxJS" />
+                <label
+                  class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold"
+                  >Compétences acquises</label
+                >
+                <input
+                  [(ngModel)]="evalForm.skills"
+                  type="text"
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
+                  placeholder="Ex: Angular, TypeScript, RxJS"
+                />
               </div>
               <!-- Comment -->
               <div>
-                <label class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold">Commentaire &amp; Appréciation</label>
-                <textarea [(ngModel)]="evalForm.comment" rows="4"
-                          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
-                          placeholder="Appréciation générale sur la progression..."></textarea>
+                <label
+                  class="text-xs text-white/50 uppercase tracking-wider block mb-2 font-semibold"
+                  >Commentaire &amp; Appréciation</label
+                >
+                <textarea
+                  [(ngModel)]="evalForm.comment"
+                  rows="4"
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors resize-none"
+                  placeholder="Appréciation générale sur la progression..."
+                ></textarea>
               </div>
               <!-- Certificate Notice -->
-              <div *ngIf="evalForm.grade >= 14"
-                   class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div
+                *ngIf="evalForm.grade >= 14"
+                class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+              >
                 <span class="text-emerald-400 text-xl">🏅</span>
                 <div>
-                  <p class="text-emerald-400 text-sm font-semibold">Certificat Blockchain sera généré</p>
-                  <p class="text-emerald-400/70 text-xs">Note ≥ 14/20 — Certificat envoyé par email automatiquement</p>
+                  <p class="text-emerald-400 text-sm font-semibold">
+                    Certificat Blockchain sera généré
+                  </p>
+                  <p class="text-emerald-400/70 text-xs">
+                    Note ≥ 14/20 — Certificat envoyé par email automatiquement
+                  </p>
                 </div>
               </div>
             </div>
@@ -887,33 +1426,52 @@ interface EnrollmentInfo {
         </div>
         <!-- Footer -->
         <div class="flex gap-3 px-5 py-4 border-t border-[var(--bridge-border)]">
-          <button (click)="closeEvalModal()" class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all">
+          <button
+            (click)="closeEvalModal()"
+            class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all"
+          >
             Annuler
           </button>
-          <button (click)="submitEvaluation()"
-                  [disabled]="!evalForm.phaseId || evalForm.grade === null || submittingEval"
-                  class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
-            {{ submittingEval ? '✓ Enregistrement...' : 'Enregistrer l\'évaluation' }}
+          <button
+            (click)="submitEvaluation()"
+            [disabled]="!evalForm.phaseId || evalForm.grade === null || submittingEval"
+            class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            {{ submittingEval ? '✓ Enregistrement...' : 'Enregistrer l'évaluation' }}
           </button>
         </div>
       </div>
-
     </div>
 
     <style>
       @keyframes inlineCardIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-      .inline-view-card { animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both; }
+      .inline-view-card {
+        animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both;
+      }
       @keyframes fadeSlideIn {
-        from { opacity: 0; transform: translateY(12px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-      .animate-fadein { animation: fadeSlideIn 0.4s ease both; }
+      .animate-fadein {
+        animation: fadeSlideIn 0.4s ease both;
+      }
     </style>
-  `
-
+  `,
 })
 export class FormationDetailComponent implements OnInit, OnDestroy {
   formation: Formation | null = null;
@@ -953,13 +1511,13 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
         { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
         { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
         { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() },
-        { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined }
+        { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined },
       ];
     }
     return [
       { id: 'phases', label: 'Phases & Séances', icon: '🗂️', count: this.formation?.phases.length },
       { id: 'stagiaires', label: 'Stagiaires', icon: '👥', count: this.enrollments.length },
-      { id: 'evaluations', label: 'Évaluations', icon: '📝', count: this.phaseEvaluations.length }
+      { id: 'evaluations', label: 'Évaluations', icon: '📝', count: this.phaseEvaluations.length },
     ];
   }
 
@@ -970,9 +1528,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   getMyPresenceCount(): number {
     if (!this.formation || !this.user) return 0;
     let count = 0;
-    this.formation.phases.forEach(p => {
-      p.seances?.forEach(s => {
-        const pres = s.presences?.find(pr => pr.stagiaireId === this.user!.id);
+    this.formation.phases.forEach((p) => {
+      p.seances?.forEach((s) => {
+        const pres = s.presences?.find((pr) => pr.stagiaireId === this.user!.id);
         if (pres) count++;
       });
     });
@@ -980,7 +1538,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getMyEvalCount(): number {
-    return this.phaseEvaluations.filter(e => e.studentId?.toString() === this.user?.id?.toString()).length;
+    return this.phaseEvaluations.filter(
+      (e) => e.studentId?.toString() === this.user?.id?.toString(),
+    ).length;
   }
 
   getMyPresenceForSeance(seance: any): any {
@@ -990,18 +1550,24 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
 
   getMyAttendanceRate(): number {
     if (!this.formation || !this.user) return 0;
-    let total = 0, present = 0;
-    this.formation.phases.forEach(p => {
-      p.seances?.forEach(s => {
-        const pres = s.presences?.find(pr => pr.stagiaireId === this.user!.id);
-        if (pres) { total++; if (pres.present) present++; }
+    let total = 0,
+      present = 0;
+    this.formation.phases.forEach((p) => {
+      p.seances?.forEach((s) => {
+        const pres = s.presences?.find((pr) => pr.stagiaireId === this.user!.id);
+        if (pres) {
+          total++;
+          if (pres.present) present++;
+        }
       });
     });
     return total > 0 ? Math.round((present / total) * 100) : 0;
   }
 
   getMyEvals(): any[] {
-    return this.phaseEvaluations.filter(e => e.studentId?.toString() === this.user?.id?.toString());
+    return this.phaseEvaluations.filter(
+      (e) => e.studentId?.toString() === this.user?.id?.toString(),
+    );
   }
 
   getMyFormationProgress(): number {
@@ -1014,10 +1580,11 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   get filteredEnrollments(): EnrollmentInfo[] {
     if (!this.searchQuery.trim()) return this.enrollments;
     const q = this.searchQuery.toLowerCase();
-    return this.enrollments.filter(e =>
-      e.studentFirstName.toLowerCase().includes(q) ||
-      e.studentLastName.toLowerCase().includes(q) ||
-      e.studentEmail.toLowerCase().includes(q)
+    return this.enrollments.filter(
+      (e) =>
+        e.studentFirstName.toLowerCase().includes(q) ||
+        e.studentLastName.toLowerCase().includes(q) ||
+        e.studentEmail.toLowerCase().includes(q),
     );
   }
 
@@ -1029,7 +1596,7 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private http: HttpClient,
     private paiementService: PaiementService,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -1043,7 +1610,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void { this.sub.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
 
   loadFormationDetails(): void {
     this.loading = true;
@@ -1057,24 +1626,30 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
           }
           this.loading = false;
         },
-        error: () => { this.loading = false; }
-      })
+        error: () => {
+          this.loading = false;
+        },
+      }),
     );
   }
 
   loadEnrollments(): void {
     this.sub.add(
-      this.http.get<EnrollmentInfo[]>(`${environment.apiUrl}/enrollments/formation/${this.formationId}`).subscribe({
-        next: (data) => { this.enrollments = data || []; },
-        error: () => {}
-      })
+      this.http
+        .get<EnrollmentInfo[]>(`${environment.apiUrl}/enrollments/formation/${this.formationId}`)
+        .subscribe({
+          next: (data) => {
+            this.enrollments = data || [];
+          },
+          error: () => {},
+        }),
     );
   }
 
   loadAllEvaluations(): void {
     if (!this.formation) return;
-    const evalRequests = this.formation.phases.map(p =>
-      this.evaluationService.getEvaluationsByPhase(p.id)
+    const evalRequests = this.formation.phases.map((p) =>
+      this.evaluationService.getEvaluationsByPhase(p.id),
     );
     if (evalRequests.length === 0) return;
     this.sub.add(
@@ -1082,13 +1657,15 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
         next: (results) => {
           this.phaseEvaluations = results.flat();
         },
-        error: () => {}
-      })
+        error: () => {},
+      }),
     );
   }
 
   goBack(): void {
-    this.router.navigate([this.user?.role === 'FORMATEUR' ? '/dashboard/formateur/formations' : '/dashboard/formations']);
+    this.router.navigate([
+      this.user?.role === 'FORMATEUR' ? '/dashboard/formateur/formations' : '/dashboard/formations',
+    ]);
   }
 
   togglePhase(id: string): void {
@@ -1139,7 +1716,7 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getPresentInModal(): number {
-    return this.activePresences.filter(p => p.present).length;
+    return this.activePresences.filter((p) => p.present).length;
   }
 
   saveAttendance(): void {
@@ -1151,8 +1728,10 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
           this.selectedSeance!.presences = [...this.activePresences];
           this.closeAttendance();
         },
-        error: () => { this.savingAttendance = false; }
-      })
+        error: () => {
+          this.savingAttendance = false;
+        },
+      }),
     );
   }
 
@@ -1177,30 +1756,36 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
       phaseId: this.evalForm.phaseId,
       grade: this.evalForm.grade,
       skills: this.evalForm.skills,
-      comment: this.evalForm.comment
+      comment: this.evalForm.comment,
     };
     this.sub.add(
       this.evaluationService.saveEvaluation(payload).subscribe({
         next: () => {
           this.loadAllEvaluations();
-          setTimeout(() => { this.closeEvalModal(); }, 800);
+          setTimeout(() => {
+            this.closeEvalModal();
+          }, 800);
         },
-        error: () => { this.submittingEval = false; }
-      })
+        error: () => {
+          this.submittingEval = false;
+        },
+      }),
     );
   }
 
   // Helpers
   getPresenceCount(seance: Seance): number {
-    return seance.presences?.filter(p => p.present).length || 0;
+    return seance.presences?.filter((p) => p.present).length || 0;
   }
 
   isToday(date: Date): boolean {
     const d = new Date(date);
     const today = new Date();
-    return d.getFullYear() === today.getFullYear() &&
-           d.getMonth() === today.getMonth() &&
-           d.getDate() === today.getDate();
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
   }
 
   isPast(date: Date): boolean {
@@ -1221,46 +1806,66 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'ACTIVE': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'TERMINEE': return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
-      case 'PLANIFIEE': return 'bg-[rgba(245,166,35,0.1)] text-[#F5A623] border-[rgba(245,166,35,0.2)]';
-      default: return 'bg-white/5 text-white/50 border-white/10';
+      case 'ACTIVE':
+        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'TERMINEE':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      case 'PLANIFIEE':
+        return 'bg-[rgba(245,166,35,0.1)] text-[#F5A623] border-[rgba(245,166,35,0.2)]';
+      default:
+        return 'bg-white/5 text-white/50 border-white/10';
     }
   }
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'ACTIVE': return 'En cours';
-      case 'TERMINEE': return 'Terminée';
-      case 'PLANIFIEE': return 'Planifiée';
-      default: return status;
+      case 'ACTIVE':
+        return 'En cours';
+      case 'TERMINEE':
+        return 'Terminée';
+      case 'PLANIFIEE':
+        return 'Planifiée';
+      default:
+        return status;
     }
   }
 
   getPhaseStatusBg(status: string): string {
     switch (status) {
-      case 'COMPLETEE': return 'bg-emerald-500/20 text-emerald-400';
-      case 'EN_COURS': return 'bg-gradient-to-br from-[#C62761] to-[#F5A623] text-white';
-      case 'VERROUILLEE': return 'bg-white/5 text-white/30';
-      default: return 'bg-white/5 text-white/30';
+      case 'COMPLETEE':
+        return 'bg-emerald-500/20 text-emerald-400';
+      case 'EN_COURS':
+        return 'bg-gradient-to-br from-[#C62761] to-[#F5A623] text-white';
+      case 'VERROUILLEE':
+        return 'bg-white/5 text-white/30';
+      default:
+        return 'bg-white/5 text-white/30';
     }
   }
 
   getPhaseStatusBadge(status: string): string {
     switch (status) {
-      case 'COMPLETEE': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'EN_COURS': return 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]';
-      case 'VERROUILLEE': return 'bg-white/5 text-white/30 border-white/10';
-      default: return 'bg-white/5 text-white/30 border-white/10';
+      case 'COMPLETEE':
+        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'EN_COURS':
+        return 'bg-[rgba(198,39,97,0.1)] text-[#C62761] border-[rgba(198,39,97,0.2)]';
+      case 'VERROUILLEE':
+        return 'bg-white/5 text-white/30 border-white/10';
+      default:
+        return 'bg-white/5 text-white/30 border-white/10';
     }
   }
 
   getPhaseStatusText(status: string): string {
     switch (status) {
-      case 'COMPLETEE': return '✓ Complétée';
-      case 'EN_COURS': return '▶ En cours';
-      case 'VERROUILLEE': return '🔒 Verrouillée';
-      default: return status;
+      case 'COMPLETEE':
+        return '✓ Complétée';
+      case 'EN_COURS':
+        return '▶ En cours';
+      case 'VERROUILLEE':
+        return '🔒 Verrouillée';
+      default:
+        return status;
     }
   }
 
@@ -1291,26 +1896,32 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
       this.paiementService.getPaiementsByStagiaire(this.user.id).subscribe({
         next: (data) => {
           // Filter by formation if formationId available on paiement
-          this.formationPaiements = data.filter(p =>
-            !p.formationId || p.formationId === this.formationId || p.formationId === ''
+          this.formationPaiements = data.filter(
+            (p) => !p.formationId || p.formationId === this.formationId || p.formationId === '',
           );
           this.loadingPaiements = false;
         },
-        error: () => { this.loadingPaiements = false; }
-      })
+        error: () => {
+          this.loadingPaiements = false;
+        },
+      }),
     );
   }
 
   getPaiementForPhase(phase: Phase): Paiement | undefined {
-    return this.formationPaiements.find(p => p.phaseNumero === phase.numero);
+    return this.formationPaiements.find((p) => p.phaseNumero === phase.numero);
   }
 
   getTotalPaidFormation(): number {
-    return this.formationPaiements.filter(p => p.status === 'PAYE').reduce((s, p) => s + p.montant, 0);
+    return this.formationPaiements
+      .filter((p) => p.status === 'PAYE')
+      .reduce((s, p) => s + p.montant, 0);
   }
 
   getTotalRemainingFormation(): number {
-    return this.formationPaiements.filter(p => p.status !== 'PAYE').reduce((s, p) => s + p.montant, 0);
+    return this.formationPaiements
+      .filter((p) => p.status !== 'PAYE')
+      .reduce((s, p) => s + p.montant, 0);
   }
 
   unlockPhase(phaseId: string): void {
@@ -1321,8 +1932,13 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
           this.toastService.success('Phase débloquée avec succès !', 'Déblocage de Phase');
           this.loadFormationDetails();
         },
-        error: (err) => { this.toastService.error(err?.error?.message || 'Erreur lors du déblocage de la phase', 'Erreur'); }
-      })
+        error: (err) => {
+          this.toastService.error(
+            err?.error?.message || 'Erreur lors du déblocage de la phase',
+            'Erreur',
+          );
+        },
+      }),
     );
   }
 
@@ -1331,11 +1947,19 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.formationService.closeSession(sessionId).subscribe({
         next: () => {
-          this.toastService.success('Séance clôturée ! Les calculs d\'assiduité et de progression ont été mis à jour.', 'Clôture de Séance');
+          this.toastService.success(
+            "Séance clôturée ! Les calculs d'assiduité et de progression ont été mis à jour.",
+            'Clôture de Séance',
+          );
           this.loadFormationDetails();
         },
-        error: (err) => { this.toastService.error(err?.error?.message || 'Erreur lors de la clôture de la séance', 'Erreur'); }
-      })
+        error: (err) => {
+          this.toastService.error(
+            err?.error?.message || 'Erreur lors de la clôture de la séance',
+            'Erreur',
+          );
+        },
+      }),
     );
   }
 
@@ -1348,23 +1972,31 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     localStorage.setItem('pending_stripe_enrollment_id', enrollmentId.toString());
     localStorage.setItem('pending_stripe_phase_id', phaseId.toString());
 
-    this.paiementService.initiateStripePayment({
-      enrollmentId,
-      phaseId,
-      amount: paiement.montant
-    }).subscribe({
-      next: (res: any) => {
-        this.payingPhaseId = null;
-        if (res?.url) {
-          window.location.href = res.url;
-        } else {
-          this.toastService.error('Impossible d\'obtenir le lien de paiement Stripe.', 'Paiement Stripe');
-        }
-      },
-      error: (err: any) => {
-        this.payingPhaseId = null;
-        this.toastService.error(err?.error?.message || 'Erreur lors de la connexion avec Stripe.', 'Paiement Stripe');
-      }
-    });
+    this.paiementService
+      .initiateStripePayment({
+        enrollmentId,
+        phaseId,
+        amount: paiement.montant,
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.payingPhaseId = null;
+          if (res?.url) {
+            window.location.href = res.url;
+          } else {
+            this.toastService.error(
+              "Impossible d'obtenir le lien de paiement Stripe.",
+              'Paiement Stripe',
+            );
+          }
+        },
+        error: (err: any) => {
+          this.payingPhaseId = null;
+          this.toastService.error(
+            err?.error?.message || 'Erreur lors de la connexion avec Stripe.',
+            'Paiement Stripe',
+          );
+        },
+      });
   }
 }

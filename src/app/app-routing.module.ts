@@ -43,55 +43,55 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'settings', component: SettingsComponent },
-      
+
       // ─── Stagiaire ───────────────────────────────────────────────────────────
       {
         path: 'stagiaire',
         component: StagiaireOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/formations',
         component: FormationsListComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/formations/:id',
         component: FormationDetailComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/historique',
         component: StagiaireHistoriqueComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/certificats',
         component: StagiaireOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/paiements',
         component: StagiaireOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/presence',
         component: StagiaireOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/notifications',
         component: StagiaireOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['STAGIAIRE'] }
+        data: { roles: ['STAGIAIRE'] },
       },
 
       // ─── Formateur ───────────────────────────────────────────────────────────
@@ -99,37 +99,37 @@ const routes: Routes = [
         path: 'formateur',
         component: FormateurOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/formations',
         component: FormationsListComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/formations/:id',
         component: FormationDetailComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/evaluations',
         component: EvaluationHistoryComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/seances',
         component: FormateurSeancesComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/stagiaires',
         component: FormateurStagiairesComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['FORMATEUR'] }
+        data: { roles: ['FORMATEUR'] },
       },
 
       // ─── Admin ───────────────────────────────────────────────────────────────
@@ -137,49 +137,49 @@ const routes: Routes = [
         path: 'admin',
         component: AdminOverviewComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formations',
         component: FormationsListComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formations/:id',
         component: FormationDetailComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/users',
         component: AdminUsersComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formateurs',
         component: AdminFormateursComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/stats',
         component: AdminStatsComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/broadcast',
         component: AdminBroadcastComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/logs',
         component: AdminLogsComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
       },
 
       // ─── Shared Formations ───────────────────────────────────────────────────
@@ -187,29 +187,29 @@ const routes: Routes = [
         path: 'formations',
         component: FormationsListComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'FORMATEUR'] }
+        data: { roles: ['ADMIN', 'FORMATEUR'] },
       },
       {
         path: 'formations/new',
         component: FormationWizardComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'FORMATEUR'] }
+        data: { roles: ['ADMIN', 'FORMATEUR'] },
       },
       {
         path: 'formations/:id',
         component: FormationDetailComponent,
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'FORMATEUR'] }
+        data: { roles: ['ADMIN', 'FORMATEUR'] },
       },
 
-      { path: '', redirectTo: 'stagiaire', pathMatch: 'full' }
-    ]
+      { path: '', redirectTo: 'stagiaire', pathMatch: 'full' },
+    ],
   },
-  { path: '**', redirectTo: 'home' }
+  { path: '**', redirectTo: 'home' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

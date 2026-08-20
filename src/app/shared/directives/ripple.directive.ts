@@ -2,10 +2,13 @@ import { Directive, ElementRef, HostListener, Renderer2 } from '@angular/core';
 
 @Directive({
   selector: '[appRipple]',
-  standalone: true
+  standalone: true,
 })
 export class RippleDirective {
-  constructor(private el: ElementRef, private renderer: Renderer2) {
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+  ) {
     this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
     this.renderer.setStyle(this.el.nativeElement, 'overflow', 'hidden');
   }
@@ -30,7 +33,11 @@ export class RippleDirective {
     this.renderer.setStyle(circle, 'background', 'rgba(255, 255, 255, 0.3)');
     this.renderer.setStyle(circle, 'transform', 'scale(0)');
     this.renderer.setStyle(circle, 'pointer-events', 'none');
-    this.renderer.setStyle(circle, 'transition', 'transform 600ms ease-out, opacity 600ms ease-out');
+    this.renderer.setStyle(
+      circle,
+      'transition',
+      'transform 600ms ease-out, opacity 600ms ease-out',
+    );
 
     this.renderer.appendChild(target, circle);
 

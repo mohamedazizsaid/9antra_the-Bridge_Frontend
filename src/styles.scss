@@ -9,136 +9,140 @@
 /* ─── CSS Custom Properties ─── */
 :root {
   /* Brand Colors */
-  --bridge-crimson:     #C62761;
-  --bridge-gold:        #F5A623;
-  --bridge-crimson-dark:#9B1E4D;
-  --bridge-gold-light:  #FFD07A;
-  --bridge-bg:          #08081A;
-  --bridge-surface:     #10102A;
-  --bridge-card:        #171738;
-  --bridge-card-hover:  #1F1F48;
-  --bridge-border:      #2A2A5A;
-  --bridge-text:        #F0F0FF;
-  --bridge-text-muted:  #8888BB;
-  --bridge-text-sub:    #5555AA;
+  --bridge-crimson: #c62761;
+  --bridge-gold: #f5a623;
+  --bridge-crimson-dark: #9b1e4d;
+  --bridge-gold-light: #ffd07a;
+  --bridge-bg: #08081a;
+  --bridge-surface: #10102a;
+  --bridge-card: #171738;
+  --bridge-card-hover: #1f1f48;
+  --bridge-border: #2a2a5a;
+  --bridge-text: #f0f0ff;
+  --bridge-text-muted: #8888bb;
+  --bridge-text-sub: #5555aa;
 
   /* Gradients */
-  --grad-brand:     linear-gradient(135deg, #C62761 0%, #F5A623 100%);
-  --grad-brand-inv: linear-gradient(135deg, #F5A623 0%, #C62761 100%);
-  --grad-dark:      linear-gradient(180deg, #08081A 0%, #0F0F2E 100%);
-  --grad-glow-cr:   radial-gradient(ellipse at center, rgba(198,39,97,0.25) 0%, transparent 70%);
-  --grad-glow-go:   radial-gradient(ellipse at center, rgba(245,166,35,0.20) 0%, transparent 70%);
+  --grad-brand: linear-gradient(135deg, #c62761 0%, #f5a623 100%);
+  --grad-brand-inv: linear-gradient(135deg, #f5a623 0%, #c62761 100%);
+  --grad-dark: linear-gradient(180deg, #08081a 0%, #0f0f2e 100%);
+  --grad-glow-cr: radial-gradient(ellipse at center, rgba(198, 39, 97, 0.25) 0%, transparent 70%);
+  --grad-glow-go: radial-gradient(ellipse at center, rgba(245, 166, 35, 0.2) 0%, transparent 70%);
 
   /* Animation */
-  --ease-smooth:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-cinematic: cubic-bezier(0.77, 0, 0.175, 1);
-  --dur-fast:       200ms;
-  --dur-normal:     400ms;
-  --dur-slow:       700ms;
-  --dur-cinematic:  1200ms;
+  --dur-fast: 200ms;
+  --dur-normal: 400ms;
+  --dur-slow: 700ms;
+  --dur-cinematic: 1200ms;
 }
 
-:root[data-theme='light'] {
-  --bridge-bg:          #EFE9DD;
-  --bridge-surface:      #FFFFFF;
-  --bridge-card:         #FFFFFF;
-  --bridge-card-hover:   #F9F6F0;
-  --bridge-border:       #E2D9C8;
-  --bridge-text:         #1D2433;
-  --bridge-text-muted:   #5F6878;
-  --bridge-text-sub:     #7C8493;
-  --grad-dark:           linear-gradient(180deg, #F5EFE4 0%, #E9E1D2 100%);
-  --grad-glow-cr:        radial-gradient(ellipse at center, rgba(198,39,97,0.12) 0%, transparent 70%);
-  --grad-glow-go:        radial-gradient(ellipse at center, rgba(245,166,35,0.14) 0%, transparent 70%);
+:root[data-theme="light"] {
+  --bridge-bg: #efe9dd;
+  --bridge-surface: #ffffff;
+  --bridge-card: #ffffff;
+  --bridge-card-hover: #f9f6f0;
+  --bridge-border: #e2d9c8;
+  --bridge-text: #1d2433;
+  --bridge-text-muted: #5f6878;
+  --bridge-text-sub: #7c8493;
+  --grad-dark: linear-gradient(180deg, #f5efe4 0%, #e9e1d2 100%);
+  --grad-glow-cr: radial-gradient(ellipse at center, rgba(198, 39, 97, 0.12) 0%, transparent 70%);
+  --grad-glow-go: radial-gradient(ellipse at center, rgba(245, 166, 35, 0.14) 0%, transparent 70%);
 }
 
-:root[data-theme='light'] body,
-:root[data-theme='light'] .animated-bg-root {
+:root[data-theme="light"] body,
+:root[data-theme="light"] .animated-bg-root {
   background: var(--bridge-bg) !important;
 }
 
-:root[data-theme='light'] .text-white {
+:root[data-theme="light"] .text-white {
   color: var(--bridge-text) !important;
 }
 
-:root[data-theme='light'] .text-white\/80,
-:root[data-theme='light'] .text-white\/60,
-:root[data-theme='light'] .text-white\/50,
-:root[data-theme='light'] .text-white\/40,
-:root[data-theme='light'] .text-white\/20 {
+:root[data-theme="light"] .text-white\/80,
+:root[data-theme="light"] .text-white\/60,
+:root[data-theme="light"] .text-white\/50,
+:root[data-theme="light"] .text-white\/40,
+:root[data-theme="light"] .text-white\/20 {
   color: var(--bridge-text-muted) !important;
 }
 
-:root[data-theme='light'] .bg-white\/\[0\.03\],
-:root[data-theme='light'] .bg-white\/\[0\.04\],
-:root[data-theme='light'] .bg-white\/5,
-:root[data-theme='light'] .bg-white\/\[0\.02\] {
+:root[data-theme="light"] .bg-white\/\[0\.03\],
+:root[data-theme="light"] .bg-white\/\[0\.04\],
+:root[data-theme="light"] .bg-white\/5,
+:root[data-theme="light"] .bg-white\/\[0\.02\] {
   background-color: color-mix(in srgb, var(--bridge-surface) 86%, var(--bridge-bg) 14%) !important;
 }
 
-:root[data-theme='light'] .hover\:bg-white\/\[0\.08\]:hover,
-:root[data-theme='light'] .hover\:bg-white\/10:hover {
+:root[data-theme="light"] .hover\:bg-white\/\[0\.08\]:hover,
+:root[data-theme="light"] .hover\:bg-white\/10:hover {
   background-color: color-mix(in srgb, var(--bridge-surface) 78%, var(--bridge-bg) 22%) !important;
 }
 
-:root[data-theme='light'] .border-white\/10,
-:root[data-theme='light'] .border-white\/5,
-:root[data-theme='light'] .border-white\/20 {
+:root[data-theme="light"] .border-white\/10,
+:root[data-theme="light"] .border-white\/5,
+:root[data-theme="light"] .border-white\/20 {
   border-color: color-mix(in srgb, var(--bridge-border) 80%, transparent) !important;
 }
 
-:root[data-theme='light'] .bg-\[\#08081A\] {
-  background-color: #EFE9DD !important;
+:root[data-theme="light"] .bg-\[\#08081A\] {
+  background-color: #efe9dd !important;
 }
 
 /* Sidebar (Drawer) & Header (Nav) Light Theme Override */
-:root[data-theme='light'] aside,
-:root[data-theme='light'] header,
-:root[data-theme='light'] .bg-\[\#10102A\],
-:root[data-theme='light'] .bg-\[\#0F0F2E\],
-:root[data-theme='light'] .bg-\[\#171738\] {
-  background-color: #E6DFC5 !important;
-  border-color: #D6CCA8 !important;
+:root[data-theme="light"] aside,
+:root[data-theme="light"] header,
+:root[data-theme="light"] .bg-\[\#10102A\],
+:root[data-theme="light"] .bg-\[\#0F0F2E\],
+:root[data-theme="light"] .bg-\[\#171738\] {
+  background-color: #e6dfc5 !important;
+  border-color: #d6cca8 !important;
 }
 
-:root[data-theme='light'] aside a,
-:root[data-theme='light'] header button,
-:root[data-theme='light'] header a {
-  color: #2D3748 !important;
+:root[data-theme="light"] aside a,
+:root[data-theme="light"] header button,
+:root[data-theme="light"] header a {
+  color: #2d3748 !important;
 }
 
-:root[data-theme='light'] aside a.router-link-active,
-:root[data-theme='light'] aside a.active,
-:root[data-theme='light'] aside a:hover {
+:root[data-theme="light"] aside a.router-link-active,
+:root[data-theme="light"] aside a.active,
+:root[data-theme="light"] aside a:hover {
   background-color: rgba(255, 255, 255, 0.6) !important;
-  color: #C62761 !important;
+  color: #c62761 !important;
 }
 
-:root[data-theme='light'] .from-\[\#10102A\]\/80,
-:root[data-theme='light'] .from-\[\#10102A\] {
-  --tw-gradient-from: color-mix(in srgb, var(--bridge-surface) 88%, var(--bridge-bg) 12%) !important;
+:root[data-theme="light"] .from-\[\#10102A\]\/80,
+:root[data-theme="light"] .from-\[\#10102A\] {
+  --tw-gradient-from: color-mix(
+    in srgb,
+    var(--bridge-surface) 88%,
+    var(--bridge-bg) 12%
+  ) !important;
   --tw-gradient-to: color-mix(in srgb, var(--bridge-surface) 88%, var(--bridge-bg) 12%) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 
-:root[data-theme='light'] .to-\[\#171738\]\/90,
-:root[data-theme='light'] .to-\[\#171738\] {
+:root[data-theme="light"] .to-\[\#171738\]\/90,
+:root[data-theme="light"] .to-\[\#171738\] {
   --tw-gradient-to: color-mix(in srgb, var(--bridge-bg) 82%, var(--bridge-surface) 18%) !important;
 }
 
-:root[data-theme='light'] .text-\[var\(--bridge-text-muted\)\],
-:root[data-theme='light'] .text-\[var\(--bridge-text-sub\)\] {
+:root[data-theme="light"] .text-\[var\(--bridge-text-muted\)\],
+:root[data-theme="light"] .text-\[var\(--bridge-text-sub\)\] {
   color: var(--bridge-text-muted) !important;
 }
 
-:root[data-theme='light'] .bg-rose-500\/10,
-:root[data-theme='light'] .bg-emerald-500\/10 {
+:root[data-theme="light"] .bg-rose-500\/10,
+:root[data-theme="light"] .bg-emerald-500\/10 {
   background-color: color-mix(in srgb, var(--bridge-surface) 82%, var(--bridge-bg) 18%) !important;
 }
 
-:root[data-theme='light'] .bg-emerald-500,
-:root[data-theme='light'] .bg-rose-500 {
+:root[data-theme="light"] .bg-emerald-500,
+:root[data-theme="light"] .bg-rose-500 {
   color: white !important;
 }
 
@@ -148,69 +152,71 @@
    var(--bridge-card) is already #FFFFFF in light mode, so they render white correctly.     */
 
 /* SVG donut background track: override rgba(255,255,255,0.06) to a visible light tone */
-:root[data-theme='light'] .donut-track {
-  stroke: rgba(0,0,0,0.09) !important;
+:root[data-theme="light"] .donut-track {
+  stroke: rgba(0, 0, 0, 0.09) !important;
 }
 
 /* Legend text white/60 → bridge-text-muted */
-:root[data-theme='light'] .text-white\/60 {
+:root[data-theme="light"] .text-white\/60 {
   color: var(--bridge-text-muted) !important;
 }
 
 /* Legend total label white/70 → bridge-text */
-:root[data-theme='light'] .text-white\/70 {
+:root[data-theme="light"] .text-white\/70 {
   color: var(--bridge-text) !important;
 }
 
 /* border-white/5 dividers inside donut legend */
-:root[data-theme='light'] .border-white\/5 {
+:root[data-theme="light"] .border-white\/5 {
   border-color: color-mix(in srgb, var(--bridge-border) 60%, transparent) !important;
 }
 
 /* Expand/collapse button background using color-mix var(--bridge-card) — inherits correctly */
 
 /* Ensure white/20 ratio separator stays readable */
-:root[data-theme='light'] .text-white\/20 {
+:root[data-theme="light"] .text-white\/20 {
   color: var(--bridge-text-sub) !important;
 }
 
 /* Toggle button border-white/10 text-white/50 */
-:root[data-theme='light'] .text-white\/50 {
+:root[data-theme="light"] .text-white\/50 {
   color: var(--bridge-text-muted) !important;
 }
 
 /* Session card background via inline style: color-mix(var(--bridge-card)) auto-resolves ✓ */
 
 /* ─── Light Mode Input & Form Control Visibility Fix ─── */
-:root[data-theme='light'] input,
-:root[data-theme='light'] textarea,
-:root[data-theme='light'] select {
-  background-color: #FFFFFF !important;
-  color: #1A202C !important;
-  border: 1.5px solid #A0AEC0 !important;
+:root[data-theme="light"] input,
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  border: 1.5px solid #a0aec0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
-:root[data-theme='light'] input::placeholder,
-:root[data-theme='light'] textarea::placeholder {
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder {
   color: #718096 !important;
 }
 
-:root[data-theme='light'] input:focus,
-:root[data-theme='light'] textarea:focus,
-:root[data-theme='light'] select:focus {
-  border-color: #C62761 !important;
+:root[data-theme="light"] input:focus,
+:root[data-theme="light"] textarea:focus,
+:root[data-theme="light"] select:focus {
+  border-color: #c62761 !important;
   box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.2) !important;
-  background-color: #FFFFFF !important;
+  background-color: #ffffff !important;
 }
 
-:root[data-theme='light'] label {
-  color: #4A5568 !important;
+:root[data-theme="light"] label {
+  color: #4a5568 !important;
   font-weight: 600 !important;
 }
 
 /* ─── Reset & Base ─── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -223,13 +229,15 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 400;
   color: var(--bridge-text);
   background: var(--bridge-bg);
   line-height: 1.6;
   overflow-x: hidden;
-  transition: background-color 240ms ease, color 240ms ease;
+  transition:
+    background-color 240ms ease,
+    color 240ms ease;
 }
 
 a {
@@ -245,7 +253,9 @@ button {
   color: inherit;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   font-family: inherit;
   color: inherit;
   border: none;
@@ -253,7 +263,8 @@ input, select, textarea {
   background: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -263,9 +274,15 @@ img {
 }
 
 /* ─── Typography ─── */
-.font-syne   { font-family: 'Syne', sans-serif; }
-.font-inter  { font-family: 'Inter', sans-serif; }
-.font-mono   { font-family: 'Space Mono', monospace; }
+.font-syne {
+  font-family: "Syne", sans-serif;
+}
+.font-inter {
+  font-family: "Inter", sans-serif;
+}
+.font-mono {
+  font-family: "Space Mono", monospace;
+}
 
 .text-gradient {
   background: var(--grad-brand);
@@ -312,8 +329,10 @@ img {
   background: linear-gradient(135deg, var(--bridge-crimson), var(--bridge-gold));
   color: white;
   box-shadow: 0 12px 30px rgba(198, 39, 97, 0.28);
-  border: 1px solid rgba(255,255,255,0.18);
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .theme-floating-toggle:hover {
@@ -330,7 +349,7 @@ img {
   padding: 14px 32px;
   background: var(--grad-brand);
   color: white;
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 700;
   font-size: 16px;
   border-radius: 14px;
@@ -338,24 +357,35 @@ img {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+  transition:
+    transform var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
 }
 
 .btn-primary::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
   transform: translateX(-100%);
   transition: transform 600ms;
 }
 
-.btn-primary:hover::before { transform: translateX(100%); }
+.btn-primary:hover::before {
+  transform: translateX(100%);
+}
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(198, 39, 97, 0.4);
 }
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:active {
+  transform: translateY(0);
+}
 
 .btn-ghost {
   display: inline-flex;
@@ -365,7 +395,7 @@ img {
   padding: 14px 32px;
   background: transparent;
   color: white;
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 600;
   font-size: 16px;
   border-radius: 14px;
@@ -392,17 +422,20 @@ img {
   transition: all 300ms ease;
 }
 
-.input-dark::placeholder { color: var(--bridge-text-muted); }
+.input-dark::placeholder {
+  color: var(--bridge-text-muted);
+}
 .input-dark:focus {
   border-color: var(--bridge-crimson);
   box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.15);
 }
 
 /* ─── Global Bridge Controls (Inputs & Selects) ─── */
-select, .bridge-input {
+select,
+.bridge-input {
   background-color: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   border-radius: 0.75rem !important;
   padding: 0.625rem 1rem !important;
   font-size: 0.875rem !important;
@@ -415,24 +448,29 @@ select, .bridge-input {
   }
 
   &:focus {
-    border-color: #C62761 !important;
+    border-color: #c62761 !important;
     box-shadow: 0 0 0 3px rgba(198, 39, 97, 0.2) !important;
     background-color: rgba(16, 16, 42, 0.9) !important;
   }
 
   option {
-    background-color: #10102A !important;
-    color: #FFFFFF !important;
+    background-color: #10102a !important;
+    color: #ffffff !important;
     padding: 10px;
   }
 }
 
 /* ─── Fixed Modal Overlay Backdrop Fix ─── */
-.bridge-modal-overlay, .modal-backdrop-fixed {
+.bridge-modal-overlay,
+.modal-backdrop-fixed {
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
-  background: radial-gradient(ellipse at 50% 40%, rgba(198, 39, 97, 0.08) 0%, rgba(4, 4, 18, 0.92) 60%) !important;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(198, 39, 97, 0.08) 0%,
+    rgba(4, 4, 18, 0.92) 60%
+  ) !important;
   backdrop-filter: blur(20px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
   display: flex !important;
@@ -451,8 +489,9 @@ select, .bridge-input {
   }
 
   /* Panel background override */
-  .glass-card, div.glass-card {
-    background: linear-gradient(145deg, #13132E 0%, #101026 100%) !important;
+  .glass-card,
+  div.glass-card {
+    background: linear-gradient(145deg, #13132e 0%, #101026 100%) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: 1px solid rgba(198, 39, 97, 0.2) !important;
@@ -465,13 +504,23 @@ select, .bridge-input {
 }
 
 @keyframes modalOverlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modalPanelIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Inline fixed modal (admin-users style — uses Tailwind fixed inset-0) */
@@ -489,14 +538,18 @@ select, .bridge-input {
 .modal-inline-overlay .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, rgba(198, 39, 97, 0.08) 0%, rgba(4, 4, 18, 0.92) 60%);
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(198, 39, 97, 0.08) 0%,
+    rgba(4, 4, 18, 0.92) 60%
+  );
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
 }
 
 .modal-inline-overlay .modal-panel {
   position: relative;
-  background: linear-gradient(145deg, #13132E 0%, #101026 100%);
+  background: linear-gradient(145deg, #13132e 0%, #101026 100%);
   border: 1px solid rgba(198, 39, 97, 0.2);
   border-radius: 1.5rem;
   box-shadow:
@@ -608,7 +661,10 @@ select, .bridge-input {
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
+  transition:
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    transform var(--dur-fast) ease;
   flex-shrink: 0;
 }
 
@@ -628,57 +684,80 @@ select, .bridge-input {
 
 /* Responsive mobile — largeur pleine */
 @media (max-width: 480px) {
-  .bridge-side-panel { max-width: 100%; }
+  .bridge-side-panel {
+    max-width: 100%;
+  }
 }
 
 /* Light theme overrides */
-:root[data-theme='light'] .bridge-side-panel {
+:root[data-theme="light"] .bridge-side-panel {
   background: linear-gradient(180deg, var(--bridge-surface) 0%, var(--bridge-bg) 100%);
   border-left-color: color-mix(in srgb, var(--bridge-border) 80%, transparent);
 }
 
 /* ─── Keyframes Side Panel ─── */
 @keyframes bridgeBackdropIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes bridgeBackdropOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 @keyframes bridgePanelSlideIn {
-  from { transform: translateX(100%); opacity: 0.7; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 @keyframes bridgePanelSlideOut {
-  from { transform: translateX(0);    opacity: 1; }
-  to   { transform: translateX(100%); opacity: 0.5; }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0.5;
+  }
 }
-
 
 /* ─── Inputs (Light theme — auth cards) ─── */
 .input-light {
   width: 100%;
-  background: #F4F4FB;
+  background: #f4f4fb;
   border: 2px solid transparent;
   border-radius: 14px;
   padding: 16px 18px 16px 52px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 15px;
   color: #171738;
   transition: all 300ms ease;
 }
 
-.input-light::placeholder { color: #8888BB; }
+.input-light::placeholder {
+  color: #8888bb;
+}
 .input-light:focus {
-  border-color: #C62761;
-  background: #FFFFFF;
+  border-color: #c62761;
+  background: #ffffff;
   box-shadow: 0 0 0 4px rgba(198, 39, 97, 0.1);
   outline: none;
 }
 .input-light.error {
-  border-color: #EF4444;
-  background: #FFF5F5;
+  border-color: #ef4444;
+  background: #fff5f5;
 }
 
 /* ─── Status Chips ─── */
@@ -694,35 +773,39 @@ select, .bridge-input {
 
 .chip-success {
   background: rgba(16, 185, 129, 0.15);
-  color: #10B981;
+  color: #10b981;
 }
 
 .chip-warning {
   background: rgba(245, 166, 35, 0.15);
-  color: #F5A623;
+  color: #f5a623;
 }
 
 .chip-danger {
   background: rgba(239, 68, 68, 0.15);
-  color: #EF4444;
+  color: #ef4444;
 }
 
 .chip-info {
   background: rgba(59, 130, 246, 0.15);
-  color: #3B82F6;
+  color: #3b82f6;
 }
 
 /* ─── Skeleton Loading ─── */
 .skeleton {
-  background: linear-gradient(90deg, #171738 25%, #1F1F48 50%, #171738 75%);
+  background: linear-gradient(90deg, #171738 25%, #1f1f48 50%, #171738 75%);
   background-size: 400% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ─── Scroll Reveal ─── */
@@ -764,7 +847,9 @@ select, .bridge-input {
 
 /* ─── Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -39,20 +39,20 @@ export class PaiementService {
       status: status,
       datePaiement: p.paymentDate ? new Date(p.paymentDate) : undefined,
       dateEcheance: echeance,
-      methode: p.paymentMethod || 'ESPECES'
+      methode: p.paymentMethod || 'ESPECES',
     };
   }
 
   getPaiementsByStagiaire(stagiaireId: string): Observable<Paiement[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/student/${stagiaireId}`).pipe(
-      map(list => list.map(p => this.mapPaymentDTO(p)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/student/${stagiaireId}`)
+      .pipe(map((list) => list.map((p) => this.mapPaymentDTO(p))));
   }
 
   getPaiementsByFormation(formationId: string): Observable<Paiement[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/formation/${formationId}`).pipe(
-      map(list => list.map(p => this.mapPaymentDTO(p)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/formation/${formationId}`)
+      .pipe(map((list) => list.map((p) => this.mapPaymentDTO(p))));
   }
 
   registerPayment(req: RegisterPaymentRequest): Observable<any> {
@@ -60,12 +60,16 @@ export class PaiementService {
   }
 
   getRetardCount(stagiaireId: string): Observable<number> {
-    return this.http.get<{ count: number }>(`${this.apiUrl}/student/${stagiaireId}/retard`).pipe(
-      map(res => res.count)
-    );
+    return this.http
+      .get<{ count: number }>(`${this.apiUrl}/student/${stagiaireId}/retard`)
+      .pipe(map((res) => res.count));
   }
 
-  initiateStripePayment(payload: { enrollmentId: number; phaseId: number; amount: number }): Observable<any> {
+  initiateStripePayment(payload: {
+    enrollmentId: number;
+    phaseId: number;
+    amount: number;
+  }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/stripe/create-checkout-session`, payload);
   }
 
@@ -74,10 +78,8 @@ export class PaiementService {
       params: {
         sessionId: sessionId,
         enrollmentId: enrollmentId.toString(),
-        phaseId: phaseId.toString()
-      }
+        phaseId: phaseId.toString(),
+      },
     });
   }
 }
-
-

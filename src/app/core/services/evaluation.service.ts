@@ -42,15 +42,15 @@ export class EvaluationService {
   }
 
   getEvaluationsByStudent(studentId: string): Observable<Evaluation[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/student/${studentId}`).pipe(
-      map(list => list.map(e => this.mapEval(e)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/student/${studentId}`)
+      .pipe(map((list) => list.map((e) => this.mapEval(e))));
   }
 
   getEvaluationsByTrainer(trainerId: string): Observable<Evaluation[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/trainer/${trainerId}`).pipe(
-      map(list => list.map(e => this.mapEval(e)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/trainer/${trainerId}`)
+      .pipe(map((list) => list.map((e) => this.mapEval(e))));
   }
 
   saveEvaluation(evaluation: Evaluation): Observable<Evaluation> {
@@ -60,16 +60,14 @@ export class EvaluationService {
       skills: evaluation.skills,
       studentId: parseInt(evaluation.studentId),
       trainerId: parseInt(evaluation.trainerId),
-      phaseId: parseInt(evaluation.phaseId)
+      phaseId: parseInt(evaluation.phaseId),
     };
-    return this.http.post<any>(this.apiUrl, payload).pipe(
-      map(e => this.mapEval(e))
-    );
+    return this.http.post<any>(this.apiUrl, payload).pipe(map((e) => this.mapEval(e)));
   }
 
   getEvaluationsByPhase(phaseId: string): Observable<Evaluation[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/phase/${phaseId}`).pipe(
-      map(list => list.map(e => this.mapEval(e)))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/phase/${phaseId}`)
+      .pipe(map((list) => list.map((e) => this.mapEval(e))));
   }
 }
