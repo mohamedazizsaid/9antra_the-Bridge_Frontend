@@ -1,8 +1,7 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist/the_bridge_frontend/browser",
-      "numberOfRuns": 2,
+      "numberOfRuns": 1,
       "settings": {
         "onlyCategories": ["performance", "accessibility", "best-practices", "seo"]
       }

@@ -58,3 +58,5 @@ Thumbs.db
 
 # Coverage (don't commit coverage reports)
 /coverage/
+.vercel
+.env*
