@@ -3,6 +3,9 @@
     "deploymentEnabled": false
   },
   "rewrites": [
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

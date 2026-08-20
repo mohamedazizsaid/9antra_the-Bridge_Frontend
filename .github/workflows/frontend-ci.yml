@@ -92,7 +92,7 @@ jobs:
     name: Deploy to Vercel (Preview)
     runs-on: ubuntu-latest
     needs: quality
-    if: github.event_name == 'pull_request'
+    if: always() && needs.quality.result == 'success'
     outputs:
       preview_url: ${{ steps.deploy.outputs.url }}
 
