@@ -1,0 +1,14 @@
+node_modules
+.angular
+dist
+.git
+.github
+.husky
+.vercel
+e2e
+playwright-report
+*.log
+.editorconfig
+.prettierignore
+.prettierrc.json
+.eslintrc.json
