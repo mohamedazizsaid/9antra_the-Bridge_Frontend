@@ -16,7 +16,7 @@ export default defineConfig({
     ['github'],
   ],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4200',
+    baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

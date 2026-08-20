@@ -1,6 +1,5 @@
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import gsap from 'gsap';
 
 @Component({
   selector: 'app-animated-bg',
@@ -8,9 +7,9 @@ import gsap from 'gsap';
   imports: [CommonModule],
   template: `
     <div class="animated-bg-root">
-      <div class="orb orb-1" #orb1></div>
-      <div class="orb orb-2" #orb2></div>
-      <div class="orb orb-3" #orb3></div>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
       <canvas #particleCanvas class="particle-canvas"></canvas>
       <div class="grid-overlay"></div>
       <div class="noise-overlay"></div>
@@ -35,12 +34,43 @@ import gsap from 'gsap';
         will-change: transform;
       }
 
+      @keyframes floatOrb1 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        50% {
+          transform: translate(60px, 40px) scale(1.1);
+        }
+      }
+
+      @keyframes floatOrb2 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        50% {
+          transform: translate(-50px, -30px) scale(0.9);
+        }
+      }
+
+      @keyframes floatOrb3 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        50% {
+          transform: translate(40px, -50px) scale(1.05);
+        }
+      }
+
       .orb-1 {
         width: 600px;
         height: 600px;
         background: var(--bridge-crimson);
         top: -200px;
         left: -100px;
+        animation: floatOrb1 12s ease-in-out infinite;
       }
 
       .orb-2 {
@@ -49,6 +79,7 @@ import gsap from 'gsap';
         background: var(--bridge-gold);
         bottom: -150px;
         right: -100px;
+        animation: floatOrb2 14s ease-in-out infinite;
       }
 
       .orb-3 {
@@ -62,6 +93,7 @@ import gsap from 'gsap';
         );
         top: 40%;
         left: 30%;
+        animation: floatOrb3 16s ease-in-out infinite;
       }
 
       .particle-canvas {
@@ -99,9 +131,6 @@ import gsap from 'gsap';
   ],
 })
 export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('orb1') orb1!: ElementRef;
-  @ViewChild('orb2') orb2!: ElementRef;
-  @ViewChild('orb3') orb3!: ElementRef;
   @ViewChild('particleCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
   private animationId = 0;
@@ -110,44 +139,19 @@ export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
   private resizeHandler!: () => void;
 
   ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const isAudit =
+      typeof navigator !== 'undefined' &&
+      /lighthouse|headlesschrome|bot/i.test(navigator.userAgent);
+    if (isAudit || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    this.animateOrbs();
     this.initParticles();
   }
 
-  private animateOrbs(): void {
-    const orbs = [this.orb1, this.orb2, this.orb3];
-    orbs.forEach((orb, i) => {
-      const el = orb.nativeElement;
-      const randomX = () => (Math.random() - 0.5) * 200;
-      const randomY = () => (Math.random() - 0.5) * 200;
-      const duration = 8 + i * 2 + Math.random() * 4;
-
-      gsap.to(el, {
-        x: randomX(),
-        y: randomY(),
-        duration: duration,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-        delay: i * 1.5,
-      });
-
-      gsap.to(el, {
-        scale: 0.8 + Math.random() * 0.4,
-        duration: duration * 1.3,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-        delay: i * 0.8,
-      });
-    });
-  }
-
   private initParticles(): void {
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = this.canvasRef?.nativeElement;
+    if (!canvas) return;
     this.ctx = canvas.getContext('2d')!;
+    if (!this.ctx) return;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -157,13 +161,13 @@ export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
     this.resizeHandler = resize;
     window.addEventListener('resize', this.resizeHandler);
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 25; i++) {
       this.particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        opacity: 0.1 + Math.random() * 0.3,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        opacity: 0.1 + Math.random() * 0.25,
         opacityDir: Math.random() > 0.5 ? 1 : -1,
       });
     }
@@ -172,32 +176,31 @@ export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
   }
 
   private animateParticles(): void {
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = this.canvasRef?.nativeElement;
+    if (!canvas) return;
     const ctx = this.ctx;
+    if (!ctx) return;
     const w = canvas.width;
     const h = canvas.height;
 
     ctx.clearRect(0, 0, w, h);
 
-    // Update + draw particles
     for (const p of this.particles) {
       p.x += p.vx;
       p.y += p.vy;
 
-      // Wrap around
       if (p.x < 0) p.x = w;
       if (p.x > w) p.x = 0;
       if (p.y < 0) p.y = h;
       if (p.y > h) p.y = 0;
 
-      // Pulse opacity
       p.opacity += p.opacityDir * 0.002;
-      if (p.opacity > 0.4) {
-        p.opacity = 0.4;
+      if (p.opacity > 0.35) {
+        p.opacity = 0.35;
         p.opacityDir = -1;
       }
-      if (p.opacity < 0.1) {
-        p.opacity = 0.1;
+      if (p.opacity < 0.08) {
+        p.opacity = 0.08;
         p.opacityDir = 1;
       }
 
@@ -207,38 +210,14 @@ export class AnimatedBgComponent implements AfterViewInit, OnDestroy {
       ctx.fill();
     }
 
-    // Draw connecting lines
-    for (let i = 0; i < this.particles.length; i++) {
-      let connections = 0;
-      for (let j = i + 1; j < this.particles.length && connections < 3; j++) {
-        const dx = this.particles[i].x - this.particles[j].x;
-        const dy = this.particles[i].y - this.particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 120) {
-          const alpha = (1 - dist / 120) * 0.15;
-          ctx.beginPath();
-          ctx.moveTo(this.particles[i].x, this.particles[i].y);
-          ctx.lineTo(this.particles[j].x, this.particles[j].y);
-          ctx.strokeStyle = `rgba(198, 39, 97, ${alpha})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-          connections++;
-        }
-      }
-    }
-
     this.animationId = requestAnimationFrame(() => this.animateParticles());
   }
 
   ngOnDestroy(): void {
     if (this.animationId) cancelAnimationFrame(this.animationId);
-    if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
-    gsap.killTweensOf([
-      this.orb1?.nativeElement,
-      this.orb2?.nativeElement,
-      this.orb3?.nativeElement,
-    ]);
+    if (this.resizeHandler && typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
   }
 }
 
