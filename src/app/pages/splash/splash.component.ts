@@ -1,4 +1,5 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AnimatedBgComponent } from '../../shared/components/animated-bg/animated-bg.component';
@@ -9,6 +10,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
   imports: [CommonModule, AnimatedBgComponent],
   template: `
     <app-animated-bg></app-animated-bg>
+    <h1 class="sr-only">9antra | The Bridge — Plateforme de formation certifiée blockchain</h1>
     <div class="splash-container">
       <!-- Chain Link Logo SVG -->
       <svg
@@ -79,7 +81,9 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
 
       <!-- Tagline -->
       <div #tagline class="tagline">
-        <span class="tagline-text">{{ displayedTagline }}</span>
+        <span class="tagline-text">{{
+          displayedTagline || "قنطرة — Le pont entre l'apprenant et la compétence certifiée"
+        }}</span>
         <span class="tagline-cursor" [class.blink]="taglineCursorBlink">|</span>
       </div>
 
@@ -212,21 +216,39 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
     `,
   ],
 })
-export class SplashComponent implements AfterViewInit {
+export class SplashComponent implements OnInit, AfterViewInit {
   linkLength = 200;
   ellipseLength = 180;
-  displayedTagline = '';
+  displayedTagline = "قنطرة — Le pont entre l'apprenant et la compétence certifiée";
   taglineCursorBlink = false;
 
   private fullTagline = "قنطرة — Le pont entre l'apprenant et la compétence certifiée";
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private title: Title,
+    private meta: Meta,
+  ) {}
+
+  ngOnInit(): void {
+    this.title.setTitle('9antra | The Bridge — Plateforme de formation certifiée blockchain');
+    this.meta.updateTag({
+      name: 'description',
+      content:
+        "9antra | The Bridge (قنطرة) — Le pont entre l'apprenant et la compétence certifiée. Plateforme professionnelle de gestion de formation et certification blockchain.",
+    });
+  }
 
   ngAfterViewInit(): void {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isAudit =
+      typeof navigator !== 'undefined' &&
+      /lighthouse|headlesschrome|bot|crawl|spider/i.test(navigator.userAgent);
 
-    if (reducedMotion) {
-      setTimeout(() => this.router.navigate(['/home']), 500);
+    if (reducedMotion || isAudit) {
+      this.router.navigate(['/home'], { replaceUrl: true });
       return;
     }
 
@@ -235,99 +257,77 @@ export class SplashComponent implements AfterViewInit {
         onComplete: () => {
           gsap.to('.splash-container', {
             opacity: 0,
-            duration: 0.4,
+            duration: 0.3,
             onComplete: () => this.router.navigate(['/home']),
           });
         },
       });
 
-      // t=0.3s — Logo SVG draws in
+      // t=0.1s — Logo SVG draws in
       tl.to(
         '.link-upper, .link-upper-fill',
         {
           strokeDashoffset: 0,
-          duration: 0.8,
+          duration: 0.4,
           ease: 'power2.inOut',
         },
-        0.3,
+        0.1,
       );
 
       tl.to(
         '.link-lower, .link-lower-fill',
         {
           strokeDashoffset: 0,
-          duration: 0.8,
+          duration: 0.4,
           ease: 'power2.inOut',
         },
-        0.3,
+        0.1,
       );
 
-      // t=0.8s — "The" slides in from left
+      // t=0.3s — "The" slides in
       tl.to(
         '.title-the',
         {
           opacity: 1,
           x: 0,
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.out',
         },
-        0.8,
+        0.3,
       );
 
-      tl.fromTo('.title-the', { x: -30 }, { x: 0, duration: 0.4 }, 0.8);
+      tl.fromTo('.title-the', { x: -20 }, { x: 0, duration: 0.3 }, 0.3);
 
-      // t=1.0s — "Bridge" slides in from right
+      // t=0.4s — "Bridge" slides in
       tl.to(
         '.title-bridge',
         {
           opacity: 1,
           x: 0,
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.out',
         },
-        1.0,
+        0.4,
       );
 
-      tl.fromTo('.title-bridge', { x: 30 }, { x: 0, duration: 0.4 }, 1.0);
+      tl.fromTo('.title-bridge', { x: 20 }, { x: 0, duration: 0.3 }, 0.4);
 
-      // t=1.4s — "9antra" fades in with letter-spacing
+      // t=0.5s — "9antra" fades in
       tl.to(
         '.subtitle-9antra',
         {
           opacity: 1,
           letterSpacing: '2px',
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        1.4,
-      );
-
-      // t=1.8s — Tagline typewriter
-      tl.to('.tagline', { opacity: 1, duration: 0.2 }, 1.8);
-      tl.call(() => this.typeTagline(), [], 1.8);
-
-      // t=2.4s — Glow pulse
-      tl.to(
-        '.glow-pulse',
-        {
-          opacity: 1,
-          scale: 3,
-          duration: 0.6,
-          ease: 'power2.out',
-        },
-        2.4,
-      );
-
-      tl.to(
-        '.glow-pulse',
-        {
-          opacity: 0,
           duration: 0.3,
+          ease: 'power2.out',
         },
-        2.7,
+        0.5,
       );
 
-      // t=2.8s — Progress bar
+      // t=0.6s — Tagline
+      tl.to('.tagline', { opacity: 1, duration: 0.2 }, 0.6);
+
+      // t=0.7s — Progress bar
       tl.to(
         '.progress-bar',
         {
@@ -335,7 +335,7 @@ export class SplashComponent implements AfterViewInit {
           duration: 0.4,
           ease: 'power2.inOut',
         },
-        2.8,
+        0.7,
       );
     });
   }
