@@ -41,6 +41,8 @@ testem.log
 .env
 .env.local
 .env.*.local
+src/environments/environment.prod.ts
+src/environments/environment.ts
 
 # System files
 .DS_Store
