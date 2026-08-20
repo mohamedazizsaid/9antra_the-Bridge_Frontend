@@ -52,7 +52,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
         <div class="w-full max-w-lg glass-card p-8 md:p-10 relative overflow-hidden transition-all">
           
           <!-- Success Animation Overlay -->
-          <div *ngIf="showSuccessAnimation" class="absolute inset-0 bg-[#08081a]/95 z-50 flex flex-col items-center justify-center p-8 text-center animate-fadeIn">
+          <div *ngIf="showSuccessAnimation" class="py-6 md:py-8 flex flex-col items-center justify-center text-center animate-fadeIn min-h-[320px]">
             <div class="success-checkmark mb-6">
               <div class="check-icon">
                 <span class="icon-line line-tip"></span>
@@ -61,8 +61,8 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 <div class="icon-fix"></div>
               </div>
             </div>
-            <h3 class="font-syne font-bold text-2xl mb-2 text-gradient">Inscription Réussie !</h3>
-            <p class="text-sm text-[var(--bridge-text-muted)] max-w-xs mb-6">
+            <h3 class="font-syne font-bold text-2xl md:text-3xl mb-2 text-gradient">Inscription Réussie !</h3>
+            <p class="text-sm text-[var(--bridge-text-muted)] max-w-xs mb-6 leading-relaxed">
               Votre adresse email a été validée avec succès. Connexion automatique en cours...
             </p>
             <div class="w-8 h-8 border-2 border-[var(--bridge-crimson)] border-t-transparent rounded-full animate-spin"></div>
