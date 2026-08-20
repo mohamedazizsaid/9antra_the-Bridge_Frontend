@@ -135,8 +135,8 @@ jobs:
   e2e:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: quality
-    if: always() && (needs.quality.result == 'success')
+    needs: [quality, deploy-preview]
+    if: always() && needs.quality.result == 'success' && (needs.deploy-preview.result == 'success' || needs.deploy-preview.result == 'skipped')
 
     steps:
       - name: Checkout source
@@ -200,8 +200,8 @@ jobs:
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
-    needs: quality
-    if: always() && (needs.quality.result == 'success')
+    needs: [quality, deploy-preview]
+    if: always() && needs.quality.result == 'success' && (needs.deploy-preview.result == 'success' || needs.deploy-preview.result == 'skipped')
 
     steps:
       - name: Checkout source
