@@ -45,3 +45,14 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
+
+# Lighthouse CI
+/.lighthouseci/
+
+# Coverage (don't commit coverage reports)
+/coverage/

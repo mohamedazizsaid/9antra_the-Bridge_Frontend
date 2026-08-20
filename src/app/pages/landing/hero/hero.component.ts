@@ -18,15 +18,14 @@ import gsap from 'gsap';
 
         <!-- Hero Title -->
         <h1 class="hero-title" #anim>
-          Le Pont Vers la<br>
+          Le Pont Vers la<br />
           <span class="text-gradient">Compétence Certifiée</span>
         </h1>
 
         <!-- Subtitle -->
         <p class="hero-subtitle" #anim>
-          9antra | The Bridge automatise l'intégralité du parcours formation :
-          inscription, paiement, progression pédagogique et certification
-          infalsifiable sur blockchain.
+          9antra | The Bridge automatise l'intégralité du parcours formation : inscription,
+          paiement, progression pédagogique et certification infalsifiable sur blockchain.
         </p>
 
         <!-- CTA Row -->
@@ -34,7 +33,12 @@ import gsap from 'gsap';
           <a routerLink="/auth/register" class="btn-hero-primary" id="hero-cta-start">
             Démarrer gratuitement →
           </a>
-          <a href="#fonctionnalites" class="btn-hero-ghost" id="hero-cta-demo" (click)="scrollToFeatures($event)">
+          <a
+            href="#fonctionnalites"
+            class="btn-hero-ghost"
+            id="hero-cta-demo"
+            (click)="scrollToFeatures($event)"
+          >
             Voir la démo ▶
           </a>
         </div>
@@ -52,9 +56,7 @@ import gsap from 'gsap';
       <div class="hero-preview" #anim>
         <div class="preview-card">
           <div class="preview-header">
-            <div class="preview-dots">
-              <span></span><span></span><span></span>
-            </div>
+            <div class="preview-dots"><span></span><span></span><span></span></div>
             <span class="preview-title">Dashboard Overview</span>
           </div>
           <div class="preview-body">
@@ -68,14 +70,22 @@ import gsap from 'gsap';
               <svg viewBox="0 0 300 80" class="chart-svg">
                 <defs>
                   <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#C62761" stop-opacity="0.4"/>
-                    <stop offset="100%" stop-color="#C62761" stop-opacity="0"/>
+                    <stop offset="0%" stop-color="#C62761" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#C62761" stop-opacity="0" />
                   </linearGradient>
                 </defs>
-                <path d="M0,60 Q30,40 60,45 T120,30 T180,35 T240,20 T300,25"
-                      stroke="#C62761" stroke-width="2" fill="none" class="chart-line"/>
-                <path d="M0,60 Q30,40 60,45 T120,30 T180,35 T240,20 T300,25 V80 H0 Z"
-                      fill="url(#chartGrad)" class="chart-area"/>
+                <path
+                  d="M0,60 Q30,40 60,45 T120,30 T180,35 T240,20 T300,25"
+                  stroke="#C62761"
+                  stroke-width="2"
+                  fill="none"
+                  class="chart-line"
+                />
+                <path
+                  d="M0,60 Q30,40 60,45 T120,30 T180,35 T240,20 T300,25 V80 H0 Z"
+                  fill="url(#chartGrad)"
+                  class="chart-area"
+                />
               </svg>
             </div>
             <div class="preview-list">
@@ -90,280 +100,324 @@ import gsap from 'gsap';
       </div>
     </section>
   `,
-  styles: [`
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 100px 24px 60px;
-      max-width: 1280px;
-      margin: 0 auto;
-      gap: 60px;
-    }
+  styles: [
+    `
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 24px 60px;
+        max-width: 1280px;
+        margin: 0 auto;
+        gap: 60px;
+      }
 
-    .hero-content {
-      flex: 1;
-      max-width: 640px;
-    }
+      .hero-content {
+        flex: 1;
+        max-width: 640px;
+      }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 20px;
-      border: 1px solid rgba(245, 166, 35, 0.3);
-      border-radius: 40px;
-      background: rgba(245, 166, 35, 0.08);
-      color: #F5A623;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 28px;
-    }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border: 1px solid rgba(245, 166, 35, 0.3);
+        border-radius: 40px;
+        background: rgba(245, 166, 35, 0.08);
+        color: #f5a623;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 28px;
+      }
 
-    .hero-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 68px;
-      line-height: 1.1;
-      color: var(--bridge-text);
-      margin-bottom: 24px;
-    }
+      .hero-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 68px;
+        line-height: 1.1;
+        color: var(--bridge-text);
+        margin-bottom: 24px;
+      }
 
-    .text-gradient {
-      background: linear-gradient(135deg, #C62761, #F5A623);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+      .text-gradient {
+        background: linear-gradient(135deg, #c62761, #f5a623);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
 
-    .hero-subtitle {
-      font-family: 'Inter', sans-serif;
-      font-size: 18px;
-      font-weight: 400;
-      color: var(--bridge-text-muted);
-      line-height: 1.7;
-      max-width: 540px;
-      margin-bottom: 36px;
-    }
+      .hero-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--bridge-text-muted);
+        line-height: 1.7;
+        max-width: 540px;
+        margin-bottom: 36px;
+      }
 
-    .cta-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 48px;
-    }
+      .cta-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 48px;
+      }
 
-    .btn-hero-primary {
-      display: inline-flex;
-      align-items: center;
-      padding: 16px 36px;
-      background: linear-gradient(135deg, #C62761, #F5A623);
-      color: white;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 16px;
-      border-radius: 14px;
-      text-decoration: none;
-      transition: all 200ms;
-      height: 52px;
-    }
+      .btn-hero-primary {
+        display: inline-flex;
+        align-items: center;
+        padding: 16px 36px;
+        background: linear-gradient(135deg, #c62761, #f5a623);
+        color: white;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 200ms;
+        height: 52px;
+      }
 
-    .btn-hero-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(198, 39, 97, 0.4);
-    }
+      .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(198, 39, 97, 0.4);
+      }
 
-    .btn-hero-ghost {
-      display: inline-flex;
-      align-items: center;
-      padding: 16px 36px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: var(--bridge-text);
-      font-family: 'Syne', sans-serif;
-      font-weight: 600;
-      font-size: 16px;
-      border-radius: 14px;
-      text-decoration: none;
-      transition: all 200ms;
-      height: 52px;
-    }
+      .btn-hero-ghost {
+        display: inline-flex;
+        align-items: center;
+        padding: 16px 36px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: var(--bridge-text);
+        font-family: 'Syne', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 200ms;
+        height: 52px;
+      }
 
-    .btn-hero-ghost:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.45);
-    }
+      .btn-hero-ghost:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.45);
+      }
 
-    .stats-row {
-      display: flex;
-      gap: 40px;
-    }
+      .stats-row {
+        display: flex;
+        gap: 40px;
+      }
 
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-    }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+      }
 
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #F0F0FF;
-    }
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #f0f0ff;
+      }
 
-    .stat-label {
-      font-size: 13px;
-      color: #8888BB;
-      margin-top: 4px;
-    }
+      .stat-label {
+        font-size: 13px;
+        color: #8888bb;
+        margin-top: 4px;
+      }
 
-    .hero-preview {
-      flex: 0 0 380px;
-    }
+      .hero-preview {
+        flex: 0 0 380px;
+      }
 
-    .preview-card {
-      background: color-mix(in srgb, var(--bridge-card) 80%, transparent);
-      backdrop-filter: blur(20px);
-      border: 1px solid color-mix(in srgb, var(--bridge-border) 70%, transparent);
-      border-radius: 20px;
-      overflow: hidden;
-      transform: rotate(3deg);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
-                  0 0 40px rgba(198, 39, 97, 0.1);
-      transition: transform 400ms ease;
-    }
+      .preview-card {
+        background: color-mix(in srgb, var(--bridge-card) 80%, transparent);
+        backdrop-filter: blur(20px);
+        border: 1px solid color-mix(in srgb, var(--bridge-border) 70%, transparent);
+        border-radius: 20px;
+        overflow: hidden;
+        transform: rotate(3deg);
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.4),
+          0 0 40px rgba(198, 39, 97, 0.1);
+        transition: transform 400ms ease;
+      }
 
-    .preview-card:hover {
-      transform: rotate(0deg) scale(1.02);
-    }
+      .preview-card:hover {
+        transform: rotate(0deg) scale(1.02);
+      }
 
-    .preview-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: color-mix(in srgb, var(--bridge-bg) 45%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
-    }
+      .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: color-mix(in srgb, var(--bridge-bg) 45%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
+      }
 
-    .preview-dots {
-      display: flex;
-      gap: 6px;
-    }
+      .preview-dots {
+        display: flex;
+        gap: 6px;
+      }
 
-    .preview-dots span {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
+      .preview-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
 
-    .preview-dots span:nth-child(1) { background: #EF4444; }
-    .preview-dots span:nth-child(2) { background: #F5A623; }
-    .preview-dots span:nth-child(3) { background: #10B981; }
+      .preview-dots span:nth-child(1) {
+        background: #ef4444;
+      }
+      .preview-dots span:nth-child(2) {
+        background: #f5a623;
+      }
+      .preview-dots span:nth-child(3) {
+        background: #10b981;
+      }
 
-    .preview-title {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      color: #8888BB;
-    }
+      .preview-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: #8888bb;
+      }
 
-    .preview-body {
-      padding: 20px;
-    }
+      .preview-body {
+        padding: 20px;
+      }
 
-    .preview-stat-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+      .preview-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
 
-    .mini-stat {
-      text-align: center;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 10px;
-    }
+      .mini-stat {
+        text-align: center;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 10px;
+      }
 
-    .mini-stat-val {
-      font-family: 'Space Mono', monospace;
-      font-size: 20px;
-      font-weight: 700;
-    }
+      .mini-stat-val {
+        font-family: 'Space Mono', monospace;
+        font-size: 20px;
+        font-weight: 700;
+      }
 
-    .mini-stat-label {
-      font-size: 10px;
-      color: #8888BB;
-      margin-top: 2px;
-    }
+      .mini-stat-label {
+        font-size: 10px;
+        color: #8888bb;
+        margin-top: 2px;
+      }
 
-    .chart-svg {
-      width: 100%;
-      height: 60px;
-      margin-bottom: 12px;
-    }
+      .chart-svg {
+        width: 100%;
+        height: 60px;
+        margin-bottom: 12px;
+      }
 
-    .chart-line {
-      stroke-dasharray: 400;
-      stroke-dashoffset: 400;
-      animation: drawLine 2s ease forwards 1s;
-    }
+      .chart-line {
+        stroke-dasharray: 400;
+        stroke-dashoffset: 400;
+        animation: drawLine 2s ease forwards 1s;
+      }
 
-    .chart-area {
-      opacity: 0;
-      animation: fadeIn 1s ease forwards 2s;
-    }
+      .chart-area {
+        opacity: 0;
+        animation: fadeIn 1s ease forwards 2s;
+      }
 
-    @keyframes drawLine {
-      to { stroke-dashoffset: 0; }
-    }
+      @keyframes drawLine {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
 
-    .preview-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+      .preview-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-    .preview-list-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: #8888BB;
-    }
+      .preview-list-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #8888bb;
+      }
 
-    .pli-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
+      .pli-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
 
-    .pli-name { flex: 1; }
+      .pli-name {
+        flex: 1;
+      }
 
-    .pli-val {
-      font-family: 'Space Mono', monospace;
-      color: #F0F0FF;
-    }
+      .pli-val {
+        font-family: 'Space Mono', monospace;
+        color: #f0f0ff;
+      }
 
-    @media (max-width: 1024px) {
-      .hero { flex-direction: column; text-align: center; padding-top: 120px; }
-      .hero-content { max-width: 100%; }
-      .hero-subtitle { max-width: 100%; margin-left: auto; margin-right: auto; }
-      .cta-row { justify-content: center; flex-wrap: wrap; }
-      .stats-row { justify-content: center; flex-wrap: wrap; }
-      .hero-preview { flex: none; width: 100%; max-width: 400px; }
-    }
+      @media (max-width: 1024px) {
+        .hero {
+          flex-direction: column;
+          text-align: center;
+          padding-top: 120px;
+        }
+        .hero-content {
+          max-width: 100%;
+        }
+        .hero-subtitle {
+          max-width: 100%;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .cta-row {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        .stats-row {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        .hero-preview {
+          flex: none;
+          width: 100%;
+          max-width: 400px;
+        }
+      }
 
-    @media (max-width: 640px) {
-      .hero-title { font-size: 40px; }
-      .hero-subtitle { font-size: 16px; }
-      .stats-row { gap: 20px; }
-      .cta-row { flex-direction: column; align-items: center; }
-    }
-  `]
+      @media (max-width: 640px) {
+        .hero-title {
+          font-size: 40px;
+        }
+        .hero-subtitle {
+          font-size: 16px;
+        }
+        .stats-row {
+          gap: 20px;
+        }
+        .cta-row {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    `,
+  ],
 })
 export class HeroComponent implements AfterViewInit {
   @ViewChildren('anim') animElements!: QueryList<ElementRef>;
@@ -389,11 +443,11 @@ export class HeroComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.animElements.forEach(el => el.nativeElement.style.opacity = '1');
+      this.animElements.forEach((el) => (el.nativeElement.style.opacity = '1'));
       return;
     }
 
-    const elements = this.animElements.toArray().map(el => el.nativeElement);
+    const elements = this.animElements.toArray().map((el) => el.nativeElement);
     gsap.to(elements, {
       opacity: 1,
       y: 0,
@@ -430,7 +484,7 @@ export class HeroComponent implements AfterViewInit {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      let current = start + (target - start) * eased;
+      const current = start + (target - start) * eased;
 
       if (kSuffix === 'K') {
         this.stats[index].animatedValue = Math.round(current / 1000) + 'K' + suffix;

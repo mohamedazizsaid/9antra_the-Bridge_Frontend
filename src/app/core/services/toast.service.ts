@@ -14,7 +14,12 @@ export class ToastService {
   private toastsSubject = new BehaviorSubject<ToastMessage[]>([]);
   public toasts$ = this.toastsSubject.asObservable();
 
-  show(type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string, duration: number = 4000): void {
+  show(
+    type: 'success' | 'error' | 'info' | 'warning',
+    message: string,
+    title?: string,
+    duration = 4000,
+  ): void {
     const id = Math.random().toString(36).substring(2, 9);
     const toast: ToastMessage = { id, type, title, message, duration };
     const current = this.toastsSubject.getValue();
@@ -25,24 +30,24 @@ export class ToastService {
     }, duration);
   }
 
-  success(message: string, title: string = 'Succès'): void {
+  success(message: string, title = 'Succès'): void {
     this.show('success', message, title);
   }
 
-  error(message: string, title: string = 'Erreur'): void {
+  error(message: string, title = 'Erreur'): void {
     this.show('error', message, title);
   }
 
-  info(message: string, title: string = 'Information'): void {
+  info(message: string, title = 'Information'): void {
     this.show('info', message, title);
   }
 
-  warning(message: string, title: string = 'Attention'): void {
+  warning(message: string, title = 'Attention'): void {
     this.show('warning', message, title);
   }
 
   remove(id: string): void {
-    const current = this.toastsSubject.getValue().filter(t => t.id !== id);
+    const current = this.toastsSubject.getValue().filter((t) => t.id !== id);
     this.toastsSubject.next(current);
   }
 }

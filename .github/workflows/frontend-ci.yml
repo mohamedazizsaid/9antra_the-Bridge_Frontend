@@ -1,0 +1,202 @@
+﻿# ──────────────────────────────────────────────────────────────────────────────
+# The Bridge Frontend — CI/CD Pipeline
+# ──────────────────────────────────────────────────────────────────────────────
+# Pipeline stages:
+#  1. quality    → ESLint + Prettier check + unit tests (ChromeHeadless) + Codecov
+#  2. e2e        → Playwright smoke tests against Vercel preview URL
+#  3. lighthouse → Lighthouse CI audit on Vercel preview URL
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: CI — The Bridge Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+# Cancel in-progress runs on the same branch (saves CI minutes)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal permissions
+permissions:
+  contents: read
+  pull-requests: write  # needed to post Lighthouse/coverage comments
+
+env:
+  NODE_VERSION: '20'
+
+# ──────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── Job 1: Quality — Lint + Unit Tests + Coverage ─────────────────────────
+  quality:
+    name: Quality (Lint + Tests + Coverage)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Linting ─────────────────────────────────────────────────────────────
+      - name: ESLint check (ng lint)
+        run: npm run lint
+
+      - name: Prettier format check
+        run: npm run format:check
+
+      # ── Unit Tests (headless Chrome) ─────────────────────────────────────────
+      - name: Run unit tests with coverage (ChromeHeadless)
+        run: npm run test:ci
+        env:
+          CHROME_BIN: /usr/bin/google-chrome-stable
+
+      # ── Upload coverage to Codecov ────────────────────────────────────────────
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/the_bridge_frontend/lcov.info
+          flags: unit-tests
+          name: angular-coverage
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      # ── Production Build ─────────────────────────────────────────────────────
+      - name: Build for production
+        run: npm run build:prod
+        env:
+          PROD_API_URL: ${{ secrets.PROD_API_URL }}
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # ── Job 2: E2E — Playwright smoke tests ───────────────────────────────────
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Resolve target URL (preview for PRs, production for main)
+      - name: Resolve target URL
+        id: resolve-url
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH="${{ github.head_ref }}"
+            SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+            echo "E2E_URL=https://the-bridge-frontend-git-${SLUG}-${{ vars.VERCEL_TEAM_SLUG }}.vercel.app" >> $GITHUB_OUTPUT
+          else
+            echo "E2E_URL=${{ vars.VERCEL_PROD_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Wait for Vercel deployment to be ready
+        run: |
+          TARGET_URL="${{ steps.resolve-url.outputs.E2E_URL }}"
+          echo "Waiting for: $TARGET_URL"
+          for i in $(seq 1 12); do
+            HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$TARGET_URL" || echo "000")
+            echo "Attempt $i — HTTP $HTTP"
+            if [ "$HTTP" = "200" ]; then
+              echo "Deployment is ready!"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::warning::Deployment not ready after 3 minutes — running tests anyway"
+
+      - name: Run Playwright e2e tests
+        run: npm run e2e
+        env:
+          E2E_BASE_URL: ${{ steps.resolve-url.outputs.E2E_URL }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ── Job 3: Lighthouse CI — Performance & Accessibility audit ──────────────
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: Resolve Lighthouse target URL
+        id: lh-url
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH="${{ github.head_ref }}"
+            SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+            echo "LH_URL=https://the-bridge-frontend-git-${SLUG}-${{ vars.VERCEL_TEAM_SLUG }}.vercel.app" >> $GITHUB_OUTPUT
+          else
+            echo "LH_URL=${{ vars.VERCEL_PROD_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --upload.target=temporary-public-storage \
+            --collect.url="${{ steps.lh-url.outputs.LH_URL }}"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

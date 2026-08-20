@@ -1,0 +1,21 @@
+﻿# Prettier ignore — files/folders excluded from formatting
+# Build outputs
+dist/
+.angular/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+
+# Lock files (Prettier can corrupt them)
+package-lock.json
+
+# Auto-generated
+*.min.js
+*.min.css
+
+# Environment files (may contain secrets)
+.env
+.env.*

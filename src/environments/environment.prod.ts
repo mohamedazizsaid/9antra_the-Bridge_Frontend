@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://nineantra-the-bridge-backend.onrender.com/api"
+  apiUrl: process.env['PROD_API_URL'] || 'https://nineantra-the-bridge-backend.onrender.com/api',
 };

@@ -2,7 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
-import { User, Role, LoginRequest, RegisterRequest, AuthResponse, VerifyEmailRequest, OAuthLoginRequest, ForgotPasswordRequest, ResetPasswordRequest, OAuthConfigResponse } from '../models/user.model';
+import {
+  User,
+  Role,
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  VerifyEmailRequest,
+  OAuthLoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  OAuthConfigResponse,
+} from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -17,8 +28,9 @@ export class AuthService {
   constructor(private http: HttpClient) {
     // Restore session from localStorage or sessionStorage
     const storedUser = localStorage.getItem('bridge_user') || sessionStorage.getItem('bridge_user');
-    const storedToken = localStorage.getItem('bridge_token') || sessionStorage.getItem('bridge_token');
-    
+    const storedToken =
+      localStorage.getItem('bridge_token') || sessionStorage.getItem('bridge_token');
+
     if (storedUser && storedToken) {
       this.currentUserSubject.next(JSON.parse(storedUser));
       this.tokenSubject.next(storedToken);
@@ -38,17 +50,17 @@ export class AuthService {
       dateInscription: new Date(res.createdAt),
       age: res.age,
       status: res.status,
-      authProvider: res.authProvider
+      authProvider: res.authProvider,
     };
   }
 
-  login(credentials: LoginRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+  login(credentials: LoginRequest, rememberMe = false): Observable<AuthResponse> {
     const payload = {
       email: credentials.email,
-      password: credentials.password || credentials.motDePasse
+      password: credentials.password || credentials.motDePasse,
     };
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, payload).pipe(
-      tap(res => {
+      tap((res) => {
         if (res.token) {
           const user = this.mapAuthResponseToUser(res);
           const storage = rememberMe ? localStorage : sessionStorage;
@@ -58,7 +70,7 @@ export class AuthService {
           this.tokenSubject.next(res.token);
           this.isAuthenticated$.next(true);
         }
-      })
+      }),
     );
   }
 
@@ -70,9 +82,12 @@ export class AuthService {
       email: data.email,
       password: data.password || data.motDePasse,
       phone: data.telephone,
-      age: data.age
+      age: data.age,
     };
-    formData.append('data', new Blob([JSON.stringify(registerPayload)], { type: 'application/json' }));
+    formData.append(
+      'data',
+      new Blob([JSON.stringify(registerPayload)], { type: 'application/json' }),
+    );
     if (avatarFile) {
       formData.append('avatar', avatarFile);
     }
@@ -105,7 +120,7 @@ export class AuthService {
   oauthLogin(provider: string, accessToken: string): Observable<AuthResponse> {
     const request: OAuthLoginRequest = { provider, accessToken };
     return this.http.post<AuthResponse>(`${this.apiUrl}/oauth/login`, request).pipe(
-      tap(res => {
+      tap((res) => {
         if (res.token) {
           const user = this.mapAuthResponseToUser(res);
           // OAuth usually keeps user logged in via localStorage
@@ -115,7 +130,7 @@ export class AuthService {
           this.tokenSubject.next(res.token);
           this.isAuthenticated$.next(true);
         }
-      })
+      }),
     );
   }
 
@@ -123,14 +138,14 @@ export class AuthService {
     // Call server logout just in case, but always clean up locally
     this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
       next: () => {},
-      error: () => {}
+      error: () => {},
     });
-    
+
     localStorage.removeItem('bridge_user');
     localStorage.removeItem('bridge_token');
     sessionStorage.removeItem('bridge_user');
     sessionStorage.removeItem('bridge_token');
-    
+
     this.currentUserSubject.next(null);
     this.tokenSubject.next(null);
     this.isAuthenticated$.next(false);
@@ -156,10 +171,12 @@ export class AuthService {
 
   getRedirectUrl(role: Role): string {
     switch (role) {
-      case 'ADMIN': return '/dashboard/admin';
-      case 'FORMATEUR': return '/dashboard/formateur';
-      case 'STAGIAIRE': return '/dashboard/stagiaire';
+      case 'ADMIN':
+        return '/dashboard/admin';
+      case 'FORMATEUR':
+        return '/dashboard/formateur';
+      case 'STAGIAIRE':
+        return '/dashboard/stagiaire';
     }
   }
 }
-
