@@ -199,7 +199,7 @@ import { RouterModule } from '@angular/router';
         font-family: 'Inter', sans-serif;
         font-weight: 500;
         font-size: 14px;
-        color: #8888bb;
+        color: #9999cc;
         text-decoration: none;
         position: relative;
         padding: 4px 0;

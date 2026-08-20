@@ -7,22 +7,6 @@ import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-pas
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { DashboardLayoutComponent } from './pages/dashboard/layout/dashboard-layout.component';
-import { AdminOverviewComponent } from './pages/dashboard/admin/overview/admin-overview.component';
-import { StagiaireOverviewComponent } from './pages/dashboard/stagiaire/overview/stagiaire-overview.component';
-import { FormateurOverviewComponent } from './pages/dashboard/formateur/overview/formateur-overview.component';
-import { EvaluationHistoryComponent } from './pages/dashboard/formateur/overview/evaluation-history.component';
-import { FormateurSeancesComponent } from './pages/dashboard/formateur/overview/formateur-seances.component';
-import { FormateurStagiairesComponent } from './pages/dashboard/formateur/overview/formateur-stagiaires.component';
-import { FormationsListComponent } from './pages/dashboard/formations/formations-list.component';
-import { FormationWizardComponent } from './pages/dashboard/formations/formation-wizard.component';
-import { FormationDetailComponent } from './pages/dashboard/formations/formation-detail.component';
-import { SettingsComponent } from './pages/dashboard/settings/settings.component';
-import { AdminLogsComponent } from './pages/dashboard/admin/logs/admin-logs.component';
-import { AdminStatsComponent } from './pages/dashboard/admin/stats/admin-stats.component';
-import { AdminUsersComponent } from './pages/dashboard/admin/users/admin-users.component';
-import { AdminFormateursComponent } from './pages/dashboard/admin/formateurs/admin-formateurs.component';
-import { AdminBroadcastComponent } from './pages/dashboard/admin/broadcast/admin-broadcast.component';
-import { StagiaireHistoriqueComponent } from './pages/dashboard/stagiaire/historique/stagiaire-historique.component';
 import { PaymentCallbackComponent } from './pages/payment-callback/payment-callback.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
@@ -33,7 +17,6 @@ const routes: Routes = [
   { path: 'payment-success', component: PaymentCallbackComponent },
   { path: 'payment-fail', component: PaymentCallbackComponent },
   { path: 'auth/login', component: LoginComponent },
-
   { path: 'auth/forgot-password', component: ForgotPasswordComponent },
   { path: 'auth/reset-password', component: ResetPasswordComponent },
   { path: 'auth/register', component: RegisterComponent },
@@ -42,162 +25,242 @@ const routes: Routes = [
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: 'settings', component: SettingsComponent },
+      // ─── Settings (lazy) ────────────────────────────────────────────────────
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./pages/dashboard/settings/settings.component').then((m) => m.SettingsComponent),
+      },
 
-      // ─── Stagiaire ───────────────────────────────────────────────────────────
+      // ─── Stagiaire (lazy) ───────────────────────────────────────────────────
       {
         path: 'stagiaire',
-        component: StagiaireOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
+            (m) => m.StagiaireOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/formations',
-        component: FormationsListComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formations-list.component').then(
+            (m) => m.FormationsListComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/formations/:id',
-        component: FormationDetailComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formation-detail.component').then(
+            (m) => m.FormationDetailComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/historique',
-        component: StagiaireHistoriqueComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/historique/stagiaire-historique.component').then(
+            (m) => m.StagiaireHistoriqueComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/certificats',
-        component: StagiaireOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
+            (m) => m.StagiaireOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/paiements',
-        component: StagiaireOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
+            (m) => m.StagiaireOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/presence',
-        component: StagiaireOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
+            (m) => m.StagiaireOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
       {
         path: 'stagiaire/notifications',
-        component: StagiaireOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
+            (m) => m.StagiaireOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
       },
 
-      // ─── Formateur ───────────────────────────────────────────────────────────
+      // ─── Formateur (lazy) ───────────────────────────────────────────────────
       {
         path: 'formateur',
-        component: FormateurOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formateur/overview/formateur-overview.component').then(
+            (m) => m.FormateurOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/formations',
-        component: FormationsListComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formations-list.component').then(
+            (m) => m.FormationsListComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/formations/:id',
-        component: FormationDetailComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formation-detail.component').then(
+            (m) => m.FormationDetailComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/evaluations',
-        component: EvaluationHistoryComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formateur/overview/evaluation-history.component').then(
+            (m) => m.EvaluationHistoryComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/seances',
-        component: FormateurSeancesComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formateur/overview/formateur-seances.component').then(
+            (m) => m.FormateurSeancesComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
       {
         path: 'formateur/stagiaires',
-        component: FormateurStagiairesComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formateur/overview/formateur-stagiaires.component').then(
+            (m) => m.FormateurStagiairesComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['FORMATEUR'] },
       },
 
-      // ─── Admin ───────────────────────────────────────────────────────────────
+      // ─── Admin (lazy) ────────────────────────────────────────────────────────
       {
         path: 'admin',
-        component: AdminOverviewComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/overview/admin-overview.component').then(
+            (m) => m.AdminOverviewComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formations',
-        component: FormationsListComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formations-list.component').then(
+            (m) => m.FormationsListComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formations/:id',
-        component: FormationDetailComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formation-detail.component').then(
+            (m) => m.FormationDetailComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/users',
-        component: AdminUsersComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/users/admin-users.component').then(
+            (m) => m.AdminUsersComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/formateurs',
-        component: AdminFormateursComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/formateurs/admin-formateurs.component').then(
+            (m) => m.AdminFormateursComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/stats',
-        component: AdminStatsComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/stats/admin-stats.component').then(
+            (m) => m.AdminStatsComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/broadcast',
-        component: AdminBroadcastComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/broadcast/admin-broadcast.component').then(
+            (m) => m.AdminBroadcastComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
       {
         path: 'admin/logs',
-        component: AdminLogsComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/admin/logs/admin-logs.component').then(
+            (m) => m.AdminLogsComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },
       },
 
-      // ─── Shared Formations ───────────────────────────────────────────────────
+      // ─── Shared Formations (lazy) ────────────────────────────────────────────
       {
         path: 'formations',
-        component: FormationsListComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formations-list.component').then(
+            (m) => m.FormationsListComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'FORMATEUR'] },
       },
       {
         path: 'formations/new',
-        component: FormationWizardComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formation-wizard.component').then(
+            (m) => m.FormationWizardComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'FORMATEUR'] },
       },
       {
         path: 'formations/:id',
-        component: FormationDetailComponent,
+        loadComponent: () =>
+          import('./pages/dashboard/formations/formation-detail.component').then(
+            (m) => m.FormationDetailComponent,
+          ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'FORMATEUR'] },
       },

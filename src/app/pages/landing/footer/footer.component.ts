@@ -192,7 +192,7 @@ import { RouterModule } from '@angular/router';
 
       .footer-info {
         font-size: 14px;
-        color: #8888bb;
+        color: var(--bridge-text-muted);
         margin-bottom: 10px;
       }
 

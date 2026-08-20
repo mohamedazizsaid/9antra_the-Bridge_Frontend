@@ -4,8 +4,8 @@ import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/rout
 import { trigger, transition, style, animate, query } from '@angular/animations';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { ToastService, ToastMessage } from '../../../core/services/toast.service';
-import { User, Role } from '../../../core/models/user.model';
+import { ToastService } from '../../../core/services/toast.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -140,7 +140,9 @@ import { User, Role } from '../../../core/models/user.model';
                 *ngIf="user?.avatar"
                 [src]="user!.avatar"
                 class="w-full h-full rounded-full object-cover"
-                alt=""
+                alt="Avatar de l'utilisateur"
+                width="36"
+                height="36"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
               />
               <span *ngIf="!user?.avatar" class="flex items-center justify-center w-full h-full">{{
@@ -148,9 +150,9 @@ import { User, Role } from '../../../core/models/user.model';
               }}</span>
             </div>
             <div class="flex-1 min-w-0" *ngIf="!isSidebarCollapsed">
-              <h5 class="text-xs font-semibold text-white truncate">
+              <p class="text-xs font-semibold text-white truncate">
                 {{ user?.prenom }} {{ user?.nom }}
-              </h5>
+              </p>
               <span
                 class="text-[9px] bg-[rgba(245,166,35,0.15)] text-[var(--bridge-gold)] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider inline-block mt-0.5"
                 >{{ user?.role }}</span
@@ -162,9 +164,12 @@ import { User, Role } from '../../../core/models/user.model';
         <!-- Collapse Toggle -->
         <button
           (click)="isSidebarCollapsed = !isSidebarCollapsed"
+          [attr.aria-label]="
+            isSidebarCollapsed ? 'Déplier la barre latérale' : 'Réduire la barre latérale'
+          "
           class="absolute -right-3 top-20 bg-[#10102A] border border-[var(--bridge-border)] text-white hover:text-[var(--bridge-gold)] rounded-full p-1 hidden md:block z-10 transition-colors"
         >
-          <span class="text-xs">{{ isSidebarCollapsed ? '→' : '←' }}</span>
+          <span class="text-xs" aria-hidden="true">{{ isSidebarCollapsed ? '→' : '←' }}</span>
         </button>
       </aside>
 
@@ -185,6 +190,7 @@ import { User, Role } from '../../../core/models/user.model';
             <button
               id="notifications-bell"
               (click)="toggleNotifications($event)"
+              aria-label="Notifications"
               class="relative p-2 text-white/80 hover:text-white rounded-lg hover:bg-white/[0.06] transition-all"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,6 +233,7 @@ import { User, Role } from '../../../core/models/user.model';
             <!-- Logout -->
             <button
               (click)="logout()"
+              aria-label="Se déconnecter"
               class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-rose-500/10 text-white/70 hover:text-rose-400 border border-white/10 hover:border-rose-500/20 rounded-lg text-xs font-semibold transition-all"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,6 +276,7 @@ import { User, Role } from '../../../core/models/user.model';
               </button>
               <button
                 (click)="closeNotifications()"
+                aria-label="Fermer les notifications"
                 class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

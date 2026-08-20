@@ -1,7 +1,6 @@
 import { Component, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import gsap from 'gsap';
 
 @Component({
   selector: 'app-hero',
@@ -223,7 +222,7 @@ import gsap from 'gsap';
 
       .stat-label {
         font-size: 13px;
-        color: #8888bb;
+        color: #9999cc;
         margin-top: 4px;
       }
 
@@ -281,7 +280,7 @@ import gsap from 'gsap';
       .preview-title {
         font-family: 'Space Mono', monospace;
         font-size: 11px;
-        color: #8888bb;
+        color: #9999cc;
       }
 
       .preview-body {
@@ -310,7 +309,7 @@ import gsap from 'gsap';
 
       .mini-stat-label {
         font-size: 10px;
-        color: #8888bb;
+        color: #9999cc;
         margin-top: 2px;
       }
 
@@ -354,7 +353,7 @@ import gsap from 'gsap';
         align-items: center;
         gap: 8px;
         font-size: 12px;
-        color: #8888bb;
+        color: #9999cc;
       }
 
       .pli-dot {
@@ -447,26 +446,28 @@ export class HeroComponent implements AfterViewInit {
       return;
     }
 
-    const elements = this.animElements.toArray().map((el) => el.nativeElement);
-    gsap.to(elements, {
-      opacity: 1,
-      y: 0,
-      stagger: 0.15,
-      duration: 0.8,
-      ease: 'power2.out',
-      delay: 0.3,
-    });
+    import('gsap').then(({ default: gsap }) => {
+      const elements = this.animElements.toArray().map((el) => el.nativeElement);
+      gsap.to(elements, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: 0.3,
+      });
 
-    gsap.from(elements, {
-      y: 30,
-      stagger: 0.15,
-      duration: 0.8,
-      ease: 'power2.out',
-      delay: 0.3,
-    });
+      gsap.from(elements, {
+        y: 30,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: 0.3,
+      });
 
-    // Animate stat counters
-    setTimeout(() => this.animateCounters(), 1200);
+      // Animate stat counters
+      setTimeout(() => this.animateCounters(), 1200);
+    });
   }
 
   private animateCounters(): void {

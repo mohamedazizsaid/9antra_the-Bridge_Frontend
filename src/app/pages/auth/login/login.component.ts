@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -90,7 +91,7 @@ declare global {
         >
           <!-- Card header -->
           <div class="form-item mb-8">
-            <h3 class="font-syne font-bold text-2xl md:text-3xl">Connexion</h3>
+            <h2 class="font-syne font-bold text-2xl md:text-3xl">Connexion</h2>
             <p class="text-xs text-[var(--bridge-text-muted)] mt-2">
               Vous n'avez pas de compte ?
               <a
@@ -104,9 +105,10 @@ declare global {
           <!-- Alert -->
           <div
             *ngIf="errorMessage"
+            role="alert"
             class="form-item mb-6 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2"
           >
-            <span>⚠️</span>
+            <span aria-hidden="true">⚠️</span>
             <span>{{ errorMessage }}</span>
           </div>
 
@@ -115,22 +117,31 @@ declare global {
             <!-- Email -->
             <div class="form-item">
               <label
+                for="login-email"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Adresse Email</label
               >
               <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm"
+                <span
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm"
+                  aria-hidden="true"
                   >📧</span
                 >
                 <input
+                  id="login-email"
                   type="email"
                   formControlName="email"
                   placeholder="exemple@thebridge.tn"
+                  autocomplete="email"
                   class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none transition-all"
                   [ngClass]="{ 'border-rose-500/50': submitted && f['email'].errors }"
                 />
               </div>
-              <div *ngIf="submitted && f['email'].errors" class="text-xs text-rose-400 mt-1">
+              <div
+                *ngIf="submitted && f['email'].errors"
+                class="text-xs text-rose-400 mt-1"
+                role="alert"
+              >
                 <span *ngIf="f['email'].errors['required']">L'email est requis</span>
                 <span *ngIf="f['email'].errors['email']">Veuillez entrer un email valide</span>
               </div>
@@ -140,6 +151,7 @@ declare global {
             <div class="form-item">
               <div class="flex justify-between items-center mb-2">
                 <label
+                  for="login-password"
                   class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
                   >Mot de passe</label
                 >
@@ -150,19 +162,26 @@ declare global {
                 >
               </div>
               <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm"
+                <span
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm"
+                  aria-hidden="true"
                   >🔒</span
                 >
                 <input
+                  id="login-password"
                   [type]="showPassword ? 'text' : 'password'"
                   formControlName="password"
                   placeholder="••••••••"
+                  autocomplete="current-password"
                   class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 pl-12 pr-12 text-sm text-white focus:outline-none transition-all"
                   [ngClass]="{ 'border-rose-500/50': submitted && f['password'].errors }"
                 />
                 <button
                   type="button"
                   (click)="showPassword = !showPassword"
+                  [attr.aria-label]="
+                    showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  "
                   class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
                 >
                   <svg
@@ -172,6 +191,7 @@ declare global {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     stroke-width="2"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -191,6 +211,7 @@ declare global {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     stroke-width="2"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -200,7 +221,11 @@ declare global {
                   </svg>
                 </button>
               </div>
-              <div *ngIf="submitted && f['password'].errors" class="text-xs text-rose-400 mt-1">
+              <div
+                *ngIf="submitted && f['password'].errors"
+                class="text-xs text-rose-400 mt-1"
+                role="alert"
+              >
                 <span *ngIf="f['password'].errors['required']">Le mot de passe est requis</span>
               </div>
             </div>
@@ -208,8 +233,16 @@ declare global {
             <!-- Remember me Custom Toggle -->
             <div class="form-item flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" formControlName="rememberMe" class="sr-only peer" />
+                <label
+                  class="relative inline-flex items-center cursor-pointer"
+                  for="login-remember"
+                >
+                  <input
+                    id="login-remember"
+                    type="checkbox"
+                    formControlName="rememberMe"
+                    class="sr-only peer"
+                  />
                   <div
                     class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--bridge-crimson)]"
                   ></div>
@@ -226,9 +259,12 @@ declare global {
               [disabled]="loading"
               class="form-item w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer relative overflow-hidden group"
             >
-              <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+              <span *ngIf="loading" class="animate-spin text-sm" aria-hidden="true">⌛</span>
               <span>{{ loading ? 'Connexion en cours...' : 'Se Connecter' }}</span>
-              <span *ngIf="!loading" class="group-hover:translate-x-1 transition-transform"
+              <span
+                *ngIf="!loading"
+                class="group-hover:translate-x-1 transition-transform"
+                aria-hidden="true"
                 >&rarr;</span
               >
             </button>
@@ -407,9 +443,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private title: Title,
+    private meta: Meta,
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('Connexion | The Bridge — 9antra');
+    this.meta.updateTag({
+      name: 'description',
+      content:
+        'Connectez-vous à votre espace The Bridge (9antra) pour accéder à vos formations et certifications.',
+    });
     const savedEmail = localStorage.getItem('bridge_remember_email');
     this.loginForm = this.formBuilder.group({
       email: [savedEmail || '', [Validators.required, Validators.email]],

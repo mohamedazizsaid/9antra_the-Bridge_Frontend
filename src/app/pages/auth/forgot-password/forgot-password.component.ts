@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -74,9 +75,9 @@ import { AuthService } from '../../../core/services/auth.service';
             <p class="text-[11px] uppercase tracking-[0.35em] text-[var(--bridge-gold)] font-bold">
               Mot de passe oublié
             </p>
-            <h3 class="font-syne font-bold text-2xl md:text-3xl mt-3">
+            <h2 class="font-syne font-bold text-2xl md:text-3xl mt-3">
               Recevoir un code de réinitialisation
-            </h3>
+            </h2>
             <p class="text-xs text-[var(--bridge-text-muted)] mt-2">
               Saisissez votre adresse email et nous vous enverrons un code OTP.
             </p>
@@ -92,18 +93,22 @@ import { AuthService } from '../../../core/services/auth.service';
           <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()" class="space-y-5" *ngIf="!message">
             <div>
               <label
+                for="forgot-email"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Adresse Email</label
               >
               <input
+                id="forgot-email"
                 type="email"
                 formControlName="email"
                 placeholder="exemple@thebridge.tn"
+                autocomplete="email"
                 class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all"
               />
               <div
                 *ngIf="submitted && forgotForm.get('email')?.errors"
                 class="text-xs text-rose-400 mt-1"
+                role="alert"
               >
                 Veuillez entrer un email valide
               </div>
@@ -114,7 +119,7 @@ import { AuthService } from '../../../core/services/auth.service';
               [disabled]="loading"
               class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+              <span *ngIf="loading" class="animate-spin text-sm" aria-hidden="true">⌛</span>
               <span>{{ loading ? 'Envoi en cours...' : 'Envoyer le code' }}</span>
             </button>
 
@@ -179,6 +184,8 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private title: Title,
+    private meta: Meta,
   ) {
     this.forgotForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -186,6 +193,11 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle('Mot de passe oublié | The Bridge — 9antra');
+    this.meta.updateTag({
+      name: 'description',
+      content: "Réinitialisez votre mot de passe pour retrouver l'accès à votre compte The Bridge.",
+    });
     this.startTypewriter();
   }
 

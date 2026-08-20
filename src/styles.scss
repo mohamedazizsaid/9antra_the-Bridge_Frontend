@@ -19,8 +19,8 @@
   --bridge-card-hover: #1f1f48;
   --bridge-border: #2a2a5a;
   --bridge-text: #f0f0ff;
-  --bridge-text-muted: #8888bb;
-  --bridge-text-sub: #5555aa;
+  --bridge-text-muted: #9999cc;
+  --bridge-text-sub: #7b7bbb;
 
   /* Gradients */
   --grad-brand: linear-gradient(135deg, #c62761 0%, #f5a623 100%);
@@ -747,7 +747,7 @@ select,
 }
 
 .input-light::placeholder {
-  color: #8888bb;
+  color: #7c8493;
 }
 .input-light:focus {
   border-color: #c62761;

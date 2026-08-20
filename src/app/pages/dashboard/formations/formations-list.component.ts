@@ -75,16 +75,22 @@ import { User } from '../../../core/models/user.model';
       <!-- Search + Filter Bar -->
       <div *ngIf="!loading" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm">🔍</span>
+          <span
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm"
+            aria-hidden="true"
+            >🔍</span
+          >
           <input
             [(ngModel)]="searchQuery"
             type="text"
             placeholder="Rechercher une formation..."
+            aria-label="Rechercher une formation par titre ou mot-clé"
             class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
           />
         </div>
         <select
           [(ngModel)]="filterCategory"
+          aria-label="Filtrer par catégorie"
           class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
         >
           <option value="" class="bg-[#10102A]">Toutes les catégories</option>

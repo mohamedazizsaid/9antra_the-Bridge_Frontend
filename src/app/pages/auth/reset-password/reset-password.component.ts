@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -74,9 +75,9 @@ import { AuthService } from '../../../core/services/auth.service';
             <p class="text-[11px] uppercase tracking-[0.35em] text-[var(--bridge-gold)] font-bold">
               Réinitialisation
             </p>
-            <h3 class="font-syne font-bold text-2xl md:text-3xl mt-3">
+            <h2 class="font-syne font-bold text-2xl md:text-3xl mt-3">
               Définir un nouveau mot de passe
-            </h3>
+            </h2>
             <p class="text-xs text-[var(--bridge-text-muted)] mt-2">
               Saisissez le code reçu par email.
             </p>
@@ -92,55 +93,68 @@ import { AuthService } from '../../../core/services/auth.service';
           <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="space-y-5" *ngIf="!message">
             <div>
               <label
+                for="reset-email"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Adresse Email</label
               >
               <input
+                id="reset-email"
                 type="email"
                 formControlName="email"
+                autocomplete="email"
                 class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all"
               />
             </div>
 
             <div>
               <label
+                for="reset-code"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Code OTP</label
               >
               <input
+                id="reset-code"
                 type="text"
                 formControlName="code"
                 maxlength="6"
                 inputmode="numeric"
+                autocomplete="one-time-code"
                 class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all tracking-[0.3em] text-center"
               />
             </div>
 
             <div>
               <label
+                for="reset-new-password"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Nouveau mot de passe</label
               >
               <input
+                id="reset-new-password"
                 type="password"
                 formControlName="newPassword"
+                autocomplete="new-password"
                 class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all"
               />
             </div>
 
             <div>
               <label
+                for="reset-confirm-password"
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Confirmer le mot de passe</label
               >
               <input
+                id="reset-confirm-password"
                 type="password"
                 formControlName="confirmPassword"
+                autocomplete="new-password"
                 class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all"
               />
               <p
                 *ngIf="submitted && resetForm.errors?.['mismatch']"
                 class="text-xs text-rose-400 mt-1"
+                role="alert"
               >
                 Les mots de passe ne correspondent pas
               </p>
@@ -151,7 +165,7 @@ import { AuthService } from '../../../core/services/auth.service';
               [disabled]="loading"
               class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+              <span *ngIf="loading" class="animate-spin text-sm" aria-hidden="true">⌛</span>
               <span>{{ loading ? 'Validation...' : 'Réinitialiser le mot de passe' }}</span>
             </button>
 
@@ -201,6 +215,8 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private title: Title,
+    private meta: Meta,
   ) {
     this.resetForm = this.fb.group(
       {
@@ -214,6 +230,11 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.title.setTitle('Nouveau mot de passe | The Bridge — 9antra');
+    this.meta.updateTag({
+      name: 'description',
+      content: 'Définissez votre nouveau mot de passe pour sécuriser votre compte The Bridge.',
+    });
     const email = this.route.snapshot.queryParamMap.get('email');
     if (email) {
       this.resetForm.patchValue({ email });

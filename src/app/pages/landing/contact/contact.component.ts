@@ -17,14 +17,18 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
           <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
             <div class="form-group">
+              <label for="contact-name" class="sr-only">Votre nom complet</label>
               <input
                 formControlName="nom"
                 class="input-dark"
                 placeholder="Votre nom complet"
                 id="contact-name"
+                autocomplete="name"
+                aria-label="Votre nom complet"
               />
               <span
                 class="error-text"
+                role="alert"
                 *ngIf="contactForm.get('nom')?.touched && contactForm.get('nom')?.invalid"
               >
                 Veuillez entrer votre nom
@@ -32,15 +36,19 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             </div>
 
             <div class="form-group">
+              <label for="contact-email" class="sr-only">Adresse email</label>
               <input
                 formControlName="email"
                 class="input-dark"
                 placeholder="Adresse email"
                 type="email"
                 id="contact-email"
+                autocomplete="email"
+                aria-label="Adresse email"
               />
               <span
                 class="error-text"
+                role="alert"
                 *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.invalid"
               >
                 Veuillez entrer un email valide
@@ -48,7 +56,13 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             </div>
 
             <div class="form-group">
-              <select formControlName="sujet" class="input-dark" id="contact-subject">
+              <label for="contact-subject" class="sr-only">Sujet</label>
+              <select
+                formControlName="sujet"
+                class="input-dark"
+                id="contact-subject"
+                aria-label="Sujet du message"
+              >
                 <option value="" disabled>Sujet</option>
                 <option value="formation">Formation</option>
                 <option value="stage">Stage</option>
@@ -58,15 +72,18 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             </div>
 
             <div class="form-group">
+              <label for="contact-message" class="sr-only">Message</label>
               <textarea
                 formControlName="message"
                 class="input-dark textarea"
                 placeholder="Message"
                 rows="4"
                 id="contact-message"
+                aria-label="Votre message"
               ></textarea>
               <span
                 class="error-text"
+                role="alert"
                 *ngIf="contactForm.get('message')?.touched && contactForm.get('message')?.invalid"
               >
                 Veuillez entrer votre message

@@ -25,11 +25,13 @@ import { AdminService } from '../../../../core/services/admin.service';
           [(ngModel)]="searchQ"
           (ngModelChange)="applyFilter()"
           placeholder="Rechercher par nom, email..."
+          aria-label="Rechercher un utilisateur par nom ou email"
           class="bridge-input flex-1 min-w-48 text-sm"
         />
         <select
           [(ngModel)]="filterRole"
           (ngModelChange)="applyFilter()"
+          aria-label="Filtrer par rôle"
           class="bridge-input text-sm"
         >
           <option value="">Tous les rôles</option>
@@ -40,6 +42,7 @@ import { AdminService } from '../../../../core/services/admin.service';
         <select
           [(ngModel)]="filterStatus"
           (ngModelChange)="applyFilter()"
+          aria-label="Filtrer par statut"
           class="bridge-input text-sm"
         >
           <option value="">Tous les statuts</option>

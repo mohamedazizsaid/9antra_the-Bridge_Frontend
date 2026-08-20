@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { AnimatedBgComponent } from '../../shared/components/animated-bg/animated-bg.component';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -44,4 +45,18 @@ import { FooterComponent } from './footer/footer.component';
     `,
   ],
 })
-export class LandingComponent {}
+export class LandingComponent implements OnInit {
+  constructor(
+    private title: Title,
+    private meta: Meta,
+  ) {}
+
+  ngOnInit(): void {
+    this.title.setTitle('The Bridge | Plateforme de Formation & Certification Blockchain');
+    this.meta.updateTag({
+      name: 'description',
+      content:
+        '9antra | The Bridge automatise le parcours formation : inscription, paiement, progression pédagogique et certification blockchain infalsifiable.',
+    });
+  }
+}

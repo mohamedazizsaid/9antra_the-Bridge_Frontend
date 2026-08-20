@@ -1,8 +1,7 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AnimatedBgComponent } from '../../shared/components/animated-bg/animated-bg.component';
-import gsap from 'gsap';
 
 @Component({
   selector: 'app-splash',
@@ -150,7 +149,7 @@ import gsap from 'gsap';
         margin-top: 24px;
         font-family: 'Inter', sans-serif;
         font-size: 16px;
-        color: #8888bb;
+        color: #9999cc;
         opacity: 0;
         text-align: center;
         max-width: 500px;
@@ -231,112 +230,114 @@ export class SplashComponent implements AfterViewInit {
       return;
     }
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.to('.splash-container', {
-          opacity: 0,
+    import('gsap').then(({ default: gsap }) => {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.to('.splash-container', {
+            opacity: 0,
+            duration: 0.4,
+            onComplete: () => this.router.navigate(['/home']),
+          });
+        },
+      });
+
+      // t=0.3s — Logo SVG draws in
+      tl.to(
+        '.link-upper, .link-upper-fill',
+        {
+          strokeDashoffset: 0,
+          duration: 0.8,
+          ease: 'power2.inOut',
+        },
+        0.3,
+      );
+
+      tl.to(
+        '.link-lower, .link-lower-fill',
+        {
+          strokeDashoffset: 0,
+          duration: 0.8,
+          ease: 'power2.inOut',
+        },
+        0.3,
+      );
+
+      // t=0.8s — "The" slides in from left
+      tl.to(
+        '.title-the',
+        {
+          opacity: 1,
+          x: 0,
           duration: 0.4,
-          onComplete: () => this.router.navigate(['/home']),
-        });
-      },
+          ease: 'power2.out',
+        },
+        0.8,
+      );
+
+      tl.fromTo('.title-the', { x: -30 }, { x: 0, duration: 0.4 }, 0.8);
+
+      // t=1.0s — "Bridge" slides in from right
+      tl.to(
+        '.title-bridge',
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+        },
+        1.0,
+      );
+
+      tl.fromTo('.title-bridge', { x: 30 }, { x: 0, duration: 0.4 }, 1.0);
+
+      // t=1.4s — "9antra" fades in with letter-spacing
+      tl.to(
+        '.subtitle-9antra',
+        {
+          opacity: 1,
+          letterSpacing: '2px',
+          duration: 0.5,
+          ease: 'power2.out',
+        },
+        1.4,
+      );
+
+      // t=1.8s — Tagline typewriter
+      tl.to('.tagline', { opacity: 1, duration: 0.2 }, 1.8);
+      tl.call(() => this.typeTagline(), [], 1.8);
+
+      // t=2.4s — Glow pulse
+      tl.to(
+        '.glow-pulse',
+        {
+          opacity: 1,
+          scale: 3,
+          duration: 0.6,
+          ease: 'power2.out',
+        },
+        2.4,
+      );
+
+      tl.to(
+        '.glow-pulse',
+        {
+          opacity: 0,
+          duration: 0.3,
+        },
+        2.7,
+      );
+
+      // t=2.8s — Progress bar
+      tl.to(
+        '.progress-bar',
+        {
+          width: '100%',
+          duration: 0.4,
+          ease: 'power2.inOut',
+        },
+        2.8,
+      );
     });
-
-    // t=0.3s — Logo SVG draws in
-    tl.to(
-      '.link-upper, .link-upper-fill',
-      {
-        strokeDashoffset: 0,
-        duration: 0.8,
-        ease: 'power2.inOut',
-      },
-      0.3,
-    );
-
-    tl.to(
-      '.link-lower, .link-lower-fill',
-      {
-        strokeDashoffset: 0,
-        duration: 0.8,
-        ease: 'power2.inOut',
-      },
-      0.3,
-    );
-
-    // t=0.8s — "The" slides in from left
-    tl.to(
-      '.title-the',
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-      },
-      0.8,
-    );
-
-    tl.fromTo('.title-the', { x: -30 }, { x: 0, duration: 0.4 }, 0.8);
-
-    // t=1.0s — "Bridge" slides in from right
-    tl.to(
-      '.title-bridge',
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-      },
-      1.0,
-    );
-
-    tl.fromTo('.title-bridge', { x: 30 }, { x: 0, duration: 0.4 }, 1.0);
-
-    // t=1.4s — "9antra" fades in with letter-spacing
-    tl.to(
-      '.subtitle-9antra',
-      {
-        opacity: 1,
-        letterSpacing: '2px',
-        duration: 0.5,
-        ease: 'power2.out',
-      },
-      1.4,
-    );
-
-    // t=1.8s — Tagline typewriter
-    tl.to('.tagline', { opacity: 1, duration: 0.2 }, 1.8);
-    tl.call(() => this.typeTagline(), [], 1.8);
-
-    // t=2.4s — Glow pulse
-    tl.to(
-      '.glow-pulse',
-      {
-        opacity: 1,
-        scale: 3,
-        duration: 0.6,
-        ease: 'power2.out',
-      },
-      2.4,
-    );
-
-    tl.to(
-      '.glow-pulse',
-      {
-        opacity: 0,
-        duration: 0.3,
-      },
-      2.7,
-    );
-
-    // t=2.8s — Progress bar
-    tl.to(
-      '.progress-bar',
-      {
-        width: '100%',
-        duration: 0.4,
-        ease: 'power2.inOut',
-      },
-      2.8,
-    );
   }
 
   private typeTagline(): void {

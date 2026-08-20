@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -286,6 +287,9 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     *ngIf="avatarPreview"
                     [src]="avatarPreview"
                     class="w-16 h-16 rounded-full object-cover border border-white/20"
+                    alt="Aperçu de la photo de profil"
+                    width="64"
+                    height="64"
                   />
                   <div
                     class="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs transition-opacity"
@@ -843,9 +847,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private title: Title,
+    private meta: Meta,
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('Inscription | The Bridge — 9antra');
+    this.meta.updateTag({
+      name: 'description',
+      content:
+        'Créez votre compte sur The Bridge (9antra) et démarrez votre parcours de formation certifié blockchain.',
+    });
     this.registerForm = this.formBuilder.group(
       {
         prenom: ['', Validators.required],

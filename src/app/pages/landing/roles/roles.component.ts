@@ -88,7 +88,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       .section-subtitle {
         font-family: 'Inter', sans-serif;
         font-size: 18px;
-        color: #8888bb;
+        color: #9999cc;
       }
 
       .role-tabs {
@@ -103,7 +103,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
         font-family: 'Syne', sans-serif;
         font-weight: 600;
         font-size: 15px;
-        color: #8888bb;
+        color: #9999cc;
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
@@ -154,7 +154,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
       .role-card-desc {
         font-size: 15px;
-        color: #8888bb;
+        color: #9999cc;
         line-height: 1.7;
         margin-bottom: 28px;
         position: relative;

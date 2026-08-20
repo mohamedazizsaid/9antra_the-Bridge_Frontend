@@ -64,7 +64,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       .section-subtitle {
         font-family: 'Inter', sans-serif;
         font-size: 18px;
-        color: #8888bb;
+        color: #9999cc;
       }
 
       .features-grid {
@@ -123,7 +123,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       .feature-desc {
         font-family: 'Inter', sans-serif;
         font-size: 14px;
-        color: #8888bb;
+        color: #9999cc;
         line-height: 1.7;
       }
 
