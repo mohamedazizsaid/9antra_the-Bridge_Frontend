@@ -1081,7 +1081,10 @@ export class DashboardLayoutComponent implements OnInit {
     if (url.includes('/dashboard/stagiaire/certificats')) return 'Mes Certificats Blockchain';
     if (url.includes('/dashboard/stagiaire/paiements')) return 'Mes Paiements & Échéancier';
     if (url.includes('/dashboard/stagiaire/formations')) return 'Mes Formations';
-    if (url.includes('/dashboard/stagiaire/historique') || url.includes('/dashboard/stagiaire/presence'))
+    if (
+      url.includes('/dashboard/stagiaire/historique') ||
+      url.includes('/dashboard/stagiaire/presence')
+    )
       return 'Historique & Présences';
     if (url === '/dashboard/stagiaire') return 'Tableau de bord Stagiaire';
 

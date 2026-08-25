@@ -20,7 +20,15 @@ import { User } from '../../../core/models/user.model';
           <div
             class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20 border border-[var(--bridge-gold)]/30 flex items-center justify-center text-[var(--bridge-gold)] shadow-lg"
           >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
               <path d="M6 6h10" />
               <path d="M6 10h10" />
@@ -30,13 +38,13 @@ import { User } from '../../../core/models/user.model';
             <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
               {{ isAdmin ? 'Gestion des Formations' : 'Mes Programmes de Formation' }}
             </h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
-  {{
-    isAdmin
-      ? 'Supervision des cursus, phases pédagogiques et inscriptions'
-      : "Consultez le catalogue et l'avancement de vos programmes de formation"
-  }}
-</p>
+            <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
+              {{
+                isAdmin
+                  ? 'Supervision des cursus, phases pédagogiques et inscriptions'
+                  : "Consultez le catalogue et l'avancement de vos programmes de formation"
+              }}
+            </p>
           </div>
         </div>
 
@@ -86,8 +94,19 @@ import { User } from '../../../core/models/user.model';
       <div *ngIf="!loading" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]"
-                ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg></span
-              >
+            ><svg
+              class="w-4 h-4 inline-block"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="20" y1="20" x2="16.65" y2="16.65" /></svg
+          ></span>
           <input
             [(ngModel)]="searchQuery"
             type="text"

@@ -70,17 +70,40 @@ import { environment } from '../../../../environments/environment';
                   : 'bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-white'
               "
             >
-              <svg *ngIf="tab.key === 'profile'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                *ngIf="tab.key === 'profile'"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              <svg *ngIf="tab.key === 'security'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                *ngIf="tab.key === 'security'"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              <svg *ngIf="tab.key === 'platform'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                *ngIf="tab.key === 'platform'"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
               </svg>
             </div>
             <div class="flex-1 min-w-0">
@@ -161,7 +184,22 @@ import { environment } from '../../../../environments/environment';
               ></div>
               <div class="relative z-10">
                 <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                  <span class="text-[#C62761]"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="4"/><path d="M8 5l1.2-2h5.6L16 5"/></svg></span> Photo de profil
+                  <span class="text-[#C62761]"
+                    ><svg
+                      class="w-5 h-5 inline-block"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="5" width="18" height="14" rx="3" />
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M8 5l1.2-2h5.6L16 5" /></svg
+                  ></span>
+                  Photo de profil
                 </h3>
                 <div class="flex flex-col sm:flex-row items-center gap-6">
                   <!-- Avatar Preview -->
@@ -192,7 +230,19 @@ import { environment } from '../../../../environments/environment';
                       class="absolute -top-2 -left-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-400 transition-all shadow-md z-10"
                       title="Supprimer la photo"
                     >
-                      <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                      <svg
+                        class="w-4 h-4 inline-block"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                      </svg>
                     </button>
                   </div>
 
@@ -225,7 +275,20 @@ import { environment } from '../../../../environments/environment';
                         <div
                           class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl mx-auto mb-3 group-hover:bg-[rgba(198,39,97,0.1)] group-hover:border-[rgba(198,39,97,0.2)] transition-all"
                         >
-                          <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="4"/><path d="M8 5l1.2-2h5.6L16 5"/></svg>
+                          <svg
+                            class="w-5 h-5 inline-block"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <rect x="3" y="5" width="18" height="14" rx="3" />
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M8 5l1.2-2h5.6L16 5" />
+                          </svg>
                         </div>
                         <p class="text-sm font-semibold text-white mb-1">
                           {{ avatarDragOver ? 'Relâchez pour uploader' : 'Glissez une photo ici' }}
@@ -273,7 +336,20 @@ import { environment } from '../../../../environments/environment';
                       *ngIf="avatarSuccess"
                       class="text-xs text-emerald-400 mt-2 flex items-center gap-1 animate-fadeIn"
                     >
-                      <span><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg></span> {{ avatarSuccess }}
+                      <span
+                        ><svg
+                          class="w-4 h-4 inline-block"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="5 12 10 17 19 7" /></svg
+                      ></span>
+                      {{ avatarSuccess }}
                     </p>
                   </div>
                 </div>
@@ -283,7 +359,21 @@ import { environment } from '../../../../environments/environment';
             <!-- Personal Info -->
             <div class="glass-card border border-[var(--bridge-border)] p-6">
               <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                <span class="text-[#F5A623]"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span> Informations personnelles
+                <span class="text-[#F5A623]"
+                  ><svg
+                    class="w-4 h-4 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg
+                ></span>
+                Informations personnelles
               </h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -317,7 +407,20 @@ import { environment } from '../../../../environments/environment';
                       disabled
                       class="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-sm text-white/40 cursor-not-allowed pr-10"
                     />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-white/20"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-white/20"
+                      ><svg
+                        class="w-4 h-4 inline-block"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <rect x="4" y="10" width="16" height="10" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg
+                    ></span>
                   </div>
                   <p class="text-[10px] text-white/20 mt-1">L'email ne peut pas être modifié</p>
                 </div>
@@ -375,8 +478,18 @@ import { environment } from '../../../../environments/environment';
                 >
                   <span
                     class="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center text-xs"
-                    ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg></span
-                  >
+                    ><svg
+                      class="w-4 h-4 inline-block"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="5 12 10 17 19 7" /></svg
+                  ></span>
                   {{ successMsg }}
                 </div>
                 <div *ngIf="errorMsg" class="flex items-center gap-2 text-red-400 text-sm">
@@ -397,7 +510,23 @@ import { environment } from '../../../../environments/environment';
               ></div>
               <div class="relative z-10">
                 <h3 class="font-syne font-bold text-white text-base mb-2 flex items-center gap-2">
-                  <span><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="3.5"/><path d="M10 13l9-9"/><path d="M15 4l5 5"/><path d="M17 6l-2 2"/></svg></span> Changer le mot de passe
+                  <span
+                    ><svg
+                      class="w-5 h-5 inline-block"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="7.5" cy="15.5" r="3.5" />
+                      <path d="M10 13l9-9" />
+                      <path d="M15 4l5 5" />
+                      <path d="M17 6l-2 2" /></svg
+                  ></span>
+                  Changer le mot de passe
                 </h3>
                 <p class="text-[var(--bridge-text-muted)] text-sm mb-6">
                   Choisissez un mot de passe fort d'au moins 8 caractères.
@@ -512,20 +641,55 @@ import { environment } from '../../../../environments/environment';
                         <span
                           *ngIf="passwordForm.newPwd === passwordForm.confirm"
                           class="text-emerald-400 text-sm"
-                          ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg></span
-                        >
+                          ><svg
+                            class="w-4 h-4 inline-block"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="5 12 10 17 19 7" /></svg
+                        ></span>
                         <span
                           *ngIf="passwordForm.newPwd !== passwordForm.confirm"
                           class="text-red-400 text-sm"
-                          ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span
-                        >
+                          ><svg
+                            class="w-4 h-4 inline-block"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                            <line x1="18" y1="6" x2="6" y2="18" /></svg
+                        ></span>
                       </div>
                     </div>
                     <p
                       *ngIf="passwordForm.confirm && passwordForm.newPwd !== passwordForm.confirm"
                       class="text-red-400 text-xs mt-2"
                     >
-                      <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg> Les mots de passe ne correspondent pas
+                      <svg
+                        class="w-4 h-4 inline-block"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="9" />
+                        <line x1="8" y1="8" x2="16" y2="16" />
+                        <line x1="16" y1="8" x2="8" y2="16" />
+                      </svg>
+                      Les mots de passe ne correspondent pas
                     </p>
                   </div>
 
@@ -564,8 +728,18 @@ import { environment } from '../../../../environments/environment';
                     >
                       <span
                         class="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center text-xs"
-                        ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg></span
-                      >
+                        ><svg
+                          class="w-4 h-4 inline-block"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="5 12 10 17 19 7" /></svg
+                      ></span>
                       {{ pwdSuccess }}
                     </div>
                     <div *ngIf="pwdError" class="flex items-center gap-2 text-red-400 text-sm">
@@ -579,7 +753,21 @@ import { environment } from '../../../../environments/environment';
             <!-- Security Info -->
             <div class="glass-card border border-[var(--bridge-border)] p-6">
               <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                <span><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z"/><path d="m9 12 2 2 4-4"/></svg></span> Informations de sécurité
+                <span
+                  ><svg
+                    class="w-5 h-5 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z" />
+                    <path d="m9 12 2 2 4-4" /></svg
+                ></span>
+                Informations de sécurité
               </h3>
               <div class="grid sm:grid-cols-2 gap-4">
                 <div
@@ -588,7 +776,19 @@ import { environment } from '../../../../environments/environment';
                   <div
                     class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg flex-shrink-0"
                   >
-                    <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                    <svg
+                      class="w-4 h-4 inline-block"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="4" y="10" width="16" height="10" rx="2" />
+                      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
                   </div>
                   <div>
                     <p class="text-sm font-semibold text-white">Compte sécurisé</p>
@@ -601,7 +801,19 @@ import { environment } from '../../../../environments/environment';
                   <div
                     class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-lg flex-shrink-0"
                   >
-                    <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+                    <svg
+                      class="w-5 h-5 inline-block"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <polyline points="3 7 12 13 21 7" />
+                    </svg>
                   </div>
                   <div>
                     <p class="text-sm font-semibold text-white">{{ user?.email }}</p>
@@ -617,7 +829,20 @@ import { environment } from '../../../../environments/environment';
             <div class="grid md:grid-cols-2 gap-5">
               <div class="glass-card border border-[var(--bridge-border)] p-6">
                 <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg> Configuration Email
+                  <svg
+                    class="w-5 h-5 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <polyline points="3 7 12 13 21 7" />
+                  </svg>
+                  Configuration Email
                 </h3>
                 <div class="space-y-3">
                   <div>
@@ -653,7 +878,20 @@ import { environment } from '../../../../environments/environment';
 
               <div class="glass-card border border-[var(--bridge-border)] p-6">
                 <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z"/><path d="m9 12 2 2 4-4"/></svg> Sécurité Plateforme
+                  <svg
+                    class="w-5 h-5 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  Sécurité Plateforme
                 </h3>
                 <div class="space-y-4">
                   <div
@@ -695,7 +933,22 @@ import { environment } from '../../../../environments/environment';
 
               <div class="glass-card border border-[var(--bridge-border)] p-6">
                 <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="19" x2="4" y2="10"/><line x1="10" y1="19" x2="10" y2="4"/><line x1="16" y1="19" x2="16" y2="13"/><line x1="22" y1="19" x2="22" y2="7"/></svg> Paramètres pédagogiques
+                  <svg
+                    class="w-5 h-5 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="4" y1="19" x2="4" y2="10" />
+                    <line x1="10" y1="19" x2="10" y2="4" />
+                    <line x1="16" y1="19" x2="16" y2="13" />
+                    <line x1="22" y1="19" x2="22" y2="7" />
+                  </svg>
+                  Paramètres pédagogiques
                 </h3>
                 <div class="space-y-4">
                   <div>
@@ -725,7 +978,20 @@ import { environment } from '../../../../environments/environment';
 
               <div class="glass-card border border-[var(--bridge-border)] p-6">
                 <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg> Blockchain
+                  <svg
+                    class="w-5 h-5 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15" />
+                    <path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15" />
+                  </svg>
+                  Blockchain
                 </h3>
                 <div class="space-y-3">
                   <div
@@ -838,11 +1104,26 @@ export class SettingsComponent implements OnInit {
 
   get availableTabs() {
     const tabs = [
-      { key: 'profile', icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>', label: 'Profil', desc: 'Informations personnelles' },
-      { key: 'security', icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>', label: 'Sécurité', desc: 'Mot de passe & accès' },
+      {
+        key: 'profile',
+        icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>',
+        label: 'Profil',
+        desc: 'Informations personnelles',
+      },
+      {
+        key: 'security',
+        icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+        label: 'Sécurité',
+        desc: 'Mot de passe & accès',
+      },
     ];
     if (this.isAdmin) {
-      tabs.push({ key: 'platform', icon: '<svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21h16"/><path d="M6 21V4h9v17"/><path d="M15 8h3v13"/><path d="M9 8h2M9 12h2M9 16h2M16 12h1M16 16h1"/></svg>', label: 'Plateforme', desc: 'Configuration admin' });
+      tabs.push({
+        key: 'platform',
+        icon: '<svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21h16"/><path d="M6 21V4h9v17"/><path d="M15 8h3v13"/><path d="M9 8h2M9 12h2M9 16h2M16 12h1M16 16h1"/></svg>',
+        label: 'Plateforme',
+        desc: 'Configuration admin',
+      });
     }
     return tabs;
   }

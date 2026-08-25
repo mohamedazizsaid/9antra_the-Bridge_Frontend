@@ -576,9 +576,7 @@ import { User } from '../../../../core/models/user.model';
                       />
                     </svg>
                     <div>
-                      <div class="font-syne font-extrabold text-xl text-white">
-                        The Bridge
-                      </div>
+                      <div class="font-syne font-extrabold text-xl text-white">The Bridge</div>
                       <div
                         class="text-[11px] font-bold text-[var(--bridge-gold)] uppercase tracking-wider"
                       >
@@ -597,24 +595,20 @@ import { User } from '../../../../core/models/user.model';
                       REÇU #TB-{{ selectedPaiement.id || '2026-001' }}
                     </h2>
                     <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
-                      Émis le {{ (selectedPaiement.datePaiement || today) | date: 'dd/MM/yyyy' }}
+                      Émis le {{ selectedPaiement.datePaiement || today | date: 'dd/MM/yyyy' }}
                     </p>
                   </div>
                 </div>
 
                 <!-- Stagiaire & Formation Overview -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div
-                    class="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1"
-                  >
+                  <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                     <p
                       class="text-[10px] font-bold uppercase tracking-wider text-[var(--bridge-text-muted)]"
                     >
                       Bénéficiaire / Stagiaire
                     </p>
-                    <p class="font-bold text-sm text-white">
-                      {{ user?.prenom }} {{ user?.nom }}
-                    </p>
+                    <p class="font-bold text-sm text-white">{{ user?.prenom }} {{ user?.nom }}</p>
                     <p class="text-[var(--bridge-text-muted)]">
                       {{ user?.email }}
                     </p>
@@ -623,9 +617,7 @@ import { User } from '../../../../core/models/user.model';
                     </p>
                   </div>
 
-                  <div
-                    class="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1"
-                  >
+                  <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                     <p
                       class="text-[10px] font-bold uppercase tracking-wider text-[var(--bridge-text-muted)]"
                     >
@@ -637,14 +629,14 @@ import { User } from '../../../../core/models/user.model';
                     <p class="text-[var(--bridge-text-muted)]">
                       Échéance: Tranche {{ selectedPaiement.phaseNumero }}
                     </p>
-                    <p class="text-[10px] font-mono text-emerald-400">Certificat Blockchain Inclus</p>
+                    <p class="text-[10px] font-mono text-emerald-400">
+                      Certificat Blockchain Inclus
+                    </p>
                   </div>
                 </div>
 
                 <!-- Receipt Line Items Table -->
-                <div
-                  class="rounded-xl border border-white/10 overflow-hidden bg-white/[0.01]"
-                >
+                <div class="rounded-xl border border-white/10 overflow-hidden bg-white/[0.01]">
                   <table class="w-full text-left text-xs">
                     <thead class="bg-white/[0.04] border-b border-white/10">
                       <tr
@@ -660,15 +652,15 @@ import { User } from '../../../../core/models/user.model';
                       <tr>
                         <td class="py-4 px-4">
                           <p class="font-bold text-white">
-                            Frais pédagogiques — {{ getFormationName(selectedPaiement.formationId) }}
+                            Frais pédagogiques —
+                            {{ getFormationName(selectedPaiement.formationId) }}
                           </p>
                           <p class="text-[11px] text-[var(--bridge-text-muted)]">
-                            Règlement contractuel sécurisé par tranche (Phase {{ selectedPaiement.phaseNumero }})
+                            Règlement contractuel sécurisé par tranche (Phase
+                            {{ selectedPaiement.phaseNumero }})
                           </p>
                         </td>
-                        <td
-                          class="py-4 px-4 text-center font-bold text-white font-mono"
-                        >
+                        <td class="py-4 px-4 text-center font-bold text-white font-mono">
                           #{{ selectedPaiement.phaseNumero }}
                         </td>
                         <td class="py-4 px-4 text-center">
@@ -689,7 +681,9 @@ import { User } from '../../../../core/models/user.model';
                 </div>
 
                 <!-- Financial Breakdown & Total -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
+                <div
+                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2"
+                >
                   <div class="space-y-1 text-xs">
                     <div class="flex items-center gap-2">
                       <span class="text-[var(--bridge-text-muted)]">Statut:</span>
@@ -734,7 +728,9 @@ import { User } from '../../../../core/models/user.model';
                   <div class="flex items-center gap-2">
                     <span>🔒 Signature Numérique SHA-256</span>
                     <span>•</span>
-                    <span class="font-mono">TX-PROOF-{{ selectedPaiement.id || '98a4' }}e93bc01</span>
+                    <span class="font-mono"
+                      >TX-PROOF-{{ selectedPaiement.id || '98a4' }}e93bc01</span
+                    >
                   </div>
                   <div>The Bridge 9antra — R.C Tunis 1489020/B — TVA 1029384/P</div>
                 </div>
@@ -759,10 +755,14 @@ import { User } from '../../../../core/models/user.model';
                   </div>
                 </div>
 
-                <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-2 text-xs">
+                <div
+                  class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-2 text-xs"
+                >
                   <div class="flex justify-between items-center">
                     <span class="text-[var(--bridge-text-muted)]">Méthode sélectionnée</span>
-                    <span class="font-bold text-white">{{ formatMethod(selectedPaiement.methode) }}</span>
+                    <span class="font-bold text-white">{{
+                      formatMethod(selectedPaiement.methode)
+                    }}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-[var(--bridge-text-muted)]">Frais de transaction</span>
@@ -775,8 +775,12 @@ import { User } from '../../../../core/models/user.model';
                 </div>
 
                 <!-- Wire Details (RIB) -->
-                <div class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-1.5 text-xs">
-                  <p class="font-bold text-blue-400 text-[11px]">Coordonnées pour Virement Bancaire</p>
+                <div
+                  class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-1.5 text-xs"
+                >
+                  <p class="font-bold text-blue-400 text-[11px]">
+                    Coordonnées pour Virement Bancaire
+                  </p>
                   <p class="font-mono text-[11px] text-white/90">RIB: 08 014 0001234567890 32</p>
                   <p class="text-[10px] text-blue-300/80">Banque: BIAT Agence Lac 2, Tunis</p>
                 </div>
@@ -1020,7 +1024,8 @@ export class StagiairePaiementsComponent implements OnInit {
 
     const amountFormatted = (p.montant || 0).toFixed(2);
     const formationTitle = this.getFormationName(p.formationId);
-    const studentName = `${this.user?.prenom || ''} ${this.user?.nom || ''}`.trim() || 'Stagiaire The Bridge';
+    const studentName =
+      `${this.user?.prenom || ''} ${this.user?.nom || ''}`.trim() || 'Stagiaire The Bridge';
     const studentEmail = this.user?.email || '';
     const studentId = this.user?.id ? `STG-${this.user.id}` : 'STG-001';
     const methodFormatted = this.formatMethod(p.methode);
