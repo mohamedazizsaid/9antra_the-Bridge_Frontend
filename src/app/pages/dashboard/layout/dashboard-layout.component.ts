@@ -1075,7 +1075,37 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   get currentPageTitle(): string {
-    if (!this.user) return '';
+    const url = this.router.url;
+
+    // Stagiaire routes
+    if (url.includes('/dashboard/stagiaire/certificats')) return 'Mes Certificats Blockchain';
+    if (url.includes('/dashboard/stagiaire/paiements')) return 'Mes Paiements & Échéancier';
+    if (url.includes('/dashboard/stagiaire/formations')) return 'Mes Formations';
+    if (url.includes('/dashboard/stagiaire/historique') || url.includes('/dashboard/stagiaire/presence'))
+      return 'Historique & Présences';
+    if (url === '/dashboard/stagiaire') return 'Tableau de bord Stagiaire';
+
+    // Admin routes
+    if (url.includes('/dashboard/admin/paiements')) return 'Supervision des Paiements';
+    if (url.includes('/dashboard/admin/users')) return 'Gestion des Utilisateurs';
+    if (url.includes('/dashboard/admin/formateurs')) return 'Gestion des Formateurs';
+    if (url.includes('/dashboard/admin/formations')) return 'Gestion des Formations';
+    if (url.includes('/dashboard/admin/stats')) return 'Statistiques Générales';
+    if (url.includes('/dashboard/admin/broadcast')) return 'Diffusion des Notifications';
+    if (url.includes('/dashboard/admin/logs')) return 'Audit & Journal Système';
+    if (url === '/dashboard/admin') return 'Supervision Plateforme';
+
+    // Formateur routes
+    if (url.includes('/dashboard/formateur/seances')) return 'Agenda & Séances';
+    if (url.includes('/dashboard/formateur/formations')) return 'Mes Formations';
+    if (url.includes('/dashboard/formateur/stagiaires')) return 'Mes Stagiaires';
+    if (url.includes('/dashboard/formateur/evaluations')) return 'Évaluations & Notes';
+    if (url === '/dashboard/formateur') return 'Espace Formateur';
+
+    // Settings
+    if (url.includes('/dashboard/settings')) return 'Paramètres du Compte';
+
+    if (!this.user) return 'Tableau de bord';
     switch (this.user.role) {
       case 'ADMIN':
         return 'Administration';

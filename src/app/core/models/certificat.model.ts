@@ -1,5 +1,6 @@
 export interface Certificat {
   id: string;
+  certificateNumber?: string;
   stagiaireId: string;
   formationId: string;
   formationNom: string;

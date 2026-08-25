@@ -73,8 +73,8 @@ const routes: Routes = [
       {
         path: 'stagiaire/certificats',
         loadComponent: () =>
-          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
-            (m) => m.StagiaireOverviewComponent,
+          import('./pages/dashboard/stagiaire/certificats/stagiaire-certificats.component').then(
+            (m) => m.StagiaireCertificatsComponent,
           ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
@@ -82,8 +82,8 @@ const routes: Routes = [
       {
         path: 'stagiaire/paiements',
         loadComponent: () =>
-          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
-            (m) => m.StagiaireOverviewComponent,
+          import('./pages/dashboard/stagiaire/paiements/stagiaire-paiements.component').then(
+            (m) => m.StagiairePaiementsComponent,
           ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
@@ -91,8 +91,8 @@ const routes: Routes = [
       {
         path: 'stagiaire/presence',
         loadComponent: () =>
-          import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
-            (m) => m.StagiaireOverviewComponent,
+          import('./pages/dashboard/stagiaire/historique/stagiaire-historique.component').then(
+            (m) => m.StagiaireHistoriqueComponent,
           ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },

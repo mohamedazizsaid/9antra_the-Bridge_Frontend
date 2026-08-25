@@ -24,24 +24,26 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-screen space-y-6">
+   <div class="min-h-screen space-y-6">
       <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="font-syne font-bold text-2xl md:text-3xl text-white flex items-center gap-3">
-            <div
-              class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-lg font-bold shadow-lg"
-            >
-              {{ user?.prenom?.[0] }}
-            </div>
-            Bonjour,
-            <span
-              class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
-              >{{ user?.prenom }}</span
-            >
-            👋
-          </h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-1 ml-13">{{ today }}</p>
+        <div class="flex items-center gap-3.5">
+          <div
+            class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20 border border-[var(--bridge-gold)]/30 flex items-center justify-center text-lg font-bold text-[var(--bridge-gold)] shadow-lg"
+          >
+            {{ user?.prenom?.[0] || 'S' }}
+          </div>
+          <div>
+            <h1 class="font-syne font-bold text-2xl md:text-3xl text-white flex items-center gap-2">
+              Bonjour,
+              <span
+                class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
+                >{{ user?.prenom }}</span
+              >
+              <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V5a1 1 0 0 1 2 0v5"/><path d="M10 10V3.5a1 1 0 0 1 2 0V10"/><path d="M12 10V5a1 1 0 0 1 2 0v6"/><path d="M14 11V7a1 1 0 0 1 2 0v7"/></svg>
+            </h1>
+            <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">{{ today }} — Espace Stagiaire The Bridge</p>
+          </div>
         </div>
         <!-- Unread badge -->
         <div class="flex items-center gap-3">
@@ -49,7 +51,10 @@ Chart.register(...registerables);
             (click)="setActiveTab('notifications')"
             class="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[rgba(198,39,97,0.3)] transition-all text-sm text-white"
           >
-            🔔 Notifications
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg> Notifications
             <span
               *ngIf="unreadCount > 0"
               class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#C62761] text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce"
@@ -60,7 +65,148 @@ Chart.register(...registerables);
         </div>
       </div>
 
-      <!-- ═══════════════════════════════ PAYMENT REMINDER BANNER ═══════════════════════════════ -->
+
+
+      <!-- ═══════════════════════════════ 4 KPI CARDS — STYLE HISTORIQUE ═══════════════════════════════ -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- KPI 1 : Mes Formations -->
+        <div
+          class="bridge-card p-5 relative overflow-hidden group cursor-pointer"
+          (click)="openMyFormations()"
+        >
+          <div class="h-1 absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)]"></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">
+                Mes Formations
+              </p>
+              <p class="text-2xl font-mono font-bold text-white mt-1.5">
+                {{ myFormations.length }}
+              </p>
+            </div>
+
+            <div
+              class="w-12 h-12 rounded-2xl bg-[var(--bridge-crimson)]/10 border border-[var(--bridge-crimson)]/20 text-[var(--bridge-crimson)] flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-xl"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-[var(--bridge-gold)] mt-3 flex items-center gap-1 font-semibold">
+            <span>{{ activeFormationsCount }} formation(s) active(s)</span>
+          </p>
+        </div>
+
+        <!-- KPI 2 : Assiduité -->
+        <div class="bridge-card p-5 relative overflow-hidden group">
+          <div class="h-1 absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--bridge-gold)] to-amber-400"></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">
+                Assiduité Globale
+              </p>
+              <p
+                class="text-2xl font-mono font-bold mt-1.5"
+                [class]="attendanceRate >= 75 ? 'text-[var(--bridge-gold)]' : 'text-rose-400'"
+              >
+                {{ attendanceRate }}%
+              </p>
+            </div>
+
+            <div
+              class="w-12 h-12 rounded-2xl bg-[var(--bridge-gold)]/10 border border-[var(--bridge-gold)]/20 text-[var(--bridge-gold)] flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-xl"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="19" x2="4" y2="10"/><line x1="10" y1="19" x2="10" y2="4"/><line x1="16" y1="19" x2="16" y2="13"/><line x1="22" y1="19" x2="22" y2="7"/></svg></span>
+            </div>
+          </div>
+
+          <p
+            class="text-[11px] mt-3 flex items-center gap-1"
+            [class]="attendanceRate >= 75 ? 'text-[var(--bridge-gold)]' : 'text-rose-400'"
+          >
+            <span>{{ attendanceRate >= 75 ? '✓ Assiduité conforme (≥ 75%)' : '⚠️ Attention aux absences' }}</span>
+          </p>
+        </div>
+
+        <!-- KPI 3 : Paiements -->
+        <div
+          class="bridge-card p-5 relative overflow-hidden group cursor-pointer"
+          (click)="setActiveTab('paiements')"
+        >
+          <div
+            class="h-1 absolute top-0 left-0 right-0"
+            [class]="retardCount > 0
+              ? 'bg-gradient-to-r from-red-500 to-orange-400'
+              : 'bg-gradient-to-r from-emerald-500 to-teal-400'"
+          ></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">
+                Paiements
+              </p>
+              <p
+                class="text-2xl font-mono font-bold mt-1.5"
+                [class]="retardCount > 0 ? 'text-rose-400' : 'text-emerald-400'"
+              >
+                {{ paidPaymentsCount }}
+                <span class="text-xs font-sans text-white/50">/ {{ paiements.length }}</span>
+              </p>
+            </div>
+
+            <div
+              class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+              [class]="retardCount > 0
+                ? 'bg-red-500/10 border border-red-500/20 text-red-400'
+                : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'"
+            >
+              <span class="text-xl"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="9" y2="15"/></svg></span>
+            </div>
+          </div>
+
+          <p
+            class="text-[11px] mt-3 flex items-center gap-1 font-semibold"
+            [class]="retardCount > 0 ? 'text-red-400' : 'text-emerald-400'"
+          >
+            <span>{{ retardCount > 0 ? retardCount + ' en retard ⚠' : 'À jour ✓' }}</span>
+          </p>
+        </div>
+
+        <!-- KPI 4 : Certificats -->
+        <div
+          class="bridge-card p-5 relative overflow-hidden group cursor-pointer"
+          (click)="setActiveTab('certificats')"
+        >
+          <div class="h-1 absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--bridge-crimson)] to-[var(--bridge-gold)]"></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider">
+                Certificats
+              </p>
+              <p class="text-2xl font-mono font-bold text-[var(--bridge-gold)] mt-1.5">
+                {{ certificats.length }}
+              </p>
+            </div>
+
+            <div
+              class="w-12 h-12 rounded-2xl bg-[var(--bridge-crimson)]/10 border border-[var(--bridge-crimson)]/20 text-[var(--bridge-crimson)] flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-xl"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a4 4 0 0 0 4 4"/><path d="M17 6h3v2a4 4 0 0 1-4 4"/></svg></span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-[var(--bridge-gold)] mt-3 flex items-center gap-1 font-semibold">
+            <span><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Blockchain The Bridge Active</span>
+          </p>
+        </div>
+
+      </div>
+
+            <!-- ═══════════════════════════════ PAYMENT REMINDER BANNER ═══════════════════════════════ -->
       <div
         *ngIf="urgentPayments.length > 0"
         class="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-red-500/5 to-orange-500/10 p-4"
@@ -72,7 +218,7 @@ Chart.register(...registerables);
           <div
             class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-xl flex-shrink-0 animate-pulse"
           >
-            ⚠️
+            <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16.5" r=".8" fill="currentColor" stroke="none"/></svg>
           </div>
           <div class="flex-1">
             <p class="font-semibold text-orange-300 text-sm">Rappel de paiement</p>
@@ -94,189 +240,53 @@ Chart.register(...registerables);
         </div>
       </div>
 
-      <!-- ═══════════════════════════════ KPI CARDS ═══════════════════════════════ -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Formations inscrites -->
-        <div
-          class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(198,39,97,0.3)] transition-all duration-300 cursor-pointer"
-          (click)="openMyFormations()"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <p
-                class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold"
-              >
-                Mes Formations
-              </p>
-              <p
-                class="text-4xl font-mono font-black text-[#C62761] mt-2 group-hover:scale-110 transition-transform"
-              >
-                {{ myFormations.length }}
-              </p>
-              <p class="text-[10px] text-emerald-400 mt-1 font-semibold">
-                {{ activeFormationsCount }} active(s)
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 rounded-2xl bg-[rgba(198,39,97,0.1)] border border-[rgba(198,39,97,0.2)] flex items-center justify-center text-2xl group-hover:bg-[rgba(198,39,97,0.2)] transition-all"
-            >
-              📚
-            </div>
-          </div>
-          <div class="mt-3 h-1 rounded-full bg-white/5 overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full transition-all duration-1000"
-              [style.width]="(myFormations.length > 0 ? 100 : 0) + '%'"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Assiduité -->
-        <div
-          class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(245,166,35,0.3)] transition-all duration-300"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <p
-                class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold"
-              >
-                Assiduité
-              </p>
-              <p
-                class="text-4xl font-mono font-black text-[#F5A623] mt-2 group-hover:scale-110 transition-transform"
-              >
-                {{ attendanceRate }}<span class="text-lg">%</span>
-              </p>
-              <p
-                class="text-[10px] mt-1 font-semibold"
-                [class]="attendanceRate >= 75 ? 'text-emerald-400' : 'text-red-400'"
-              >
-                {{ attendanceRate >= 75 ? '✓ Satisfaisante' : '⚠ Insuffisante' }}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 rounded-2xl bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] flex items-center justify-center text-2xl"
-            >
-              📊
-            </div>
-          </div>
-          <div class="mt-3 h-1 rounded-full bg-white/5 overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-1000"
-              [class]="attendanceRate >= 75 ? 'bg-emerald-500' : 'bg-red-500'"
-              [style.width]="attendanceRate + '%'"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Paiements en retard -->
-        <div
-          class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-red-500/30 transition-all duration-300 cursor-pointer"
-          (click)="setActiveTab('paiements')"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <p
-                class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold"
-              >
-                Paiements
-              </p>
-              <p
-                class="text-4xl font-mono font-black mt-2 group-hover:scale-110 transition-transform"
-                [class]="retardCount > 0 ? 'text-red-400' : 'text-emerald-400'"
-              >
-                {{ paidPaymentsCount
-                }}<span class="text-lg text-[var(--bridge-text-muted)]"
-                  >/{{ paiements.length }}</span
-                >
-              </p>
-              <p
-                class="text-[10px] mt-1 font-semibold"
-                [class]="retardCount > 0 ? 'text-red-400' : 'text-emerald-400'"
-              >
-                {{ retardCount > 0 ? retardCount + ' en retard ⚠' : 'À jour ✓' }}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-              [class]="
-                retardCount > 0
-                  ? 'bg-red-500/10 border border-red-500/20'
-                  : 'bg-emerald-500/10 border border-emerald-500/20'
-              "
-            >
-              💳
-            </div>
-          </div>
-          <div class="mt-3 h-1 rounded-full bg-white/5 overflow-hidden">
-            <div
-              class="h-full bg-emerald-500 rounded-full transition-all duration-1000"
-              [style.width]="paymentProgressPercentage"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Certificats -->
-        <div
-          class="glass-card p-5 border border-[var(--bridge-border)] group hover:border-[rgba(198,39,97,0.3)] transition-all duration-300 cursor-pointer"
-          (click)="setActiveTab('certificats')"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <p
-                class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-widest font-semibold"
-              >
-                Certificats
-              </p>
-              <p
-                class="text-4xl font-mono font-black bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent mt-2 group-hover:scale-110 transition-transform"
-              >
-                {{ certificats.length }}
-              </p>
-              <p class="text-[10px] text-[var(--bridge-text-muted)] mt-1 font-semibold">
-                🔗 Blockchain
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[rgba(198,39,97,0.1)] to-[rgba(245,166,35,0.1)] border border-[rgba(198,39,97,0.2)] flex items-center justify-center text-2xl"
-            >
-              🏆
-            </div>
-          </div>
-          <div class="mt-3 h-1 rounded-full bg-white/5 overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-[#C62761] to-[#F5A623] rounded-full"
-              style="width: 100%"
-            ></div>
-          </div>
-        </div>
-      </div>
-
       <!-- ═══════════════════════════════ TAB NAV ═══════════════════════════════ -->
       <div
-        class="flex items-center gap-1 p-1 glass-card border border-[var(--bridge-border)] rounded-2xl overflow-x-auto"
+        class="flex items-center gap-3 p-1.5 glass-card border border-[var(--bridge-border)] rounded-2xl overflow-x-auto w-fit"
       >
         <button
           *ngFor="let tab of tabs"
           (click)="setActiveTab(tab.key)"
-          class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 cursor-pointer"
           [class]="
             activeTab === tab.key
               ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-lg'
               : 'text-[var(--bridge-text-muted)] hover:text-white hover:bg-white/5'
           "
         >
-          {{ tab.icon }} {{ tab.label }}
+          <svg *ngIf="tab.key === 'catalogue'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <svg *ngIf="tab.key === 'paiements'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="20" height="14" x="2" y="5" rx="2" />
+            <line x1="2" x2="22" y1="10" y2="10" />
+          </svg>
+          <svg *ngIf="tab.key === 'certificats'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="7" />
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+          </svg>
+          <svg *ngIf="tab.key === 'presence'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <svg *ngIf="tab.key === 'notifications'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span>{{ tab.label }}</span>
         </button>
       </div>
 
       <!-- ═══════════════════════════════ TAB: CATALOGUE FORMATIONS ═══════════════════════════════ -->
       <div *ngIf="activeTab === 'catalogue'" class="space-y-6">
         <!-- ── Sub-filter toggle + Search ── -->
-        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center ">
           <!-- View toggle: Toutes / Mes formations -->
           <div
-            class="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/8 gap-1 flex-shrink-0"
+            class="flex items-center p-1 rounded-xl bg-white/[0.04]  gap-1 flex-shrink-0"
           >
             <button
               (click)="catalogView = 'all'"
@@ -287,7 +297,7 @@ Chart.register(...registerables);
                   : 'text-[var(--bridge-text-muted)] hover:text-white'
               "
             >
-              🔎 Toutes
+              <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg> Toutes
             </button>
             <button
               (click)="catalogView = 'mine'"
@@ -298,7 +308,7 @@ Chart.register(...registerables);
                   : 'text-[var(--bridge-text-muted)] hover:text-white'
               "
             >
-              📚 Mes formations
+              <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Mes formations
               <span class="text-[10px] font-mono opacity-75">({{ myFormations.length }})</span>
             </button>
           </div>
@@ -307,7 +317,7 @@ Chart.register(...registerables);
           <ng-container *ngIf="catalogView === 'all'">
             <div class="relative flex-1">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]"
-                >🔍</span
+                ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg></span
               >
               <input
                 [(ngModel)]="catalogSearch"
@@ -365,8 +375,8 @@ Chart.register(...registerables);
                 <div
                   class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-[var(--bridge-text-muted)]"
                 >
-                  <span class="flex items-center gap-1">👨‍🏫 {{ f.formateurNom }}</span>
-                  <span class="flex items-center gap-1">📋 {{ f.phases.length }} phase(s)</span>
+                  <span class="flex items-center gap-1"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M16 4h4v4"/><path d="M20 4l-4 4"/></svg> {{ f.formateurNom }}</span>
+                  <span class="flex items-center gap-1"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4V2h6v2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg> {{ f.phases.length }} phase(s)</span>
                 </div>
                 <div class="flex items-center justify-between mt-4">
                   <div>
@@ -410,7 +420,7 @@ Chart.register(...registerables);
             *ngIf="filteredCatalogue.length === 0 && !loadingCatalogue"
             class="glass-card border border-[var(--bridge-border)] p-16 text-center"
           >
-            <div class="text-5xl mb-4">🔍</div>
+            <div class="text-5xl mb-4"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg></div>
             <p class="font-syne font-bold text-lg text-white">Aucune formation trouvée</p>
             <p class="text-[var(--bridge-text-muted)] text-sm mt-2">
               Essayez une autre recherche ou catégorie.
@@ -438,7 +448,7 @@ Chart.register(...registerables);
             *ngIf="myFormations.length === 0 && !loadingMine"
             class="glass-card border border-[var(--bridge-border)] p-16 text-center"
           >
-            <div class="text-5xl mb-4 animate-bounce">📚</div>
+            <div class="text-5xl mb-4 animate-bounce"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
             <p class="font-syne font-bold text-lg text-white">Aucune formation inscrite</p>
             <p class="text-[var(--bridge-text-muted)] text-sm mt-2">
               Parcourez le catalogue et inscrivez-vous.
@@ -493,8 +503,8 @@ Chart.register(...registerables);
                   <div
                     class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-[var(--bridge-text-muted)]"
                   >
-                    <span class="flex items-center gap-1">👨‍🏫 {{ f.formateurNom }}</span>
-                    <span class="flex items-center gap-1">📋 {{ f.phases.length }} phase(s)</span>
+                    <span class="flex items-center gap-1"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M16 4h4v4"/><path d="M20 4l-4 4"/></svg> {{ f.formateurNom }}</span>
+                    <span class="flex items-center gap-1"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4V2h6v2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg> {{ f.phases.length }} phase(s)</span>
                   </div>
                   <!-- Progress bar -->
                   <div class="mt-4">
@@ -554,7 +564,7 @@ Chart.register(...registerables);
                       title="Demande de remboursement"
                       class="px-3 py-2 rounded-xl text-xs font-semibold border transition-all text-orange-400 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20"
                     >
-                      🔙
+                      <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10a6 6 0 0 1 6 6v1"/></svg>
                     </button>
                   </div>
                 </div>
@@ -570,7 +580,7 @@ Chart.register(...registerables);
                       <div
                         class="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-sm font-bold text-orange-400"
                       >
-                        🔙
+                        <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10a6 6 0 0 1 6 6v1"/></svg>
                       </div>
                       <div>
                         <h4 class="font-syne font-bold text-white text-sm">
@@ -587,7 +597,7 @@ Chart.register(...registerables);
                       (click)="toggleRemboursement(null)"
                       class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center text-xs transition-all border border-white/5"
                     >
-                      ✕
+                      <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
                     </button>
                   </div>
 
@@ -596,7 +606,7 @@ Chart.register(...registerables);
                     *ngIf="remboursementSuccess === f.id"
                     class="py-6 px-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-1"
                   >
-                    <span class="text-2xl">✅</span>
+                    <span class="text-2xl"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg></span>
                     <p class="text-emerald-400 font-bold text-xs">Demande envoyée !</p>
                     <p class="text-[10px] text-emerald-300/70">
                       Un responsable étudiera votre dossier sous 48h.
@@ -624,7 +634,7 @@ Chart.register(...registerables);
                     <div
                       class="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-start gap-2"
                     >
-                      <span class="text-orange-400 text-xs mt-0.5">ℹ️</span>
+                      <span class="text-orange-400 text-xs mt-0.5"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="10" x2="12" y2="16"/><circle cx="12" cy="7" r=".8" fill="currentColor" stroke="none"/></svg></span>
                       <p class="text-[10px] text-orange-200/80 leading-tight">
                         Sous réserve d'éligibilité. Le remboursement n'est possible que si aucune
                         phase n'a été complétée.
@@ -700,7 +710,7 @@ Chart.register(...registerables);
           *ngIf="myFormations.length === 0 && !loadingMine"
           class="glass-card border border-[var(--bridge-border)] p-16 text-center"
         >
-          <div class="text-5xl mb-4 animate-bounce">📚</div>
+          <div class="text-5xl mb-4 animate-bounce"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
           <p class="font-syne font-bold text-lg text-white">Aucune formation en cours</p>
           <p class="text-[var(--bridge-text-muted)] text-sm mt-2">
             Parcourez le catalogue et inscrivez-vous à votre première formation.
@@ -736,7 +746,7 @@ Chart.register(...registerables);
               <div
                 class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xl shadow-lg flex-shrink-0"
               >
-                📚
+                <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
               </div>
               <div>
                 <h3 class="font-syne font-bold text-white text-lg">{{ f.nom }}</h3>
@@ -866,7 +876,7 @@ Chart.register(...registerables);
                     class="flex items-center gap-4 mt-2 text-[10px] text-[var(--bridge-text-muted)]"
                     *ngIf="phase.status !== 'VERROUILLEE'"
                   >
-                    <span>📅 {{ phase.seances.length }} séances</span>
+                    <span><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> {{ phase.seances.length }} séances</span>
                     <span
                       *ngIf="phase.status === 'COMPLETEE'"
                       class="text-emerald-400 font-semibold"
@@ -953,14 +963,14 @@ Chart.register(...registerables);
         <!-- Payment timeline -->
         <div class="glass-card border border-[var(--bridge-border)] overflow-hidden">
           <div class="p-6 border-b border-[var(--bridge-border)] flex items-center justify-between">
-            <h3 class="font-syne font-bold text-lg">💰 Historique des Paiements</h3>
+            <h3 class="font-syne font-bold text-lg"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-.7-1.7-1.1-3-1.1-1.8 0-3 .9-3 2.1s1.2 2 3 2.4 3 1.2 3 2.4-1.2 2.1-3 2.1c-1.3 0-2.4-.4-3.1-1.1"/><line x1="12" y1="6" x2="12" y2="18"/></svg> Historique des Paiements</h3>
             <span class="text-xs text-[var(--bridge-text-muted)]"
               >{{ paiements.length }} transaction(s)</span
             >
           </div>
 
           <div *ngIf="paiements.length === 0" class="p-12 text-center">
-            <div class="text-4xl mb-3">💳</div>
+            <div class="text-4xl mb-3"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="9" y2="15"/></svg></div>
             <p class="text-[var(--bridge-text-muted)] text-sm">Aucun paiement enregistré</p>
           </div>
 
@@ -1026,7 +1036,7 @@ Chart.register(...registerables);
                       *ngIf="loadingStripePaiementId === p.id"
                       class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"
                     ></span>
-                    💳 {{ loadingStripePaiementId === p.id ? 'Chargement...' : 'Payer Stripe' }}
+                    <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="9" y2="15"/></svg> {{ loadingStripePaiementId === p.id ? 'Chargement...' : 'Payer Stripe' }}
                   </button>
                   <span
                     class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase inline-block"
@@ -1056,7 +1066,7 @@ Chart.register(...registerables);
           *ngIf="certificats.length === 0"
           class="glass-card border border-[var(--bridge-border)] p-16 text-center"
         >
-          <div class="text-6xl mb-4">🏆</div>
+          <div class="text-6xl mb-4"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a4 4 0 0 0 4 4"/><path d="M17 6h3v2a4 4 0 0 1-4 4"/></svg></div>
           <p class="font-syne font-bold text-xl text-white">Pas encore de certificat</p>
           <p class="text-[var(--bridge-text-muted)] text-sm mt-2 max-w-sm mx-auto">
             Complétez vos phases de formation avec 75%+ d'assiduité et de bonnes évaluations pour
@@ -1084,7 +1094,7 @@ Chart.register(...registerables);
                 <div
                   class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[rgba(198,39,97,0.2)] to-[rgba(245,166,35,0.2)] border border-[rgba(198,39,97,0.3)] flex items-center justify-center text-3xl shadow-lg"
                 >
-                  🏆
+                  <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a4 4 0 0 0 4 4"/><path d="M17 6h3v2a4 4 0 0 1-4 4"/></svg>
                 </div>
                 <div class="text-right">
                   <span
@@ -1102,7 +1112,7 @@ Chart.register(...registerables);
               <p class="text-[var(--bridge-text-muted)] text-sm mt-1">{{ cert.formationNom }}</p>
               <!-- Issue date -->
               <div class="flex items-center gap-2 mt-4">
-                <span class="text-[#F5A623] text-sm">📅</span>
+                <span class="text-[#F5A623] text-sm"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                 <span class="font-mono text-xs text-[var(--bridge-text-muted)]"
                   >Émis le {{ cert.dateObtention | date: 'dd MMMM yyyy' : '' : 'fr' }}</span
                 >
@@ -1126,13 +1136,13 @@ Chart.register(...registerables);
                   target="_blank"
                   class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white text-xs font-semibold rounded-xl transition-all"
                 >
-                  📄 Télécharger PDF
+                  <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Télécharger PDF
                 </a>
                 <button
                   (click)="openCertificateVerif(cert)"
                   class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[rgba(198,39,97,0.15)] to-[rgba(245,166,35,0.1)] hover:from-[rgba(198,39,97,0.25)] hover:to-[rgba(245,166,35,0.2)] border border-[rgba(198,39,97,0.3)] text-[#C62761] text-xs font-semibold rounded-xl transition-all"
                 >
-                  🔗 Vérifier
+                  <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg> Vérifier
                 </button>
               </div>
             </div>
@@ -1150,7 +1160,7 @@ Chart.register(...registerables);
               <div
                 class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 flex items-center justify-center text-base"
               >
-                🔗
+                <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
               </div>
               <div>
                 <h3 class="font-syne font-bold text-sm text-white">Certificat Vérifié</h3>
@@ -1161,7 +1171,7 @@ Chart.register(...registerables);
               (click)="selectedCertForVerif = null"
               class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
             >
-              ✕
+              <svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
             </button>
           </div>
           <!-- Content -->
@@ -1213,7 +1223,7 @@ Chart.register(...registerables);
         <!-- Global attendance stat -->
         <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-syne font-bold text-lg">📊 Analyse de Présence & Progression</h3>
+            <h3 class="font-syne font-bold text-lg"><svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="19" x2="4" y2="10"/><line x1="10" y1="19" x2="10" y2="4"/><line x1="16" y1="19" x2="16" y2="13"/><line x1="22" y1="19" x2="22" y2="7"/></svg> Analyse de Présence & Progression</h3>
             <span
               class="font-mono text-2xl font-black"
               [class]="attendanceRate >= 75 ? 'text-emerald-400' : 'text-red-400'"
@@ -1260,7 +1270,7 @@ Chart.register(...registerables);
             <div
               class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-base flex-shrink-0"
             >
-              📚
+              <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
             <div>
               <h4 class="font-syne font-bold text-white text-base">{{ f.nom }}</h4>
@@ -1365,7 +1375,7 @@ Chart.register(...registerables);
           *ngIf="myFormations.length === 0 && !loadingMine"
           class="glass-card border border-[var(--bridge-border)] p-12 text-center"
         >
-          <div class="text-4xl mb-3">📋</div>
+          <div class="text-4xl mb-3"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4V2h6v2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
           <p class="text-[var(--bridge-text-muted)] text-sm">
             Aucune donnée de présence disponible.
           </p>
@@ -1375,7 +1385,7 @@ Chart.register(...registerables);
       <!-- ═══════════════════════════════ TAB: NOTIFICATIONS ═══════════════════════════════ -->
       <div *ngIf="activeTab === 'notifications'" class="space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="font-syne font-bold text-xl text-white">🔔 Mes Notifications</h3>
+          <h3 class="font-syne font-bold text-xl text-white"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg> Mes Notifications</h3>
           <button
             *ngIf="unreadCount > 0"
             (click)="markAllRead()"
@@ -1389,7 +1399,7 @@ Chart.register(...registerables);
           *ngIf="allNotifications.length === 0"
           class="glass-card border border-[var(--bridge-border)] p-12 text-center"
         >
-          <div class="text-4xl mb-3">🔔</div>
+          <div class="text-4xl mb-3"><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></div>
           <p class="text-[var(--bridge-text-muted)] text-sm">Aucune notification</p>
         </div>
 

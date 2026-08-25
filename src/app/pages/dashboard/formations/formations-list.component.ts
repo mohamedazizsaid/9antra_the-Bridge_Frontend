@@ -14,42 +14,52 @@ import { User } from '../../../core/models/user.model';
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="space-y-8 animate-fadein">
-      <!-- Header -->
+      <!-- ─── Header Synchronisé ─── -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
-            🎓 Gestion des
-            <span class="bg-gradient-to-r from-[#C62761] to-[#F5A623] bg-clip-text text-transparent"
-              >Formations</span
-            >
-          </h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">
-            {{
-              isAdmin
-                ? 'Administration de toutes les formations.'
-                : 'Gérez vos programmes de formation.'
-            }}
-          </p>
+        <div class="flex items-center gap-3.5">
+          <div
+            class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20 border border-[var(--bridge-gold)]/30 flex items-center justify-center text-[var(--bridge-gold)] shadow-lg"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+              <path d="M6 6h10" />
+              <path d="M6 10h10" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
+              {{ isAdmin ? 'Gestion des Formations' : 'Mes Programmes de Formation' }}
+            </h1>
+          <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
+  {{
+    isAdmin
+      ? 'Supervision des cursus, phases pédagogiques et inscriptions'
+      : "Consultez le catalogue et l'avancement de vos programmes de formation"
+  }}
+</p>
+          </div>
         </div>
+
         <div class="flex items-center gap-3">
           <!-- Archive toggle -->
           <button
             (click)="showArchived = !showArchived"
-            class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer"
             [class]="
               showArchived
                 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/20'
+                : 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-white/20'
             "
           >
             📦 {{ showArchived ? 'Actives' : 'Archivées' }}
           </button>
+
           <button
             *ngIf="canCreate"
             routerLink="/dashboard/formations/new"
-            class="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:scale-[1.02] shadow-[0_0_20px_rgba(198,39,97,0.3)]"
+            class="bridge-btn-primary px-4 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-lg"
           >
-            ➕ Nouvelle Formation
+            <span>➕ Nouvelle Formation</span>
           </button>
         </div>
       </div>
@@ -75,11 +85,9 @@ import { User } from '../../../core/models/user.model';
       <!-- Search + Filter Bar -->
       <div *ngIf="!loading" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
-          <span
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm"
-            aria-hidden="true"
-            >🔍</span
-          >
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]"
+                ><svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg></span
+              >
           <input
             [(ngModel)]="searchQuery"
             type="text"

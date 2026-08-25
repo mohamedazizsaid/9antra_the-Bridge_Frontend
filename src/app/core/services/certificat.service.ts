@@ -13,8 +13,9 @@ export class CertificatService {
 
   private mapCertificateDTO(c: any): Certificat {
     return {
-      id: c.id.toString(),
-      stagiaireId: c.studentId.toString(),
+      id: c.id ? c.id.toString() : '',
+      certificateNumber: c.certificateNumber || `CERT-${c.id}`,
+      stagiaireId: c.studentId ? c.studentId.toString() : '',
       formationId: c.formationId ? c.formationId.toString() : '',
       formationNom: c.formationTitle || 'Formation',
       phaseNom: c.phaseTitle || 'Phase',
@@ -36,5 +37,11 @@ export class CertificatService {
     return this.http
       .get<any>(`${this.apiUrl}/verify/${hash}`)
       .pipe(map((c) => this.mapCertificateDTO(c)));
+  }
+
+  downloadCertificatePdf(certificateNumber: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/download/${encodeURIComponent(certificateNumber)}`, {
+      responseType: 'blob',
+    });
   }
 }
