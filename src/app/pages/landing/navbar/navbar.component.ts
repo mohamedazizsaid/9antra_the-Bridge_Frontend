@@ -46,19 +46,20 @@ import { RouterModule } from '@angular/router';
             (click)="scrollTo($event, 'top')"
             >Accueil</a
           >
-          <a
-            href="#apropos"
-            class="nav-link"
-            [class.active]="activeSection === 'apropos'"
-            (click)="scrollTo($event, 'apropos')"
-            >À propos</a
-          >
+
           <a
             href="#fonctionnalites"
             class="nav-link"
             [class.active]="activeSection === 'fonctionnalites'"
             (click)="scrollTo($event, 'fonctionnalites')"
             >Fonctionnalités</a
+          >
+          <a
+            href="#apropos"
+            class="nav-link"
+            [class.active]="activeSection === 'apropos'"
+            (click)="scrollTo($event, 'apropos')"
+            >À propos</a
           >
           <a
             href="#contact"
@@ -141,10 +142,10 @@ import { RouterModule } from '@angular/router';
       }
 
       .navbar.scrolled {
-        background: rgba(23, 23, 56, 0.6);
+        background: color-mix(in srgb, var(--bridge-surface) 75%, transparent);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border-bottom: 1px solid rgba(198, 39, 97, 0.15);
+        box-shadow: 0 4px 30px color-mix(in srgb, var(--bridge-text) 6%, transparent);
       }
 
       .navbar-inner {
@@ -178,7 +179,7 @@ import { RouterModule } from '@angular/router';
         font-family: 'Syne', sans-serif;
         font-weight: 800;
         font-size: 18px;
-        color: #f0f0ff;
+        color: var(--bridge-text);
         line-height: 1.1;
       }
 
@@ -186,7 +187,7 @@ import { RouterModule } from '@angular/router';
         font-family: 'Syne', sans-serif;
         font-weight: 600;
         font-size: 11px;
-        color: #f5a623;
+        color: var(--bridge-gold);
         letter-spacing: 1px;
       }
 
@@ -199,7 +200,7 @@ import { RouterModule } from '@angular/router';
         font-family: 'Inter', sans-serif;
         font-weight: 500;
         font-size: 14px;
-        color: #9999cc;
+        color: var(--bridge-text-muted);
         text-decoration: none;
         position: relative;
         padding: 4px 0;
@@ -208,7 +209,7 @@ import { RouterModule } from '@angular/router';
 
       .nav-link:hover,
       .nav-link.active {
-        color: #f0f0ff;
+        color: var(--bridge-text);
       }
 
       .nav-link.active::after {
@@ -233,16 +234,16 @@ import { RouterModule } from '@angular/router';
         font-family: 'Inter', sans-serif;
         font-weight: 500;
         font-size: 14px;
-        color: #f0f0ff;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--bridge-text);
+        border: 1px solid color-mix(in srgb, var(--bridge-text) 22%, transparent);
         border-radius: 10px;
         text-decoration: none;
         transition: all 200ms;
       }
 
       .btn-nav-ghost:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.4);
+        background: color-mix(in srgb, var(--bridge-text) 8%, transparent);
+        border-color: color-mix(in srgb, var(--bridge-text) 45%, transparent);
       }
 
       .btn-nav-primary {
@@ -276,7 +277,7 @@ import { RouterModule } from '@angular/router';
         display: block;
         width: 24px;
         height: 2px;
-        background: #f0f0ff;
+        background: var(--bridge-text);
         border-radius: 1px;
         transition: all 300ms;
       }
@@ -296,7 +297,7 @@ import { RouterModule } from '@angular/router';
         flex-direction: column;
         padding: 16px 24px 24px;
         gap: 16px;
-        background: rgba(23, 23, 56, 0.95);
+        background: color-mix(in srgb, var(--bridge-surface) 95%, transparent);
         backdrop-filter: blur(20px);
         border-bottom: 1px solid rgba(198, 39, 97, 0.15);
       }

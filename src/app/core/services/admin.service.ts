@@ -48,4 +48,16 @@ export class AdminService {
   broadcastNotification(title: string, message: string, roles: string[]): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/notifications/broadcast`, { title, message, roles });
   }
+
+  getBroadcastHistory(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/notifications/broadcast`);
+  }
+
+  purgeLogs(count?: number): Observable<any> {
+    let params = new HttpParams();
+    if (count && count > 0) {
+      params = params.set('count', count.toString());
+    }
+    return this.http.delete<any>(`${this.apiUrl}/logs`, { params });
+  }
 }

@@ -105,14 +105,26 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
           <!-- Step indicator -->
           <div *ngIf="!showSuccessAnimation" class="form-item flex items-center gap-4 mb-8">
             <div
-              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs"
+              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs shadow-md transition-all"
               [ngClass]="
                 currentStep === 1
                   ? 'bg-[var(--bridge-crimson)] text-white'
                   : 'bg-emerald-500 text-white'
               "
             >
-              {{ currentStep > 1 ? '✓' : '1' }}
+              <svg
+                *ngIf="currentStep > 1"
+                class="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span *ngIf="currentStep <= 1">1</span>
             </div>
             <div class="h-0.5 flex-1 bg-white/10 relative">
               <div
@@ -121,16 +133,28 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
               ></div>
             </div>
             <div
-              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs"
+              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs transition-all"
               [ngClass]="
                 currentStep === 2
-                  ? 'bg-[var(--bridge-crimson)] text-white'
+                  ? 'bg-[var(--bridge-crimson)] text-white shadow-md'
                   : currentStep > 2
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-emerald-500 text-white shadow-md'
                     : 'bg-white/10 text-white/40'
               "
             >
-              {{ currentStep > 2 ? '✓' : '2' }}
+              <svg
+                *ngIf="currentStep > 2"
+                class="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span *ngIf="currentStep <= 2">2</span>
             </div>
             <div class="h-0.5 flex-1 bg-white/10 relative">
               <div
@@ -139,10 +163,10 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
               ></div>
             </div>
             <div
-              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs"
+              class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs transition-all"
               [ngClass]="
                 currentStep === 3
-                  ? 'bg-[var(--bridge-crimson)] text-white'
+                  ? 'bg-[var(--bridge-crimson)] text-white shadow-md'
                   : 'bg-white/10 text-white/40'
               "
             >
@@ -179,9 +203,23 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
           <!-- Alert -->
           <div
             *ngIf="errorMessage && !showSuccessAnimation"
-            class="form-item mb-6 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2"
+            class="form-item mb-6 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2.5"
+            role="alert"
           >
-            <span>⚠️</span>
+            <svg
+              class="w-4 h-4 flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
             <span>{{ errorMessage }}</span>
           </div>
 
@@ -200,12 +238,31 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                     >Prénom</label
                   >
-                  <input
-                    type="text"
-                    formControlName="prenom"
-                    placeholder="Ahmed"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                  />
+                  <div class="relative">
+                    <span
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      formControlName="prenom"
+                      placeholder="Ahmed"
+                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-10 pr-3 text-sm text-white focus:outline-none transition-all"
+                    />
+                  </div>
                   <div *ngIf="submitted && f['prenom'].errors" class="text-xs text-rose-400 mt-1">
                     Le prénom est requis
                   </div>
@@ -215,12 +272,31 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                     >Nom</label
                   >
-                  <input
-                    type="text"
-                    formControlName="nom"
-                    placeholder="Mansouri"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                  />
+                  <div class="relative">
+                    <span
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      formControlName="nom"
+                      placeholder="Mansouri"
+                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-10 pr-3 text-sm text-white focus:outline-none transition-all"
+                    />
+                  </div>
                   <div *ngIf="submitted && f['nom'].errors" class="text-xs text-rose-400 mt-1">
                     Le nom est requis
                   </div>
@@ -233,14 +309,35 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                     >Âge (Pro)</label
                   >
-                  <input
-                    type="number"
-                    formControlName="age"
-                    placeholder="22"
-                    min="15"
-                    max="100"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                  />
+                  <div class="relative">
+                    <span
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="w-3.5 h-3.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </span>
+                    <input
+                      type="number"
+                      formControlName="age"
+                      placeholder="22"
+                      min="15"
+                      max="100"
+                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-9 pr-2 text-sm text-white focus:outline-none transition-all"
+                    />
+                  </div>
                   <div *ngIf="submitted && f['age'].errors" class="text-xs text-rose-400 mt-1">
                     Requis (15+)
                   </div>
@@ -250,22 +347,54 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                     >Téléphone</label
                   >
-                  <input
-                    type="text"
-                    formControlName="telephone"
-                    placeholder="+216 55 555 555"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                  />
+                  <div class="relative">
+                    <span
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                        />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      formControlName="telephone"
+                      placeholder="+216 55 555 555"
+                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none transition-all"
+                    />
+                  </div>
                 </div>
               </div>
 
               <button
                 type="button"
                 (click)="nextStep()"
-                class="form-item w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                class="form-item w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
               >
                 <span>Continuer</span>
-                <span>&rarr;</span>
+                <svg
+                  class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
               </button>
             </div>
 
@@ -292,9 +421,23 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     height="64"
                   />
                   <div
-                    class="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs transition-opacity"
+                    class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-white transition-opacity gap-1"
                   >
-                    Éditer
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                      />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                    <span>Éditer</span>
                   </div>
                 </div>
                 <div class="flex-1">
@@ -312,9 +455,22 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   <button
                     type="button"
                     (click)="fileInput.click()"
-                    class="mt-2 text-xs text-[var(--bridge-gold)] hover:underline focus:outline-none"
+                    class="mt-2 text-xs text-[var(--bridge-gold)] hover:underline focus:outline-none flex items-center gap-1.5 cursor-pointer"
                   >
-                    Choisir un fichier
+                    <svg
+                      class="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span>Choisir un fichier</span>
                   </button>
                 </div>
               </div>
@@ -324,12 +480,31 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                   >Adresse Email</label
                 >
-                <input
-                  type="email"
-                  formControlName="email"
-                  placeholder="exemple@thebridge.tn"
-                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-all"
-                />
+                <div class="relative">
+                  <span
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </span>
+                  <input
+                    type="email"
+                    formControlName="email"
+                    placeholder="exemple@thebridge.tn"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none transition-all"
+                  />
+                </div>
                 <div *ngIf="submitted && f['email'].errors" class="text-xs text-rose-400 mt-1">
                   <span *ngIf="f['email'].errors['required']">L'email est requis</span>
                   <span *ngIf="f['email'].errors['email']">Veuillez entrer un email valide</span>
@@ -342,16 +517,36 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   >Mot de passe</label
                 >
                 <div class="relative">
+                  <span
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </span>
                   <input
                     [type]="showPassword ? 'text' : 'password'"
                     formControlName="password"
                     placeholder="••••••••"
                     (input)="checkPasswordStrength($event)"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none transition-all"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-12 pr-12 text-sm text-white focus:outline-none transition-all"
                   />
                   <button
                     type="button"
                     (click)="showPassword = !showPassword"
+                    [attr.aria-label]="
+                      showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                    "
                     class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
                   >
                     <svg
@@ -361,6 +556,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       stroke-width="2"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
@@ -380,6 +576,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       stroke-width="2"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
@@ -455,15 +652,35 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   >Confirmer le mot de passe</label
                 >
                 <div class="relative">
+                  <span
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </span>
                   <input
                     [type]="showConfirmPassword ? 'text' : 'password'"
                     formControlName="confirmPassword"
                     placeholder="••••••••"
-                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none transition-all"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-12 pr-12 text-sm text-white focus:outline-none transition-all"
                   />
                   <button
                     type="button"
                     (click)="showConfirmPassword = !showConfirmPassword"
+                    [attr.aria-label]="
+                      showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                    "
                     class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer"
                   >
                     <svg
@@ -473,6 +690,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       stroke-width="2"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
@@ -492,6 +710,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       stroke-width="2"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
@@ -513,17 +732,64 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 <button
                   type="button"
                   (click)="prevStep()"
-                  class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10"
+                  class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10 flex items-center justify-center gap-2"
                 >
-                  Retour
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                  </svg>
+                  <span>Retour</span>
                 </button>
                 <button
                   type="submit"
                   [disabled]="loading"
-                  class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
                 >
-                  <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+                  <svg
+                    *ngIf="loading"
+                    class="animate-spin w-4 h-4 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
                   <span>{{ loading ? 'Enregistrement...' : "S'inscrire" }}</span>
+                  <svg
+                    *ngIf="!loading"
+                    class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -534,6 +800,22 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 class="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 text-center space-y-6"
               >
                 <div>
+                  <div
+                    class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#C62761]/20 to-[#F5A623]/20 border border-[var(--bridge-gold)]/30 mx-auto mb-3 flex items-center justify-center text-[var(--bridge-gold)]"
+                  >
+                    <svg
+                      class="w-6 h-6"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                  </div>
                   <p
                     class="text-[11px] uppercase tracking-[0.35em] text-[var(--bridge-gold)] font-bold"
                   >
@@ -571,7 +853,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     type="button"
                     (click)="resendCode()"
                     [disabled]="loading"
-                    class="text-xs text-[var(--bridge-gold)] hover:underline font-bold focus:outline-none"
+                    class="text-xs text-[var(--bridge-gold)] hover:underline font-bold focus:outline-none cursor-pointer"
                   >
                     Renvoyer le code
                   </button>
@@ -581,18 +863,64 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                   <button
                     type="button"
                     (click)="prevStep()"
-                    class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10"
+                    class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-syne font-bold rounded-xl transition-all cursor-pointer text-center text-sm border border-white/10 flex items-center justify-center gap-2"
                   >
-                    Retour
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="19" y1="12" x2="5" y2="12" />
+                      <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    <span>Retour</span>
                   </button>
                   <button
                     type="button"
                     (click)="verifyOtp()"
                     [disabled]="loading"
-                    class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    class="flex-[2] py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
                   >
-                    <span *ngIf="loading" class="animate-spin text-sm">⌛</span>
+                    <svg
+                      *ngIf="loading"
+                      class="animate-spin w-4 h-4 text-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
                     <span>Vérifier & Connecter</span>
+                    <svg
+                      *ngIf="!loading"
+                      class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                   </button>
                 </div>
               </div>

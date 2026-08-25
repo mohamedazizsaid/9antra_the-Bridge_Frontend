@@ -43,6 +43,10 @@ export class PaiementService {
     };
   }
 
+  getAllPayments(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+
   getPaiementsByStagiaire(stagiaireId: string): Observable<Paiement[]> {
     return this.http
       .get<any[]>(`${this.apiUrl}/student/${stagiaireId}`)

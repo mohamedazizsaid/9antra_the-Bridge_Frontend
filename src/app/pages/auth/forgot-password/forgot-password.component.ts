@@ -85,9 +85,23 @@ import { AuthService } from '../../../core/services/auth.service';
 
           <div
             *ngIf="message"
-            class="mb-6 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs"
+            class="mb-6 p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2.5"
+            role="status"
           >
-            {{ message }}
+            <svg
+              class="w-4 h-4 flex-shrink-0 text-emerald-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>{{ message }}</span>
           </div>
 
           <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()" class="space-y-5" *ngIf="!message">
@@ -97,14 +111,33 @@ import { AuthService } from '../../../core/services/auth.service';
                 class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                 >Adresse Email</label
               >
-              <input
-                id="forgot-email"
-                type="email"
-                formControlName="email"
-                placeholder="exemple@thebridge.tn"
-                autocomplete="email"
-                class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none transition-all"
-              />
+              <div class="relative">
+                <span
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </span>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="exemple@thebridge.tn"
+                  autocomplete="email"
+                  class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none transition-all"
+                />
+              </div>
               <div
                 *ngIf="submitted && forgotForm.get('email')?.errors"
                 class="text-xs text-rose-400 mt-1"
@@ -117,22 +150,85 @@ import { AuthService } from '../../../core/services/auth.service';
             <button
               type="submit"
               [disabled]="loading"
-              class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+              class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
             >
-              <span *ngIf="loading" class="animate-spin text-sm" aria-hidden="true">⌛</span>
+              <svg
+                *ngIf="loading"
+                class="animate-spin w-4 h-4 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
               <span>{{ loading ? 'Envoi en cours...' : 'Envoyer le code' }}</span>
+              <svg
+                *ngIf="!loading"
+                class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </button>
 
             <div class="flex items-center justify-between text-xs text-[var(--bridge-text-muted)]">
-              <a routerLink="/auth/login" class="hover:text-white hover:underline"
-                >Retour à la connexion</a
+              <a
+                routerLink="/auth/login"
+                class="hover:text-white hover:underline flex items-center gap-1.5"
               >
+                <svg
+                  class="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+                <span>Retour à la connexion</span>
+              </a>
               <a
                 routerLink="/auth/reset-password"
                 [queryParams]="{ email: forgotForm.value.email }"
-                class="text-[var(--bridge-gold)] hover:underline"
-                >J'ai déjà le code</a
+                class="text-[var(--bridge-gold)] hover:underline flex items-center gap-1"
               >
+                <span>J'ai déjà le code</span>
+                <svg
+                  class="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </a>
             </div>
           </form>
 
@@ -140,15 +236,40 @@ import { AuthService } from '../../../core/services/auth.service';
             <button
               routerLink="/auth/reset-password"
               [queryParams]="{ email: forgotForm.value.email }"
-              class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-syne font-bold rounded-xl transition-all cursor-pointer"
+              class="w-full py-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-syne font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 group"
             >
-              Continuer vers la réinitialisation
+              <span>Continuer vers la réinitialisation</span>
+              <svg
+                class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </button>
             <a
               routerLink="/auth/login"
-              class="text-center text-xs text-[var(--bridge-text-muted)] hover:text-white hover:underline"
-              >Revenir à la connexion</a
+              class="text-center text-xs text-[var(--bridge-text-muted)] hover:text-white hover:underline flex items-center justify-center gap-1.5"
             >
+              <svg
+                class="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Revenir à la connexion</span>
+            </a>
           </div>
         </div>
       </div>

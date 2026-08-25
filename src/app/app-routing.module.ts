@@ -210,6 +210,15 @@ const routes: Routes = [
         data: { roles: ['ADMIN'] },
       },
       {
+        path: 'admin/paiements',
+        loadComponent: () =>
+          import('./pages/dashboard/admin/paiements/admin-paiements.component').then(
+            (m) => m.AdminPaiementsComponent,
+          ),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
         path: 'admin/stats',
         loadComponent: () =>
           import('./pages/dashboard/admin/stats/admin-stats.component').then(

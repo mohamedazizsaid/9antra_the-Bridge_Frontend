@@ -1,7 +1,8 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-logs',
@@ -9,23 +10,249 @@ import { AdminService } from '../../../../core/services/admin.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="space-y-6 animate-fadeIn">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="font-syne font-bold text-2xl text-white">🔍 Logs & Audit</h1>
-          <p class="text-[var(--bridge-text-muted)] text-sm mt-1">
-            Historique de toutes les requêtes API
-          </p>
+      <!-- Header Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20 border border-[var(--bridge-gold)]/30 flex items-center justify-center text-[var(--bridge-gold)]"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-syne font-bold text-2xl text-white">Logs & Audit Système</h1>
+            <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
+              Historique de toutes les requêtes API et traçabilité
+            </p>
+          </div>
         </div>
-        <button (click)="loadLogs()" class="bridge-btn-secondary px-4 py-2 text-sm">
-          🔄 Actualiser
-        </button>
+
+        <div class="flex items-center gap-3">
+          <!-- Purge Logs Button -->
+          <button
+            (click)="openPurgeModal()"
+            [disabled]="totalElements === 0"
+            class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
+          >
+            <svg
+              class="w-3.5 h-3.5 transition-transform group-hover:scale-110"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            <span>Purger les requêtes</span>
+          </button>
+
+          <!-- Refresh Button -->
+          <button
+            (click)="loadLogs()"
+            class="bridge-btn-secondary px-4 py-2 text-xs flex items-center gap-2 cursor-pointer"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+            <span>Actualiser</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── Inline Purge Confirmation Card (No Background Overlay) ─── -->
+      <div
+        *ngIf="showPurgeModal"
+        class="bridge-card p-6 border border-rose-500/30 bg-rose-500/[0.03] shadow-xl relative overflow-hidden animate-fadeIn"
+      >
+        <div
+          class="h-1 absolute top-0 left-0 right-0 bg-gradient-to-r from-rose-500 via-[#E0452F] to-[#F5A623]"
+        ></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-syne font-bold text-lg text-white">
+                Confirmation de Purge des Requêtes
+              </h3>
+              <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                Sélectionnez le volume de requêtes d'audit à supprimer définitivement.
+              </p>
+            </div>
+          </div>
+
+          <button
+            (click)="showPurgeModal = false"
+            class="self-end sm:self-auto w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all text-sm cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+          <!-- Option 1: Delete All -->
+          <label
+            (click)="purgeMode = 'all'"
+            class="flex items-center gap-3.5 p-4 rounded-xl border cursor-pointer transition-all"
+            [class]="
+              purgeMode === 'all'
+                ? 'border-rose-500/60 bg-rose-500/10'
+                : 'border-white/10 hover:border-white/20 bg-white/[0.02]'
+            "
+          >
+            <input
+              type="radio"
+              name="purgeMode"
+              [checked]="purgeMode === 'all'"
+              (change)="purgeMode = 'all'"
+              class="accent-rose-500 w-4 h-4 cursor-pointer"
+            />
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-white">Supprimer toutes les requêtes</p>
+              <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                Purger l'intégralité de la base ({{ totalElements }} logs au total)
+              </p>
+            </div>
+          </label>
+
+          <!-- Option 2: Delete specific count -->
+          <label
+            (click)="purgeMode = 'custom'"
+            class="flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition-all"
+            [class]="
+              purgeMode === 'custom'
+                ? 'border-rose-500/60 bg-rose-500/10'
+                : 'border-white/10 hover:border-white/20 bg-white/[0.02]'
+            "
+          >
+            <input
+              type="radio"
+              name="purgeMode"
+              [checked]="purgeMode === 'custom'"
+              (change)="purgeMode = 'custom'"
+              class="accent-rose-500 w-4 h-4 mt-1 cursor-pointer"
+            />
+            <div class="flex-1 space-y-2">
+              <div>
+                <p class="text-sm font-semibold text-white">Supprimer un nombre précis</p>
+                <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                  Supprimer les N requêtes les plus anciennes
+                </p>
+              </div>
+              <div *ngIf="purgeMode === 'custom'" class="pt-1 flex items-center gap-2">
+                <input
+                  type="number"
+                  [(ngModel)]="customCount"
+                  min="1"
+                  [max]="totalElements || 1000"
+                  (click)="$event.stopPropagation()"
+                  class="bridge-input w-28 text-sm text-center font-mono font-bold"
+                />
+                <span class="text-xs text-[var(--bridge-text-muted)]">requête(s)</span>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+          <button
+            (click)="showPurgeModal = false"
+            [disabled]="isPurging"
+            class="bridge-btn-secondary px-4 py-2 text-xs cursor-pointer"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmPurge()"
+            [disabled]="isPurging || (purgeMode === 'custom' && (!customCount || customCount <= 0))"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-600/30 disabled:opacity-50"
+          >
+            <svg
+              *ngIf="isPurging"
+              class="animate-spin w-3.5 h-3.5 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <svg
+              *ngIf="!isPurging"
+              class="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            </svg>
+            <span>{{ isPurging ? 'Suppression en cours...' : 'Confirmer la suppression' }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
       <div class="bridge-card p-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Méthode HTTP</label>
+            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5 font-semibold"
+              >Méthode HTTP</label
+            >
             <select [(ngModel)]="filters.method" class="bridge-input w-full text-sm">
               <option value="">Toutes</option>
               <option value="GET">GET</option>
@@ -35,7 +262,9 @@ import { AdminService } from '../../../../core/services/admin.service';
             </select>
           </div>
           <div>
-            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">Adresse IP</label>
+            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5 font-semibold"
+              >Adresse IP</label
+            >
             <input
               [(ngModel)]="filters.ip"
               placeholder="ex: 127.0.0.1"
@@ -43,7 +272,9 @@ import { AdminService } from '../../../../core/services/admin.service';
             />
           </div>
           <div>
-            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">De</label>
+            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5 font-semibold"
+              >De</label
+            >
             <input
               [(ngModel)]="filters.from"
               type="datetime-local"
@@ -51,7 +282,9 @@ import { AdminService } from '../../../../core/services/admin.service';
             />
           </div>
           <div>
-            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5">À</label>
+            <label class="block text-xs text-[var(--bridge-text-muted)] mb-1.5 font-semibold"
+              >À</label
+            >
             <input
               [(ngModel)]="filters.to"
               type="datetime-local"
@@ -60,10 +293,25 @@ import { AdminService } from '../../../../core/services/admin.service';
           </div>
         </div>
         <div class="flex gap-3 mt-4">
-          <button (click)="applyFilters()" class="bridge-btn-primary px-4 py-2 text-sm">
-            Appliquer les filtres
+          <button
+            (click)="applyFilters()"
+            class="bridge-btn-primary px-4 py-2 text-xs flex items-center gap-1.5 cursor-pointer"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            <span>Appliquer les filtres</span>
           </button>
-          <button (click)="clearFilters()" class="bridge-btn-secondary px-4 py-2 text-sm">
+          <button
+            (click)="clearFilters()"
+            class="bridge-btn-secondary px-4 py-2 text-xs cursor-pointer"
+          >
             Réinitialiser
           </button>
         </div>
@@ -72,20 +320,24 @@ import { AdminService } from '../../../../core/services/admin.service';
       <!-- Stats row -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bridge-card p-4 text-center">
-          <p class="text-2xl font-bold text-white">{{ totalElements }}</p>
+          <p class="text-2xl font-bold font-mono text-white">{{ totalElements }}</p>
           <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Total requêtes</p>
         </div>
         <div class="bridge-card p-4 text-center">
-          <p class="text-2xl font-bold text-emerald-400">{{ getCount('200') + getCount('201') }}</p>
+          <p class="text-2xl font-bold font-mono text-emerald-400">
+            {{ getCount('200') + getCount('201') }}
+          </p>
           <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Succès (2xx)</p>
         </div>
         <div class="bridge-card p-4 text-center">
-          <p class="text-2xl font-bold text-yellow-400">{{ getCount('401') + getCount('403') }}</p>
-          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Auth échouée</p>
+          <p class="text-2xl font-bold font-mono text-yellow-400">
+            {{ getCount('401') + getCount('403') }}
+          </p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Auth échouée (4xx)</p>
         </div>
         <div class="bridge-card p-4 text-center">
-          <p class="text-2xl font-bold text-red-400">{{ getCount('500') }}</p>
-          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Erreurs serveur</p>
+          <p class="text-2xl font-bold font-mono text-red-400">{{ getCount('500') }}</p>
+          <p class="text-xs text-[var(--bridge-text-muted)] mt-1">Erreurs serveur (5xx)</p>
         </div>
       </div>
 
@@ -174,14 +426,14 @@ import { AdminService } from '../../../../core/services/admin.service';
           <div class="flex items-center gap-2">
             <button
               (click)="expanded = !expanded"
-              class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-white/5"
+              class="text-xs text-[var(--bridge-crimson)] hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-white/5 cursor-pointer"
             >
               {{ expanded ? '▲ Réduire' : '▼ Tout afficher' }}
             </button>
             <button
               *ngIf="currentPage < totalPages - 1"
               (click)="loadMore()"
-              class="bridge-btn-secondary text-xs px-3 py-1.5"
+              class="bridge-btn-secondary text-xs px-3 py-1.5 cursor-pointer"
             >
               Charger plus
             </button>
@@ -199,7 +451,16 @@ export class AdminLogsComponent implements OnInit {
   expanded = false;
   filters = { method: '', ip: '', from: '', to: '' };
 
-  constructor(private adminService: AdminService) {}
+  // Purge Modal State
+  showPurgeModal = false;
+  purgeMode: 'all' | 'custom' = 'all';
+  customCount = 50;
+  isPurging = false;
+
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.loadLogs();
@@ -224,6 +485,34 @@ export class AdminLogsComponent implements OnInit {
         },
         error: () => {},
       });
+  }
+
+  openPurgeModal(): void {
+    this.showPurgeModal = true;
+    this.purgeMode = 'all';
+    this.customCount = Math.min(50, this.totalElements || 50);
+  }
+
+  confirmPurge(): void {
+    this.isPurging = true;
+    const countToDelete = this.purgeMode === 'all' ? undefined : this.customCount;
+
+    this.adminService.purgeLogs(countToDelete).subscribe({
+      next: (res) => {
+        this.isPurging = false;
+        this.showPurgeModal = false;
+        const deleted = res?.deleted || countToDelete || this.totalElements;
+        this.toastService.success(
+          `${deleted} log(s) d'audit supprimé(s) avec succès.`,
+          'Purge des Logs',
+        );
+        this.loadLogs();
+      },
+      error: () => {
+        this.isPurging = false;
+        this.toastService.error("Erreur lors de la purge des logs d'audit.", 'Échec Purge');
+      },
+    });
   }
 
   applyFilters(): void {

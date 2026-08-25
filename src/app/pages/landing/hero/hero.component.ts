@@ -1,6 +1,16 @@
-import { Component, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ElementRef,
+  ViewChildren,
+  QueryList,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { interval, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-hero',
@@ -11,14 +21,30 @@ import { RouterModule } from '@angular/router';
       <div class="hero-content">
         <!-- Eyebrow Badge -->
         <div class="eyebrow" #anim>
-          <span class="eyebrow-icon">🔗</span>
-          Plateforme certifiée blockchain
+          <span class="eyebrow-icon">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+          </span>
+          <span>9antra The Bridge</span>
         </div>
 
         <!-- Hero Title -->
         <h1 class="hero-title" #anim>
-          Le Pont Vers la<br />
-          <span class="text-gradient">Compétence Certifiée</span>
+          {{ typedLine1 }}<br />
+          <span class="text-gradient">{{ typedLine2 }}</span>
+          <span class="cursor-blink">|</span>
         </h1>
 
         <!-- Subtitle -->
@@ -30,7 +56,21 @@ import { RouterModule } from '@angular/router';
         <!-- CTA Row -->
         <div class="cta-row" #anim>
           <a routerLink="/auth/register" class="btn-hero-primary" id="hero-cta-start">
-            Démarrer gratuitement →
+            <span>Démarrer gratuitement</span>
+            <svg
+              class="btn-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
           </a>
           <a
             href="#fonctionnalites"
@@ -38,7 +78,10 @@ import { RouterModule } from '@angular/router';
             id="hero-cta-demo"
             (click)="scrollToFeatures($event)"
           >
-            Voir la démo ▶
+            <svg class="btn-play" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="6 4 20 12 6 20 6 4" />
+            </svg>
+            <span>Voir la démo</span>
           </a>
         </div>
 
@@ -105,16 +148,16 @@ import { RouterModule } from '@angular/router';
         min-height: 100vh;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         padding: 100px 24px 60px;
         max-width: 1280px;
         margin: 0 auto;
-        gap: 60px;
+        gap: 90px;
       }
 
       .hero-content {
         flex: 1;
-        max-width: 640px;
+        max-width: 620px;
       }
 
       .eyebrow {
@@ -139,6 +182,25 @@ import { RouterModule } from '@angular/router';
         line-height: 1.1;
         color: var(--bridge-text);
         margin-bottom: 24px;
+        min-height: 155px;
+      }
+
+      .cursor-blink {
+        display: inline-block;
+        color: #f5a623;
+        font-weight: 300;
+        animation: cursorBlink 1s infinite;
+        margin-left: 4px;
+      }
+
+      @keyframes cursorBlink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
       }
 
       .text-gradient {
@@ -167,6 +229,7 @@ import { RouterModule } from '@angular/router';
       .btn-hero-primary {
         display: inline-flex;
         align-items: center;
+        gap: 10px;
         padding: 16px 36px;
         background: linear-gradient(135deg, #c62761, #f5a623);
         color: white;
@@ -184,11 +247,20 @@ import { RouterModule } from '@angular/router';
         box-shadow: 0 8px 24px rgba(198, 39, 97, 0.4);
       }
 
+      .btn-hero-primary .btn-arrow {
+        transition: transform 200ms ease;
+      }
+
+      .btn-hero-primary:hover .btn-arrow {
+        transform: translateX(3px);
+      }
+
       .btn-hero-ghost {
         display: inline-flex;
         align-items: center;
+        gap: 10px;
         padding: 16px 36px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid color-mix(in srgb, var(--bridge-text) 25%, transparent);
         color: var(--bridge-text);
         font-family: 'Syne', sans-serif;
         font-weight: 600;
@@ -200,8 +272,8 @@ import { RouterModule } from '@angular/router';
       }
 
       .btn-hero-ghost:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.45);
+        background: color-mix(in srgb, var(--bridge-text) 8%, transparent);
+        border-color: color-mix(in srgb, var(--bridge-text) 45%, transparent);
       }
 
       .stats-row {
@@ -217,29 +289,29 @@ import { RouterModule } from '@angular/router';
       .stat-value {
         font-size: 28px;
         font-weight: 700;
-        color: #f0f0ff;
+        color: var(--bridge-text);
       }
 
       .stat-label {
         font-size: 13px;
-        color: #9999cc;
+        color: var(--bridge-text-muted);
         margin-top: 4px;
       }
 
       .hero-preview {
-        flex: 0 0 380px;
+        flex: 0 0 450px;
       }
 
       .preview-card {
-        background: color-mix(in srgb, var(--bridge-card) 80%, transparent);
+        background: color-mix(in srgb, var(--bridge-card) 85%, transparent);
         backdrop-filter: blur(20px);
         border: 1px solid color-mix(in srgb, var(--bridge-border) 70%, transparent);
-        border-radius: 20px;
+        border-radius: 22px;
         overflow: hidden;
-        transform: rotate(3deg);
+        transform: rotate(8deg);
         box-shadow:
-          0 20px 60px rgba(0, 0, 0, 0.4),
-          0 0 40px rgba(198, 39, 97, 0.1);
+          0 20px 60px rgba(0, 0, 0, 0.25),
+          0 0 40px rgba(198, 39, 97, 0.08);
         transition: transform 400ms ease;
       }
 
@@ -251,8 +323,8 @@ import { RouterModule } from '@angular/router';
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 16px;
-        background: color-mix(in srgb, var(--bridge-bg) 45%, transparent);
+        padding: 14px 20px;
+        background: color-mix(in srgb, var(--bridge-bg) 35%, transparent);
         border-bottom: 1px solid color-mix(in srgb, var(--bridge-border) 55%, transparent);
       }
 
@@ -262,8 +334,8 @@ import { RouterModule } from '@angular/router';
       }
 
       .preview-dots span {
-        width: 8px;
-        height: 8px;
+        width: 9px;
+        height: 9px;
         border-radius: 50%;
       }
 
@@ -279,44 +351,44 @@ import { RouterModule } from '@angular/router';
 
       .preview-title {
         font-family: 'Space Mono', monospace;
-        font-size: 11px;
-        color: #9999cc;
+        font-size: 12px;
+        color: var(--bridge-text-muted);
       }
 
       .preview-body {
-        padding: 20px;
+        padding: 24px;
       }
 
       .preview-stat-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 14px;
+        margin-bottom: 18px;
       }
 
       .mini-stat {
         text-align: center;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.04);
-        border-radius: 10px;
+        padding: 12px 10px;
+        background: color-mix(in srgb, var(--bridge-text) 5%, transparent);
+        border-radius: 12px;
       }
 
       .mini-stat-val {
         font-family: 'Space Mono', monospace;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
       }
 
       .mini-stat-label {
-        font-size: 10px;
-        color: #9999cc;
-        margin-top: 2px;
+        font-size: 11px;
+        color: var(--bridge-text-muted);
+        margin-top: 3px;
       }
 
       .chart-svg {
         width: 100%;
-        height: 60px;
-        margin-bottom: 12px;
+        height: 75px;
+        margin-bottom: 16px;
       }
 
       .chart-line {
@@ -345,20 +417,20 @@ import { RouterModule } from '@angular/router';
       .preview-list {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
       }
 
       .preview-list-item {
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        color: #9999cc;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--bridge-text-muted);
       }
 
       .pli-dot {
-        width: 6px;
-        height: 6px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
       }
 
@@ -368,7 +440,8 @@ import { RouterModule } from '@angular/router';
 
       .pli-val {
         font-family: 'Space Mono', monospace;
-        color: #f0f0ff;
+        color: var(--bridge-text);
+        font-weight: 600;
       }
 
       @media (max-width: 1024px) {
@@ -396,7 +469,7 @@ import { RouterModule } from '@angular/router';
         .hero-preview {
           flex: none;
           width: 100%;
-          max-width: 400px;
+          max-width: 460px;
         }
       }
 
@@ -418,8 +491,12 @@ import { RouterModule } from '@angular/router';
     `,
   ],
 })
-export class HeroComponent implements AfterViewInit {
+export class HeroComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('anim') animElements!: QueryList<ElementRef>;
+
+  typedLine1 = '';
+  typedLine2 = '';
+  private subscriptions: Subscription[] = [];
 
   stats = [
     { value: '500+', animatedValue: '0', label: 'Formateurs' },
@@ -439,6 +516,52 @@ export class HeroComponent implements AfterViewInit {
     { name: 'Design UI/UX', val: '45%', color: '#F5A623' },
     { name: 'Data Science & IA', val: '30%', color: '#8B5CF6' },
   ];
+
+  ngOnInit(): void {
+    this.startTypewriter();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  startTypewriter(): void {
+    const text1 = 'Le Pont Vers la';
+    const text2 = 'Compétence Certifiée';
+
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      this.typedLine1 = text1;
+      this.typedLine2 = text2;
+      return;
+    }
+
+    let i = 0;
+    const sub1 = interval(45)
+      .pipe(take(text1.length))
+      .subscribe({
+        next: () => {
+          this.typedLine1 = text1.substring(0, i + 1);
+          i++;
+        },
+        complete: () => {
+          let j = 0;
+          const sub2 = interval(55)
+            .pipe(take(text2.length))
+            .subscribe({
+              next: () => {
+                this.typedLine2 = text2.substring(0, j + 1);
+                j++;
+              },
+            });
+          this.subscriptions.push(sub2);
+        },
+      });
+    this.subscriptions.push(sub1);
+  }
 
   ngAfterViewInit(): void {
     const isAudit =
