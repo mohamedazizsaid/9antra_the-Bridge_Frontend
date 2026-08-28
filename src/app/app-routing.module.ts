@@ -44,6 +44,15 @@ const routes: Routes = [
         data: { roles: ['STAGIAIRE'] },
       },
       {
+        path: 'stagiaire/agenda',
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/agenda/stagiaire-agenda.component').then(
+            (m) => m.StagiaireAgendaComponent,
+          ),
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] },
+      },
+      {
         path: 'stagiaire/formations',
         loadComponent: () =>
           import('./pages/dashboard/formations/formations-list.component').then(

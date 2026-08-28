@@ -303,7 +303,7 @@ import { Subscription } from 'rxjs';
 
       <!-- Drawer Panel -->
       <div
-        class="relative z-10 w-full max-w-lg h-full flex flex-col drawer-slide-in"
+        class="bridge-drawer-panel relative z-10 w-full max-w-lg h-full flex flex-col drawer-slide-in"
         style="background: linear-gradient(135deg, #0e0e24 0%, #12122e 100%); border-left: 1px solid rgba(198,39,97,0.2);"
         (click)="$event.stopPropagation()"
       >
@@ -314,7 +314,7 @@ import { Subscription } from 'rxjs';
 
         <!-- Header -->
         <div
-          class="flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0"
+          class="bridge-drawer-header flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0"
         >
           <div>
             <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
@@ -358,7 +358,7 @@ import { Subscription } from 'rxjs';
             </div>
             <button
               (click)="closeAttendanceModal()"
-              class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
+              class="bridge-drawer-close w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all border border-white/5 text-sm"
             >
               ✕
             </button>
@@ -367,7 +367,7 @@ import { Subscription } from 'rxjs';
 
         <!-- Progress Bar -->
         <div class="px-6 pt-4 pb-2 flex-shrink-0" *ngIf="activePresences.length > 0">
-          <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+          <div class="bridge-progress-track h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
             <div
               class="h-full rounded-full transition-all duration-500"
               [class]="
@@ -391,7 +391,7 @@ import { Subscription } from 'rxjs';
         <!-- Quick actions (only when not yet validated) -->
         <div
           *ngIf="!attendanceValidated"
-          class="flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0"
+          class="bridge-quick-actions flex items-center gap-3 px-6 py-3 border-b border-white/5 flex-shrink-0"
         >
           <span class="text-xs text-white/40">Action rapide :</span>
           <button

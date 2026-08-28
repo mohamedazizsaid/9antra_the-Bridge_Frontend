@@ -488,7 +488,7 @@ import { User } from '../../../../core/models/user.model';
               </p>
             </div>
             <a
-              routerLink="/dashboard/formations"
+              routerLink="/dashboard/stagiaire/formations"
               class="bridge-btn-primary px-5 py-2.5 text-xs inline-flex items-center gap-2 cursor-pointer"
             >
               <span>Explorer mes Formations</span>

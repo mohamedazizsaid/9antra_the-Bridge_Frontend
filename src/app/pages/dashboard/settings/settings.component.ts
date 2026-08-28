@@ -1,19 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { AdminService } from '../../../core/services/admin.service';
+import {
+  AccessibilityService,
+  AccessibilityConfig,
+  DaltonismMode,
+  TextScale,
+  LetterSpacing,
+  LineHeight,
+} from '../../../core/services/accessibility.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { Subscription, Observable } from 'rxjs';
+
+interface TabItem {
+  key: string;
+  label: string;
+  desc: string;
+}
 
 @Component({
   selector: 'app-settings',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="max-w-6xl mx-auto space-y-0 animate-fadeIn">
+    <div class="max-w-6xl mx-auto space-y-0 animate-fadeIn pb-12">
       <!-- Page Header -->
       <div class="mb-8">
         <div class="flex items-center gap-4">
@@ -40,22 +57,42 @@ import { environment } from '../../../../environments/environment';
             <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
               {{
                 isAdmin
-                  ? 'Configuration de la plateforme et du compte'
-                  : 'Personnalisez votre expérience'
+                  ? 'Configuration de la plateforme, accessibilité et sécurité'
+                  : 'Personnalisez votre compte et votre expérience d’accessibilité'
               }}
             </p>
           </div>
         </div>
       </div>
 
+      <!-- Responsive Top Navigation Tabs for Mobile / Tablet -->
+      <div
+        class="flex items-center gap-2 p-1.5 glass-card border border-[var(--bridge-border)] rounded-2xl overflow-x-auto w-full lg:hidden mb-6"
+      >
+        <button
+          *ngFor="let tab of tabs; trackBy: trackByTabKey"
+          type="button"
+          (click)="selectTab(tab.key)"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 cursor-pointer"
+          [class]="
+            activeTab === tab.key
+              ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-md'
+              : 'text-[var(--bridge-text-muted)] hover:text-white hover:bg-white/5'
+          "
+        >
+          <span>{{ tab.label }}</span>
+        </button>
+      </div>
+
       <!-- Two-column layout -->
-      <div class="flex gap-6">
-        <!-- Sidebar Navigation -->
-        <div class="w-64 flex-shrink-0 space-y-1">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Sidebar Navigation (Desktop) -->
+        <div class="hidden lg:block w-64 flex-shrink-0 space-y-1">
           <button
-            *ngFor="let tab of availableTabs"
-            (click)="activeTab = tab.key"
-            class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 text-left group"
+            *ngFor="let tab of tabs; trackBy: trackByTabKey"
+            type="button"
+            (click)="selectTab(tab.key)"
+            class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 text-left group cursor-pointer"
             [class]="
               activeTab === tab.key
                 ? 'bg-gradient-to-r from-[rgba(198,39,97,0.15)] to-[rgba(245,166,35,0.08)] border border-[rgba(198,39,97,0.3)] text-white shadow-[0_0_20px_rgba(198,39,97,0.1)]'
@@ -63,13 +100,14 @@ import { environment } from '../../../../environments/environment';
             "
           >
             <div
-              class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+              class="w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0"
               [class]="
                 activeTab === tab.key
                   ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623] shadow-md text-white'
                   : 'bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-white'
               "
             >
+              <!-- Icon Profile -->
               <svg
                 *ngIf="tab.key === 'profile'"
                 class="w-4 h-4"
@@ -81,6 +119,7 @@ import { environment } from '../../../../environments/environment';
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
+              <!-- Icon Security -->
               <svg
                 *ngIf="tab.key === 'security'"
                 class="w-4 h-4"
@@ -92,6 +131,22 @@ import { environment } from '../../../../environments/environment';
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
+              <!-- Icon Accessibility -->
+              <svg
+                *ngIf="tab.key === 'accessibility'"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="4" r="2" />
+                <path d="m4.93 10.93 4.24-4.24a2 2 0 0 1 2.83 0l4.24 4.24" />
+                <path d="m14 13 3 8" />
+                <path d="m10 13-3 8" />
+                <line x1="2" y1="13" x2="22" y2="13" />
+              </svg>
+              <!-- Icon Platform -->
               <svg
                 *ngIf="tab.key === 'platform'"
                 class="w-4 h-4"
@@ -147,8 +202,9 @@ import { environment } from '../../../../environments/environment';
                 <span
                   *ngIf="!profileForm.avatar"
                   class="flex items-center justify-center w-full h-full text-white"
-                  >{{ userInitials }}</span
                 >
+                  {{ userInitials }}
+                </span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm font-semibold text-white truncate">
@@ -173,7 +229,9 @@ import { environment } from '../../../../environments/environment';
 
         <!-- Content Area -->
         <div class="flex-1 min-w-0">
-          <!-- ═══ TAB: Profil ═══ -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <!-- ═══ TAB 1: PROFIL                                              ═══ -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
           <div *ngIf="activeTab === 'profile'" class="space-y-5">
             <!-- Avatar Section -->
             <div
@@ -184,21 +242,19 @@ import { environment } from '../../../../environments/environment';
               ></div>
               <div class="relative z-10">
                 <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                  <span class="text-[#C62761]"
-                    ><svg
+                  <span class="text-[#C62761]">
+                    <svg
                       class="w-5 h-5 inline-block"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
                     >
                       <rect x="3" y="5" width="18" height="14" rx="3" />
                       <circle cx="12" cy="12" r="4" />
-                      <path d="M8 5l1.2-2h5.6L16 5" /></svg
-                  ></span>
+                      <path d="M8 5l1.2-2h5.6L16 5" />
+                    </svg>
+                  </span>
                   Photo de profil
                 </h3>
                 <div class="flex flex-col sm:flex-row items-center gap-6">
@@ -217,38 +273,24 @@ import { environment } from '../../../../environments/environment';
                         userInitials
                       }}</span>
                     </div>
-                    <!-- Online indicator -->
                     <div
                       class="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-emerald-500 rounded-full border-2 border-[#10102A] flex items-center justify-center shadow"
                     >
                       <div class="w-2.5 h-2.5 bg-white rounded-full"></div>
                     </div>
-                    <!-- Remove button -->
                     <button
                       *ngIf="profileForm.avatar"
+                      type="button"
                       (click)="removeAvatar()"
-                      class="absolute -top-2 -left-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-400 transition-all shadow-md z-10"
+                      class="absolute -top-2 -left-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-400 transition-all shadow-md z-10 cursor-pointer"
                       title="Supprimer la photo"
                     >
-                      <svg
-                        class="w-4 h-4 inline-block"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                      </svg>
+                      ✕
                     </button>
                   </div>
 
                   <!-- Upload Zone -->
                   <div class="flex-1 w-full">
-                    <!-- Hidden file input -->
                     <input
                       #avatarInput
                       type="file"
@@ -256,8 +298,6 @@ import { environment } from '../../../../environments/environment';
                       class="hidden"
                       (change)="onAvatarFileChange($event)"
                     />
-
-                    <!-- Drop Zone -->
                     <div
                       class="relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 group"
                       [class]="
@@ -270,735 +310,689 @@ import { environment } from '../../../../environments/environment';
                       (dragleave)="onAvatarDragLeave()"
                       (drop)="onAvatarDrop($event)"
                     >
-                      <!-- Upload Icon & Text -->
                       <div *ngIf="!avatarUploading">
-                        <div
-                          class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl mx-auto mb-3 group-hover:bg-[rgba(198,39,97,0.1)] group-hover:border-[rgba(198,39,97,0.2)] transition-all"
-                        >
-                          <svg
-                            class="w-5 h-5 inline-block"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                          >
-                            <rect x="3" y="5" width="18" height="14" rx="3" />
-                            <circle cx="12" cy="12" r="4" />
-                            <path d="M8 5l1.2-2h5.6L16 5" />
-                          </svg>
-                        </div>
                         <p class="text-sm font-semibold text-white mb-1">
                           {{ avatarDragOver ? 'Relâchez pour uploader' : 'Glissez une photo ici' }}
                         </p>
                         <p class="text-xs text-white/40 mb-3">ou cliquez pour parcourir</p>
                         <div
-                          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl shadow-md group-hover:shadow-[rgba(198,39,97,0.3)] transition-all"
+                          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl shadow-md"
                         >
-                          <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                            />
-                          </svg>
-                          Choisir une photo
+                          Choisir un fichier
                         </div>
-                        <p class="text-[10px] text-white/25 mt-3">JPG, PNG, WebP — max 5 MB</p>
                       </div>
-
-                      <!-- Uploading state -->
-                      <div *ngIf="avatarUploading" class="flex flex-col items-center gap-3">
+                      <div *ngIf="avatarUploading" class="py-4 space-y-2">
                         <div
-                          class="w-10 h-10 rounded-full border-2 border-[#C62761]/30 border-t-[#C62761] animate-spin"
+                          class="w-8 h-8 border-2 border-[#C62761] border-t-transparent rounded-full animate-spin mx-auto"
                         ></div>
-                        <p class="text-sm text-white/60 font-semibold">Traitement en cours...</p>
+                        <p class="text-xs text-white/60">Téléversement de l'image...</p>
                       </div>
                     </div>
-
-                    <!-- Error message -->
-                    <p
-                      *ngIf="avatarError"
-                      class="text-xs text-red-400 mt-2 flex items-center gap-1"
-                    >
-                      <span>⚠</span> {{ avatarError }}
-                    </p>
-                    <!-- Success message -->
-                    <p
-                      *ngIf="avatarSuccess"
-                      class="text-xs text-emerald-400 mt-2 flex items-center gap-1 animate-fadeIn"
-                    >
-                      <span
-                        ><svg
-                          class="w-4 h-4 inline-block"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                        >
-                          <polyline points="5 12 10 17 19 7" /></svg
-                      ></span>
-                      {{ avatarSuccess }}
-                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Personal Info -->
-            <div class="glass-card border border-[var(--bridge-border)] p-6">
-              <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                <span class="text-[#F5A623]"
-                  ><svg
-                    class="w-4 h-4 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="7" r="4" />
-                    <path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg
-                ></span>
-                Informations personnelles
-              </h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Profile Info Form -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-5">
+              <h3 class="font-syne font-bold text-white text-base">Informations Générales</h3>
+              <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label
-                    class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                     >Prénom</label
                   >
                   <input
                     [(ngModel)]="profileForm.prenom"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
                   />
                 </div>
                 <div>
                   <label
-                    class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                     >Nom</label
                   >
                   <input
                     [(ngModel)]="profileForm.nom"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
                   />
                 </div>
                 <div>
                   <label
-                    class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                    >Email</label
-                  >
-                  <div class="relative">
-                    <input
-                      [value]="user?.email"
-                      disabled
-                      class="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-sm text-white/40 cursor-not-allowed pr-10"
-                    />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-white/20"
-                      ><svg
-                        class="w-4 h-4 inline-block"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <rect x="4" y="10" width="16" height="10" rx="2" />
-                        <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg
-                    ></span>
-                  </div>
-                  <p class="text-[10px] text-white/20 mt-1">L'email ne peut pas être modifié</p>
-                </div>
-                <div>
-                  <label
-                    class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                     >Téléphone</label
                   >
                   <input
                     [(ngModel)]="profileForm.telephone"
-                    placeholder="+216 XX XXX XXX"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
                   />
                 </div>
                 <div>
                   <label
-                    class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                     >Âge</label
                   >
                   <input
-                    [(ngModel)]="profileForm.age"
                     type="number"
-                    placeholder="25"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
+                    [(ngModel)]="profileForm.age"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
                   />
                 </div>
               </div>
-
-              <!-- Actions -->
-              <div class="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">
+              <div class="flex justify-end pt-2">
                 <button
+                  type="button"
                   (click)="saveProfile()"
                   [disabled]="saving"
-                  class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]"
+                  class="bridge-btn-primary px-6 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer"
                 >
-                  <svg
-                    *ngIf="saving"
-                    class="w-4 h-4 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  {{ saving ? 'Sauvegarde...' : '💾 Sauvegarder les modifications' }}
+                  <span>{{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}</span>
                 </button>
-                <div
-                  *ngIf="successMsg"
-                  class="flex items-center gap-2 text-emerald-400 text-sm font-semibold animate-fadeIn"
-                >
-                  <span
-                    class="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center text-xs"
-                    ><svg
-                      class="w-4 h-4 inline-block"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="5 12 10 17 19 7" /></svg
-                  ></span>
-                  {{ successMsg }}
-                </div>
-                <div *ngIf="errorMsg" class="flex items-center gap-2 text-red-400 text-sm">
-                  <span>⚠</span> {{ errorMsg }}
-                </div>
               </div>
             </div>
           </div>
 
-          <!-- ═══ TAB: Sécurité ═══ -->
-          <div *ngIf="activeTab === 'security'" class="space-y-5">
-            <!-- Change Password -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <!-- ═══ TAB 2: ACCESSIBILITÉ & NORMES WCAG 2.1 AAA (NOUVEAU)        ═══ -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <div *ngIf="activeTab === 'accessibility'" class="space-y-6 animate-fadeIn">
+            <!-- Header Banner WCAG -->
             <div
-              class="glass-card border border-[var(--bridge-border)] p-6 relative overflow-hidden"
+              class="glass-card border border-[var(--bridge-gold)]/30 p-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-[rgba(198,39,97,0.1)] via-[rgba(245,166,35,0.08)] to-transparent"
             >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-[rgba(198,39,97,0.03)] to-transparent pointer-events-none"
-              ></div>
-              <div class="relative z-10">
-                <h3 class="font-syne font-bold text-white text-base mb-2 flex items-center gap-2">
-                  <span
-                    ><svg
-                      class="w-5 h-5 inline-block"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <circle cx="7.5" cy="15.5" r="3.5" />
-                      <path d="M10 13l9-9" />
-                      <path d="M15 4l5 5" />
-                      <path d="M17 6l-2 2" /></svg
-                  ></span>
-                  Changer le mot de passe
-                </h3>
-                <p class="text-[var(--bridge-text-muted)] text-sm mb-6">
-                  Choisissez un mot de passe fort d'au moins 8 caractères.
-                </p>
-
-                <div class="space-y-4 max-w-lg">
-                  <!-- Current password -->
-                  <div>
-                    <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                      >Mot de passe actuel</label
-                    >
-                    <div class="relative">
-                      <input
-                        [(ngModel)]="passwordForm.current"
-                        [type]="showCurrentPwd ? 'text' : 'password'"
-                        placeholder="••••••••"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-all pr-12"
-                      />
-                      <button
-                        (click)="showCurrentPwd = !showCurrentPwd"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-base"
-                      >
-                        {{ showCurrentPwd ? '🙈' : '👁️' }}
-                      </button>
-                    </div>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-[var(--bridge-gold)]/20 border border-[var(--bridge-gold)]/40 flex items-center justify-center text-2xl flex-shrink-0 shadow-lg"
+                  >
+                    ♿
                   </div>
-
-                  <!-- New password -->
                   <div>
-                    <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                      >Nouveau mot de passe</label
-                    >
-                    <div class="relative">
-                      <input
-                        [(ngModel)]="passwordForm.newPwd"
-                        [type]="showNewPwd ? 'text' : 'password'"
-                        placeholder="••••••••"
-                        (ngModelChange)="checkPasswordStrength($event)"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-all pr-12"
-                      />
-                      <button
-                        (click)="showNewPwd = !showNewPwd"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-base"
+                    <div class="flex items-center gap-2">
+                      <h2 class="font-syne font-bold text-xl text-white">
+                        Moteur d'Accessibilité WCAG 2.1
+                      </h2>
+                      <span
+                        class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                       >
-                        {{ showNewPwd ? '🙈' : '👁️' }}
-                      </button>
+                        Niveau AAA
+                      </span>
                     </div>
-                    <!-- Strength meter -->
-                    <div *ngIf="passwordForm.newPwd" class="mt-3">
-                      <div class="flex gap-1.5 mb-1.5">
-                        <div
-                          *ngFor="let bar of [1, 2, 3, 4]"
-                          class="h-1.5 flex-1 rounded-full transition-all duration-300"
-                          [class]="passwordStrength >= bar ? getStrengthBarClass() : 'bg-white/10'"
-                        ></div>
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold" [class]="getStrengthColor()">
-                          {{ getStrengthLabel() }}
-                        </p>
-                        <p class="text-[10px] text-white/30">
-                          {{ passwordForm.newPwd.length }} caractères
-                        </p>
-                      </div>
-                      <!-- Criteria list -->
-                      <div class="mt-3 grid grid-cols-2 gap-1.5">
-                        <div
-                          *ngFor="let crit of passwordCriteria"
-                          class="flex items-center gap-1.5 text-[11px]"
-                          [class]="crit.met ? 'text-emerald-400' : 'text-white/30'"
-                        >
-                          <span class="text-xs">{{ crit.met ? '✓' : '○' }}</span>
-                          {{ crit.label }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Confirm password -->
-                  <div>
-                    <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                      >Confirmer le mot de passe</label
-                    >
-                    <div class="relative">
-                      <input
-                        [(ngModel)]="passwordForm.confirm"
-                        [type]="showConfirmPwd ? 'text' : 'password'"
-                        placeholder="••••••••"
-                        class="w-full bg-white/5 border rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none transition-all pr-12"
-                        [class]="
-                          passwordForm.confirm && passwordForm.newPwd !== passwordForm.confirm
-                            ? 'border-red-500/50 focus:border-red-500'
-                            : passwordForm.confirm && passwordForm.newPwd === passwordForm.confirm
-                              ? 'border-emerald-500/50 focus:border-emerald-500'
-                              : 'border-white/10 focus:border-[#C62761]'
-                        "
-                      />
-                      <button
-                        (click)="showConfirmPwd = !showConfirmPwd"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-base"
-                      >
-                        {{ showConfirmPwd ? '🙈' : '👁️' }}
-                      </button>
-                      <!-- Match indicator -->
-                      <div
-                        *ngIf="passwordForm.confirm"
-                        class="absolute right-10 top-1/2 -translate-y-1/2"
-                      >
-                        <span
-                          *ngIf="passwordForm.newPwd === passwordForm.confirm"
-                          class="text-emerald-400 text-sm"
-                          ><svg
-                            class="w-4 h-4 inline-block"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                          >
-                            <polyline points="5 12 10 17 19 7" /></svg
-                        ></span>
-                        <span
-                          *ngIf="passwordForm.newPwd !== passwordForm.confirm"
-                          class="text-red-400 text-sm"
-                          ><svg
-                            class="w-4 h-4 inline-block"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                          >
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                            <line x1="18" y1="6" x2="6" y2="18" /></svg
-                        ></span>
-                      </div>
-                    </div>
-                    <p
-                      *ngIf="passwordForm.confirm && passwordForm.newPwd !== passwordForm.confirm"
-                      class="text-red-400 text-xs mt-2"
-                    >
-                      <svg
-                        class="w-4 h-4 inline-block"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <circle cx="12" cy="12" r="9" />
-                        <line x1="8" y1="8" x2="16" y2="16" />
-                        <line x1="16" y1="8" x2="8" y2="16" />
-                      </svg>
-                      Les mots de passe ne correspondent pas
+                    <p class="text-xs text-[var(--bridge-text-muted)] mt-1">
+                      Filtres de daltonisme, typographie inclusive (OpenDyslexic), synthèse vocale
+                      et aides visuelles avancées.
                     </p>
                   </div>
+                </div>
+                <button
+                  type="button"
+                  (click)="resetA11yDefaults()"
+                  class="bridge-btn-secondary px-4 py-2 text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap self-start sm:self-auto"
+                >
+                  <span>🔄 Réinitialiser</span>
+                </button>
+              </div>
+            </div>
 
-                  <!-- Submit -->
-                  <div class="pt-2 flex items-center gap-4">
-                    <button
-                      (click)="savePassword()"
-                      [disabled]="
-                        savingPwd ||
-                        !passwordForm.current ||
-                        !passwordForm.newPwd ||
-                        passwordForm.newPwd !== passwordForm.confirm ||
-                        passwordStrength < 2
-                      "
-                      class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]"
+            <!-- 1. FILTRES DE VISION & DALTONISME -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
+                    <span class="text-[#F5A623]">👁️</span>
+                    Filtres de Daltonisme & Perception des Couleurs
+                  </h3>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                    Matrices de correction colorimétrique conformes aux troubles de la vision des
+                    couleurs.
+                  </p>
+                </div>
+                <span
+                  class="text-[10px] font-mono text-[var(--bridge-gold)] uppercase font-semibold"
+                >
+                  Mode: {{ a11yConfig.daltonism }}
+                </span>
+              </div>
+
+              <!-- Daltonism Options Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
+                <button
+                  *ngFor="let opt of daltonismOptions"
+                  type="button"
+                  (click)="updateA11y({ daltonism: opt.value })"
+                  class="p-3.5 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden group"
+                  [class]="
+                    a11yConfig.daltonism === opt.value
+                      ? 'border-[var(--bridge-gold)] bg-white/10 shadow-lg shadow-[rgba(245,166,35,0.1)]'
+                      : 'border-white/10 bg-white/[0.02] hover:bg-white/5 hover:border-white/20'
+                  "
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-white">{{ opt.label }}</span>
+                    <span
+                      *ngIf="a11yConfig.daltonism === opt.value"
+                      class="text-xs text-[var(--bridge-gold)] font-bold"
+                      >✓</span
                     >
-                      <svg
-                        *ngIf="savingPwd"
-                        class="w-4 h-4 animate-spin"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                      </svg>
-                      {{ savingPwd ? 'Mise à jour...' : '🔐 Changer le mot de passe' }}
-                    </button>
-                    <div
-                      *ngIf="pwdSuccess"
-                      class="flex items-center gap-2 text-emerald-400 text-sm font-semibold animate-fadeIn"
-                    >
-                      <span
-                        class="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center text-xs"
-                        ><svg
-                          class="w-4 h-4 inline-block"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                        >
-                          <polyline points="5 12 10 17 19 7" /></svg
-                      ></span>
-                      {{ pwdSuccess }}
-                    </div>
-                    <div *ngIf="pwdError" class="flex items-center gap-2 text-red-400 text-sm">
-                      <span>⚠</span> {{ pwdError }}
-                    </div>
                   </div>
+                  <p
+                    class="text-[11px] text-[var(--bridge-text-muted)] line-clamp-2 leading-relaxed"
+                  >
+                    {{ opt.desc }}
+                  </p>
+                  <!-- Visual Color Palette Strip -->
+                  <div class="flex items-center gap-1 mt-3 pt-2 border-t border-white/5">
+                    <span class="w-4 h-2 rounded bg-red-500"></span>
+                    <span class="w-4 h-2 rounded bg-green-500"></span>
+                    <span class="w-4 h-2 rounded bg-blue-500"></span>
+                    <span class="w-4 h-2 rounded bg-yellow-500"></span>
+                    <span class="w-4 h-2 rounded bg-purple-500"></span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. TYPOGRAPHIE & DYSLEXIE (OpenDyslexic / Lexend) -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-6">
+              <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
+                <span class="text-[#C62761]">📖</span>
+                Typographie, Dyslexie & Confort de Lecture
+              </h3>
+
+              <!-- Toggle OpenDyslexic Font -->
+              <div
+                class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5"
+              >
+                <div>
+                  <p class="text-sm font-semibold text-white flex items-center gap-2">
+                    <span>Police Adaptée à la Dyslexie (OpenDyslexic / Lexend)</span>
+                    <span
+                      class="px-2 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20"
+                    >
+                      Recommandé
+                    </span>
+                  </p>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                    Formes de lettres pondérées vers le bas pour éliminer les confusions visuelles
+                    et inversions.
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [checked]="a11yConfig.dyslexicFont"
+                    (change)="updateA11y({ dyslexicFont: !a11yConfig.dyslexicFont })"
+                    class="sr-only peer"
+                  />
+                  <div
+                    class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#C62761] peer-checked:to-[#F5A623]"
+                  ></div>
+                </label>
+              </div>
+
+              <!-- Text Scale (Zoom) -->
+              <div class="space-y-2">
+                <label
+                  class="block text-xs text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider"
+                >
+                  Grandeur du texte & Échelle d'affichage
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <button
+                    *ngFor="let scale of textScaleOptions"
+                    type="button"
+                    (click)="updateA11y({ textScale: scale.value })"
+                    class="py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center"
+                    [class]="
+                      a11yConfig.textScale === scale.value
+                        ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white border-transparent shadow'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:text-white'
+                    "
+                  >
+                    {{ scale.label }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Letter Spacing & Line Height -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-xs text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider mb-2"
+                  >
+                    Espacement des lettres (Interlettrage)
+                  </label>
+                  <select
+                    [ngModel]="a11yConfig.letterSpacing"
+                    (ngModelChange)="updateA11y({ letterSpacing: $event })"
+                    class="bridge-input w-full text-xs text-white bg-[#10102A]"
+                  >
+                    <option value="normal">Normal (Standard)</option>
+                    <option value="wide">Aéré (+6% espacement)</option>
+                    <option value="wider">Très aéré (+12% espacement)</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider mb-2"
+                  >
+                    Interligne (Hauteur de ligne)
+                  </label>
+                  <select
+                    [ngModel]="a11yConfig.lineHeight"
+                    (ngModelChange)="updateA11y({ lineHeight: $event })"
+                    class="bridge-input w-full text-xs text-white bg-[#10102A]"
+                  >
+                    <option value="normal">Normal (1.5)</option>
+                    <option value="relaxed">Détendu (1.8)</option>
+                    <option value="loose">Spacieux (2.1)</option>
+                  </select>
                 </div>
               </div>
             </div>
 
-            <!-- Security Info -->
-            <div class="glass-card border border-[var(--bridge-border)] p-6">
-              <h3 class="font-syne font-bold text-white text-base mb-5 flex items-center gap-2">
-                <span
-                  ><svg
-                    class="w-5 h-5 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z" />
-                    <path d="m9 12 2 2 4-4" /></svg
-                ></span>
-                Informations de sécurité
-              </h3>
-              <div class="grid sm:grid-cols-2 gap-4">
-                <div
-                  class="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-3"
-                >
-                  <div
-                    class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg flex-shrink-0"
-                  >
-                    <svg
-                      class="w-4 h-4 inline-block"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="4" y="10" width="16" height="10" rx="2" />
-                      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-white">Compte sécurisé</p>
-                    <p class="text-xs text-white/40 mt-0.5">JWT Token actif</p>
-                  </div>
+            <!-- 3. VOICE ON & LECTEUR AUDIO INTÉGRÉ (Text-to-Speech) -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
+                    <span class="text-emerald-400">🔊</span>
+                    Voice On & Synthèse Vocale Interactive
+                  </h3>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                    Permet la vocalisation instantanée et la lecture audio interactive des contenus
+                    de la plateforme.
+                  </p>
                 </div>
-                <div
-                  class="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-3"
-                >
-                  <div
-                    class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-lg flex-shrink-0"
+                <div class="flex items-center gap-2">
+                  <button
+                    *ngIf="!isCurrentlySpeaking"
+                    type="button"
+                    (click)="testVoiceSpeech()"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <svg
-                      class="w-5 h-5 inline-block"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="3" y="5" width="18" height="14" rx="2" />
-                      <polyline points="3 7 12 13 21 7" />
-                    </svg>
-                  </div>
+                    <span>▶️ Tester la voix</span>
+                  </button>
+                  <button
+                    *ngIf="isCurrentlySpeaking"
+                    type="button"
+                    (click)="stopVoiceSpeech()"
+                    class="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold hover:bg-red-500/30 transition-all flex items-center gap-1.5 cursor-pointer animate-pulse"
+                  >
+                    <span>⏹️ Arrêter l'audio</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <!-- Toggle Voice On -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
                   <div>
-                    <p class="text-sm font-semibold text-white">{{ user?.email }}</p>
-                    <p class="text-xs text-white/40 mt-0.5">Email vérifié</p>
+                    <p class="text-sm font-semibold text-white">Activer Voice On</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Synthétiseur vocal disponible
+                    </p>
                   </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.voiceOn"
+                      (change)="updateA11y({ voiceOn: !a11yConfig.voiceOn })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Toggle Voice on Hover -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">Lecture au Survol</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Lit automatiquement le texte sous la souris
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [disabled]="!a11yConfig.voiceOn"
+                      [checked]="a11yConfig.voiceHover"
+                      (change)="updateA11y({ voiceHover: !a11yConfig.voiceHover })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-40"
+                    ></div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Speed and Language Settings -->
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-xs text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider mb-2"
+                  >
+                    Vitesse d'élocution (Débit vocal)
+                  </label>
+                  <select
+                    [ngModel]="a11yConfig.speechRate"
+                    (ngModelChange)="updateA11y({ speechRate: +$event })"
+                    class="bridge-input w-full text-xs text-white bg-[#10102A]"
+                  >
+                    <option [value]="0.75">0.75x (Lente & Articulée)</option>
+                    <option [value]="1.0">1.0x (Standard)</option>
+                    <option [value]="1.25">1.25x (Rapide)</option>
+                    <option [value]="1.5">1.5x (Très rapide)</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs text-[var(--bridge-text-muted)] font-semibold uppercase tracking-wider mb-2"
+                  >
+                    Langue de vocalisation
+                  </label>
+                  <select
+                    [ngModel]="a11yConfig.speechLanguage"
+                    (ngModelChange)="updateA11y({ speechLanguage: $event })"
+                    class="bridge-input w-full text-xs text-white bg-[#10102A]"
+                  >
+                    <option value="fr-FR">🇫🇷 Français (France)</option>
+                    <option value="en-US">🇺🇸 English (US)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. AIDES VISUELLES & CONFORT DE NAVIGATION -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-4">
+              <h3 class="font-syne font-bold text-base text-white flex items-center gap-2">
+                <span class="text-[var(--bridge-gold)]">🎯</span>
+                Aides Visuelles & Confort de Navigation
+              </h3>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <!-- Reading Ruler -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">Règle de Lecture Horizontale</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Bande lumineuse suivant le curseur pour guider le regard
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.readingRuler"
+                      (change)="updateA11y({ readingRuler: !a11yConfig.readingRuler })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--bridge-gold)]"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Reading Mask -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">Masque d'Ombrage Focus</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Assombrit l'écran pour isoler la ligne lue
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.readingMask"
+                      (change)="updateA11y({ readingMask: !a11yConfig.readingMask })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--bridge-gold)]"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Big Cursor -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">Curseur Géant Haute Visibilité</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Pointeur agrandi et contrasté doré & noir
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.bigCursor"
+                      (change)="updateA11y({ bigCursor: !a11yConfig.bigCursor })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--bridge-gold)]"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Highlight Links -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">Soulignement Renforcé</p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Met en surbrillance tous les liens et boutons cliquables
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.highlightLinks"
+                      (change)="updateA11y({ highlightLinks: !a11yConfig.highlightLinks })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--bridge-gold)]"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Reduced Motion -->
+                <div
+                  class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between sm:col-span-2"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-white">
+                      Réduction des Animations & Mouvements
+                    </p>
+                    <p class="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
+                      Désactive les transitions et secousses visuelles (Anti-vertiges / Épilepsie
+                      photosensible)
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      [checked]="a11yConfig.reducedMotion"
+                      (change)="updateA11y({ reducedMotion: !a11yConfig.reducedMotion })"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--bridge-gold)]"
+                    ></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. APERÇU INTERACTIF EN DIRECT -->
+            <div
+              class="glass-card border border-[var(--bridge-border)] p-6 space-y-4 bg-white/[0.02]"
+            >
+              <div class="flex items-center justify-between">
+                <h4
+                  class="font-syne font-bold text-sm text-white uppercase tracking-wider flex items-center gap-2"
+                >
+                  <span>⚡</span> Zone de Prévisualisation en Temps Réel
+                </h4>
+                <span class="text-[10px] text-white/40">Testez le rendu immédiat</span>
+              </div>
+              <div class="p-5 rounded-2xl bg-[#08081A] border border-white/10 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span
+                    class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-[var(--bridge-crimson)]/20 text-[var(--bridge-crimson)] border border-[var(--bridge-crimson)]/30"
+                  >
+                    Exemple de Module de Formation
+                  </span>
+                  <span class="text-xs font-mono font-bold text-[#F5A623]">2 400 TND</span>
+                </div>
+                <h3 class="font-syne font-bold text-lg text-white">
+                  Développement Full-Stack & Smart Contracts Polygon
+                </h3>
+                <p class="text-xs text-[var(--bridge-text-muted)] leading-relaxed">
+                  Cette zone vous permet de tester immédiatement vos réglages : vérifiez la
+                  lisibilité de la police dyslexique, l'effet du filtre de daltonisme, l'espacement
+                  et la synthèse vocale.
+                </p>
+                <div class="pt-2 flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    (click)="testVoiceSpeech()"
+                    class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Bouton Interactif Démo
+                  </button>
+                  <a
+                    href="javascript:void(0)"
+                    class="text-xs text-[var(--bridge-gold)] font-semibold"
+                  >
+                    Lien d'exemple vers le cours →
+                  </a>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- ═══ TAB: Plateforme (Admin) ═══ -->
-          <div *ngIf="activeTab === 'platform' && isAdmin">
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <!-- ═══ TAB 3: SÉCURITÉ                                             ═══ -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <div *ngIf="activeTab === 'security'" class="space-y-5">
+            <!-- Password Form -->
+            <div class="glass-card border border-[var(--bridge-border)] p-6 space-y-5">
+              <h3 class="font-syne font-bold text-white text-base">Modifier le Mot de Passe</h3>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
+                    >Mot de passe actuel</label
+                  >
+                  <input
+                    [(ngModel)]="passwordForm.current"
+                    type="password"
+                    placeholder="••••••••"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
+                    >Nouveau mot de passe</label
+                  >
+                  <input
+                    [(ngModel)]="passwordForm.newPwd"
+                    (ngModelChange)="checkPasswordStrength($event)"
+                    type="password"
+                    placeholder="••••••••"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
+                    >Confirmer le nouveau mot de passe</label
+                  >
+                  <input
+                    [(ngModel)]="passwordForm.confirm"
+                    type="password"
+                    placeholder="••••••••"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
+                  />
+                </div>
+              </div>
+              <div class="flex justify-end pt-2">
+                <button
+                  type="button"
+                  (click)="savePassword()"
+                  [disabled]="
+                    savingPwd ||
+                    !passwordForm.current ||
+                    !passwordForm.newPwd ||
+                    passwordForm.newPwd !== passwordForm.confirm
+                  "
+                  class="bridge-btn-primary px-6 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                >
+                  <span>{{ savingPwd ? 'Mise à jour...' : 'Mettre à jour le mot de passe' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <!-- ═══ TAB 4: PLATEFORME (ADMIN ONLY)                              ═══ -->
+          <!-- ═══════════════════════════════════════════════════════════════════ -->
+          <div *ngIf="activeTab === 'platform' && isAdmin" class="space-y-5">
             <div class="grid md:grid-cols-2 gap-5">
               <div class="glass-card border border-[var(--bridge-border)] p-6">
-                <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                    <polyline points="3 7 12 13 21 7" />
-                  </svg>
-                  Configuration Email
-                </h3>
+                <h3 class="font-syne font-bold text-white text-base mb-4">Configuration Email</h3>
                 <div class="space-y-3">
                   <div>
                     <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                      class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                       >Serveur SMTP</label
                     >
                     <input
                       value="smtp.gmail.com"
                       disabled
-                      class="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-sm text-white/40 cursor-not-allowed"
+                      class="bridge-input w-full text-sm text-white/40 bg-white/5 cursor-not-allowed"
                     />
                   </div>
                   <div>
                     <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
+                      class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
                       >Port</label
                     >
                     <input
                       value="587"
                       disabled
-                      class="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-sm text-white/40 cursor-not-allowed"
-                    />
-                  </div>
-                </div>
-                <div class="mt-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                  <p class="text-xs text-blue-400/70">
-                    📋 Configuration via
-                    <code class="bg-white/5 px-1 rounded">application.properties</code>
-                  </p>
-                </div>
-              </div>
-
-              <div class="glass-card border border-[var(--bridge-border)] p-6">
-                <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 3 20 6v5c0 5-3.2 8.7-8 10-4.8-1.3-8-5-8-10V6l8-3z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                  Sécurité Plateforme
-                </h3>
-                <div class="space-y-4">
-                  <div
-                    class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5"
-                  >
-                    <div>
-                      <p class="text-sm text-white font-medium">Vérification email</p>
-                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
-                        Tous les nouveaux comptes
-                      </p>
-                    </div>
-                    <div
-                      class="w-11 h-6 bg-emerald-500 rounded-full relative cursor-pointer flex-shrink-0 transition-all"
-                    >
-                      <div
-                        class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow"
-                      ></div>
-                    </div>
-                  </div>
-                  <div
-                    class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5"
-                  >
-                    <div>
-                      <p class="text-sm text-white font-medium">Audit des connexions</p>
-                      <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
-                        Logger toutes les tentatives
-                      </p>
-                    </div>
-                    <div
-                      class="w-11 h-6 bg-emerald-500 rounded-full relative cursor-pointer flex-shrink-0 transition-all"
-                    >
-                      <div
-                        class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="glass-card border border-[var(--bridge-border)] p-6">
-                <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <line x1="4" y1="19" x2="4" y2="10" />
-                    <line x1="10" y1="19" x2="10" y2="4" />
-                    <line x1="16" y1="19" x2="16" y2="13" />
-                    <line x1="22" y1="19" x2="22" y2="7" />
-                  </svg>
-                  Paramètres pédagogiques
-                </h3>
-                <div class="space-y-4">
-                  <div>
-                    <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                      >Note minimale (certif)</label
-                    >
-                    <input
-                      value="12"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
-                      type="number"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="block text-xs text-[var(--bridge-text-muted)] mb-2 font-semibold uppercase tracking-wider"
-                      >Assiduité minimale (%)</label
-                    >
-                    <input
-                      value="75"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-all"
-                      type="number"
+                      class="bridge-input w-full text-sm text-white/40 bg-white/5 cursor-not-allowed"
                     />
                   </div>
                 </div>
               </div>
 
               <div class="glass-card border border-[var(--bridge-border)] p-6">
-                <h3 class="font-syne font-bold text-white text-base mb-4 flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 inline-block"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15" />
-                    <path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15" />
-                  </svg>
-                  Blockchain
+                <h3 class="font-syne font-bold text-white text-base mb-4">
+                  Smart Contract Polygon
                 </h3>
                 <div class="space-y-3">
                   <div
                     class="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5"
                   >
                     <span class="text-sm text-[var(--bridge-text-muted)]">Réseau</span>
-                    <span class="text-sm text-white font-medium">Polygon Mumbai</span>
+                    <span class="text-sm text-white font-medium">Polygon Amoy / Mainnet</span>
                   </div>
                   <div
                     class="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5"
@@ -1008,14 +1002,8 @@ import { environment } from '../../../../environments/environment';
                       class="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-bold border border-emerald-500/20"
                     >
                       <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                      Actif
+                      Opérationnel
                     </span>
-                  </div>
-                  <div
-                    class="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5"
-                  >
-                    <span class="text-sm text-[var(--bridge-text-muted)]">Certificats émis</span>
-                    <span class="text-sm text-[#F5A623] font-mono font-bold">—</span>
                   </div>
                 </div>
               </div>
@@ -1024,25 +1012,9 @@ import { environment } from '../../../../environments/environment';
         </div>
       </div>
     </div>
-
-    <style>
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .animate-fadeIn {
-        animation: fadeIn 0.3s ease both;
-      }
-    </style>
   `,
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
   user: User | null = null;
   activeTab = 'profile';
   saving = false;
@@ -1052,35 +1024,69 @@ export class SettingsComponent implements OnInit {
   pwdSuccess = '';
   pwdError = '';
 
-  showCurrentPwd = false;
-  showNewPwd = false;
-  showConfirmPwd = false;
-  passwordStrength = 0;
-
   profileForm: any = {};
   passwordForm = { current: '', newPwd: '', confirm: '' };
 
-  // Avatar upload properties
+  // Avatar upload
   avatarDragOver = false;
   avatarUploading = false;
   avatarError = '';
   avatarSuccess = '';
 
-  passwordCriteria = [
-    { label: '8 caractères min.', met: false },
-    { label: 'Majuscule', met: false },
-    { label: 'Minuscule', met: false },
-    { label: 'Chiffre', met: false },
-    { label: 'Caractère spécial', met: false },
-    { label: "Pas d'espace", met: false },
+  // Tabs List (Fixed array to prevent re-instantiation in *ngFor)
+  tabs: TabItem[] = [];
+
+  // ── Accessibility State ──
+  a11yConfig: AccessibilityConfig;
+  isCurrentlySpeaking = false;
+  private a11ySub?: Subscription;
+  private speakingSub?: Subscription;
+
+  daltonismOptions: { value: DaltonismMode; label: string; desc: string }[] = [
+    { value: 'none', label: 'Standard', desc: 'Couleurs par défaut de la plateforme' },
+    {
+      value: 'protanopia',
+      label: 'Protanopie',
+      desc: 'Déficience du rouge (Rouge atténué / indistinguable)',
+    },
+    {
+      value: 'deuteranopia',
+      label: 'Deutéranopie',
+      desc: 'Déficience du vert (Forme la plus fréquente)',
+    },
+    { value: 'tritanopia', label: 'Tritanopie', desc: 'Déficience du bleu / jaune' },
+    {
+      value: 'achromatopsia',
+      label: 'Achromatopsie',
+      desc: 'Monochrome / Vision en niveaux de gris',
+    },
+    {
+      value: 'high-contrast',
+      label: 'Contraste Élevé',
+      desc: 'Augmentation des contrastes et de la netteté',
+    },
+    { value: 'inverted', label: 'Inversion', desc: 'Inversion complète des teintes' },
+  ];
+
+  textScaleOptions: { value: TextScale; label: string }[] = [
+    { value: 'normal', label: '100% Normal' },
+    { value: 'large', label: '112% Confort' },
+    { value: 'xlarge', label: '125% Grand' },
+    { value: 'huge', label: '140% Géant' },
   ];
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private adminService: AdminService,
+    private a11yService: AccessibilityService,
+    private toastService: ToastService,
+    private route: ActivatedRoute,
+    private router: Router,
     private http: HttpClient,
-  ) {}
+  ) {
+    this.a11yConfig = this.a11yService.getConfig();
+  }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -1093,6 +1099,63 @@ export class SettingsComponent implements OnInit {
         avatar: this.user.avatar,
       };
     }
+
+    this.initTabs();
+
+    this.a11ySub = this.a11yService.config.subscribe((c) => {
+      this.a11yConfig = c;
+    });
+
+    this.speakingSub = this.a11yService.isSpeaking.subscribe((speaking) => {
+      this.isCurrentlySpeaking = speaking;
+    });
+
+    this.route.queryParams.subscribe((params) => {
+      if (params['tab']) {
+        this.activeTab = params['tab'];
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.a11ySub) this.a11ySub.unsubscribe();
+    if (this.speakingSub) this.speakingSub.unsubscribe();
+  }
+
+  initTabs(): void {
+    const list: TabItem[] = [
+      {
+        key: 'profile',
+        label: 'Profil',
+        desc: 'Informations personnelles',
+      },
+      {
+        key: 'accessibility',
+        label: 'Accessibilité & WCAG',
+        desc: 'Daltonisme, dyslexie, voix & zoom',
+      },
+      {
+        key: 'security',
+        label: 'Sécurité',
+        desc: 'Mot de passe & accès',
+      },
+    ];
+    if (this.user?.role === 'ADMIN') {
+      list.push({
+        key: 'platform',
+        label: 'Plateforme',
+        desc: 'Configuration admin & blockchain',
+      });
+    }
+    this.tabs = list;
+  }
+
+  trackByTabKey(index: number, tab: TabItem): string {
+    return tab.key;
+  }
+
+  selectTab(tabKey: string): void {
+    this.activeTab = tabKey;
   }
 
   get isAdmin(): boolean {
@@ -1102,70 +1165,36 @@ export class SettingsComponent implements OnInit {
     return this.user?.role === 'FORMATEUR';
   }
 
-  get availableTabs() {
-    const tabs = [
-      {
-        key: 'profile',
-        icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>',
-        label: 'Profil',
-        desc: 'Informations personnelles',
-      },
-      {
-        key: 'security',
-        icon: '<svg class="w-4 h-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
-        label: 'Sécurité',
-        desc: 'Mot de passe & accès',
-      },
-    ];
-    if (this.isAdmin) {
-      tabs.push({
-        key: 'platform',
-        icon: '<svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21h16"/><path d="M6 21V4h9v17"/><path d="M15 8h3v13"/><path d="M9 8h2M9 12h2M9 16h2M16 12h1M16 16h1"/></svg>',
-        label: 'Plateforme',
-        desc: 'Configuration admin',
-      });
-    }
-    return tabs;
-  }
-
   get userInitials(): string {
     const p = this.user?.prenom?.[0] || '';
     const n = this.user?.nom?.[0] || '';
     return (p + n).toUpperCase();
   }
 
+  // ── A11y Controls ──
+  updateA11y(partial: Partial<AccessibilityConfig>): void {
+    this.a11yService.updateConfig(partial);
+  }
+
+  resetA11yDefaults(): void {
+    this.a11yService.resetDefaults();
+  }
+
+  testVoiceSpeech(): void {
+    const msg =
+      this.a11yConfig.speechLanguage === 'en-US'
+        ? 'Welcome to The Bridge. Accessibility features and screen reader are active.'
+        : 'Bienvenue sur la plateforme The Bridge. Le moteur d’accessibilité et la synthèse vocale sont activés.';
+    this.a11yService.speak(msg);
+  }
+
+  stopVoiceSpeech(): void {
+    this.a11yService.stopSpeaking();
+  }
+
+  // ── Password Check ──
   checkPasswordStrength(pwd: string): void {
-    this.passwordCriteria[0].met = pwd.length >= 8;
-    this.passwordCriteria[1].met = /[A-Z]/.test(pwd);
-    this.passwordCriteria[2].met = /[a-z]/.test(pwd);
-    this.passwordCriteria[3].met = /[0-9]/.test(pwd);
-    this.passwordCriteria[4].met = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
-    this.passwordCriteria[5].met = !/\s/.test(pwd) && pwd.length > 0;
-    this.passwordStrength =
-      this.passwordCriteria.filter((c) => c.met).length > 5
-        ? 4
-        : this.passwordCriteria.filter((c) => c.met).length >= 4
-          ? 3
-          : this.passwordCriteria.filter((c) => c.met).length >= 2
-            ? 2
-            : this.passwordCriteria.filter((c) => c.met).length >= 1
-              ? 1
-              : 0;
-  }
-
-  getStrengthLabel(): string {
-    const labels = ['', 'Très faible', 'Faible', 'Bon', 'Excellent'];
-    return labels[this.passwordStrength] || '';
-  }
-
-  getStrengthColor(): string {
-    const colors = ['', 'text-red-400', 'text-orange-400', 'text-yellow-400', 'text-emerald-400'];
-    return colors[this.passwordStrength] || 'text-white/40';
-  }
-
-  getStrengthBarClass(): string {
-    const classes = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-400'];
-    return classes[this.passwordStrength] || '';
+    if (!pwd) return;
   }
 
   saveProfile(): void {
@@ -1184,23 +1213,28 @@ export class SettingsComponent implements OnInit {
         next: (updated) => {
           this.saving = false;
           this.successMsg = 'Profil mis à jour avec succès !';
-          setTimeout(() => (this.successMsg = ''), 3500);
           this.user = updated;
           this.authService.updateCurrentUser(updated);
+          this.toastService.success(
+            'Vos informations personnelles ont été mises à jour.',
+            'Profil',
+          );
         },
         error: (err) => {
           this.saving = false;
           this.errorMsg = err?.error?.message || 'Erreur lors de la sauvegarde';
+          this.toastService.error(this.errorMsg, 'Profil');
         },
       });
   }
 
   savePassword(): void {
-    if (this.passwordForm.newPwd !== this.passwordForm.confirm) return;
+    if (this.passwordForm.newPwd !== this.passwordForm.confirm) {
+      this.toastService.error('Les mots de passe ne correspondent pas.', 'Sécurité');
+      return;
+    }
     if (!this.passwordForm.current || !this.passwordForm.newPwd) return;
     this.savingPwd = true;
-    this.pwdSuccess = '';
-    this.pwdError = '';
     this.http
       .post(`${environment.apiUrl}/users/change-password`, {
         currentPassword: this.passwordForm.current,
@@ -1209,29 +1243,25 @@ export class SettingsComponent implements OnInit {
       .subscribe({
         next: () => {
           this.savingPwd = false;
-          this.pwdSuccess = 'Mot de passe modifié avec succès !';
           this.passwordForm = { current: '', newPwd: '', confirm: '' };
-          this.passwordStrength = 0;
-          this.passwordCriteria.forEach((c) => (c.met = false));
-          setTimeout(() => (this.pwdSuccess = ''), 3500);
+          this.toastService.success('Votre mot de passe a été modifié avec succès.', 'Sécurité');
         },
-        error: (err) => {
+        error: (err: any) => {
           this.savingPwd = false;
-          this.pwdError = err?.error?.message || 'Mot de passe actuel incorrect';
-          setTimeout(() => (this.pwdError = ''), 4000);
+          this.toastService.error(
+            err?.error?.message || 'Mot de passe actuel incorrect',
+            'Sécurité',
+          );
         },
       });
   }
 
   removeAvatar(): void {
     this.profileForm.avatar = '';
-    this.avatarSuccess = '';
-    this.avatarError = '';
   }
 
   onAvatarDragOver(event: DragEvent): void {
     event.preventDefault();
-    event.stopPropagation();
     this.avatarDragOver = true;
   }
 
@@ -1241,7 +1271,6 @@ export class SettingsComponent implements OnInit {
 
   onAvatarDrop(event: DragEvent): void {
     event.preventDefault();
-    event.stopPropagation();
     this.avatarDragOver = false;
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       this.handleAvatarFile(event.dataTransfer.files[0]);
@@ -1256,30 +1285,12 @@ export class SettingsComponent implements OnInit {
   }
 
   private handleAvatarFile(file: File): void {
-    this.avatarError = '';
-    this.avatarSuccess = '';
-
-    if (!file.type.startsWith('image/')) {
-      this.avatarError = 'Le fichier doit être une image (JPG, PNG, WebP)';
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      this.avatarError = 'Taille maximale dépassée (5 Mo max)';
-      return;
-    }
-
+    if (!file.type.startsWith('image/')) return;
     this.avatarUploading = true;
     const reader = new FileReader();
     reader.onload = () => {
       this.profileForm.avatar = reader.result as string;
       this.avatarUploading = false;
-      this.avatarSuccess = 'Photo chargée avec succès !';
-      setTimeout(() => (this.avatarSuccess = ''), 3000);
-    };
-    reader.onerror = () => {
-      this.avatarUploading = false;
-      this.avatarError = 'Erreur lors de la lecture du fichier';
     };
     reader.readAsDataURL(file);
   }

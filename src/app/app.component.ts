@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AccessibilityService } from './core/services/accessibility.service';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,8 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
   title = 'the_bridge_frontend';
   theme: 'dark' | 'light' = 'dark';
+
+  constructor(private a11yService: AccessibilityService) {}
 
   ngOnInit(): void {
     const storedTheme = localStorage.getItem('bridge_theme') as 'dark' | 'light' | null;

@@ -1029,6 +1029,7 @@ export class DashboardLayoutComponent implements OnInit {
       this.menuItems = [
         { section: 'Principal' },
         { label: "Vue d'ensemble", route: '/dashboard/stagiaire', icon: 'home', exact: true },
+        { label: 'Agenda & Planning', route: '/dashboard/stagiaire/agenda', icon: 'calendar' },
         { label: 'Formations', route: '/dashboard/stagiaire/formations', icon: 'book' },
         { section: 'Personnel' },
         { label: 'Certificats', route: '/dashboard/stagiaire/certificats', icon: 'award' },
@@ -1078,6 +1079,7 @@ export class DashboardLayoutComponent implements OnInit {
     const url = this.router.url;
 
     // Stagiaire routes
+    if (url.includes('/dashboard/stagiaire/agenda')) return 'Mon Agenda & Séances';
     if (url.includes('/dashboard/stagiaire/certificats')) return 'Mes Certificats Blockchain';
     if (url.includes('/dashboard/stagiaire/paiements')) return 'Mes Paiements & Échéancier';
     if (url.includes('/dashboard/stagiaire/formations')) return 'Mes Formations';

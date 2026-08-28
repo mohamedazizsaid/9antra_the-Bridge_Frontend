@@ -213,6 +213,100 @@
   font-weight: 600 !important;
 }
 
+/* ─── Light Mode: Drawer / Side-Panel Override ─── */
+/* Fixes all slide-in drawers (agenda, feuille de présence, formateur-seances)
+   whose background is hardcoded as a dark inline style.
+   We apply a .bridge-drawer class and override it globally here.           */
+
+:root[data-theme="light"] .bridge-drawer-panel {
+  background: linear-gradient(135deg, #faf7f2 0%, #f3ede2 100%) !important;
+  border-left-color: rgba(198, 39, 97, 0.2) !important;
+  color: var(--bridge-text) !important;
+}
+
+/* Header bar inside drawer */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-drawer-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Info cards inside drawer (bg-white/[0.03], bg-white/[0.02]) */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-drawer-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Presence row cards */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-presence-row {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(0, 0, 0, 0.07) !important;
+}
+:root[data-theme="light"] .bridge-drawer-panel .bridge-presence-row.present {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+:root[data-theme="light"] .bridge-drawer-panel .bridge-presence-row.absent {
+  background: rgba(239, 68, 68, 0.07) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Footer bar inside drawer */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-drawer-footer {
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Progress bar track */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-progress-track {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Close button */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-drawer-close {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: var(--bridge-text-muted) !important;
+}
+:root[data-theme="light"] .bridge-drawer-panel .bridge-drawer-close:hover {
+  background: rgba(0, 0, 0, 0.12) !important;
+  color: var(--bridge-text) !important;
+}
+
+/* Presence stat counter text inside drawer */
+:root[data-theme="light"] .bridge-drawer-panel p.text-white\/50,
+:root[data-theme="light"] .bridge-drawer-panel .text-white\/30 {
+  color: var(--bridge-text-muted) !important;
+}
+
+/* Star / rating block */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-rating-card {
+  background: rgba(245, 166, 35, 0.1) !important;
+  border-color: rgba(245, 166, 35, 0.3) !important;
+}
+
+/* Presence status box (PRESENT / ABSENT / EN_ATTENTE) */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-presence-status {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Quick actions bar */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-quick-actions {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+:root[data-theme="light"] .bridge-drawer-panel .bridge-quick-actions span {
+  color: var(--bridge-text-muted) !important;
+}
+
+/* Fermer / Close footer button */
+:root[data-theme="light"] .bridge-drawer-panel .bridge-close-btn {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: var(--bridge-text) !important;
+}
+:root[data-theme="light"] .bridge-drawer-panel .bridge-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
 /* ─── Reset & Base ─── */
 *,
 *::before,
@@ -944,4 +1038,135 @@ input.bridge-input-icon {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ============================================================
+   WCAG 2.1 AAA Accessibility Engine — The Bridge
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap");
+
+/* ─── Daltonism & Color Vision Deficiency Filters ─── */
+.a11y-protanopia {
+  filter: url("#protanopia-filter") !important;
+}
+
+.a11y-deuteranopia {
+  filter: url("#deuteranopia-filter") !important;
+}
+
+.a11y-tritanopia {
+  filter: url("#tritanopia-filter") !important;
+}
+
+.a11y-achromatopsia {
+  filter: url("#achromatopsia-filter") grayscale(100%) contrast(110%) !important;
+}
+
+.a11y-high-contrast {
+  filter: contrast(160%) brightness(115%) !important;
+}
+
+.a11y-inverted {
+  filter: invert(100%) hue-rotate(180deg) !important;
+}
+
+/* ─── Dyslexia-Friendly Typography (OpenDyslexic / Lexend) ─── */
+body.a11y-dyslexic,
+body.a11y-dyslexic * {
+  font-family:
+    "Lexend",
+    system-ui,
+    -apple-system,
+    sans-serif !important;
+  letter-spacing: 0.04em !important;
+  word-spacing: 0.08em !important;
+}
+
+/* ─── Text Scaling & Zoom ─── */
+body.a11y-scale-large {
+  font-size: 112% !important;
+}
+
+body.a11y-scale-xlarge {
+  font-size: 125% !important;
+}
+
+body.a11y-scale-huge {
+  font-size: 140% !important;
+}
+
+/* ─── Text Spacing & Line Height ─── */
+body.a11y-spacing-wide * {
+  letter-spacing: 0.06em !important;
+}
+
+body.a11y-spacing-wider * {
+  letter-spacing: 0.12em !important;
+}
+
+body.a11y-lh-relaxed * {
+  line-height: 1.8 !important;
+}
+
+body.a11y-lh-loose * {
+  line-height: 2.1 !important;
+}
+
+/* ─── Big High-Visibility Cursor ─── */
+body.a11y-big-cursor,
+body.a11y-big-cursor * {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpolygon points='0,0 0,28 8,22 14,34 19,32 13,20 22,20' fill='%23F5A623' stroke='%23000000' stroke-width='2'/%3E%3C/svg%3E"),
+    auto !important;
+}
+
+/* ─── Highlight Links & Clickable Elements ─── */
+body.a11y-highlight-links a,
+body.a11y-highlight-links button:not(.btn-no-a11y) {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  outline: 2px dashed #f5a623 !important;
+  outline-offset: 2px !important;
+}
+
+/* ─── Forced Reduced Motion ─── */
+.a11y-reduced-motion,
+.a11y-reduced-motion *,
+.a11y-reduced-motion *::before,
+.a11y-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* ─── Reading Ruler & Mask ─── */
+.a11y-reading-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: rgba(245, 166, 35, 0.18);
+  border-top: 2px solid #f5a623;
+  border-bottom: 2px solid #f5a623;
+  pointer-events: none;
+  z-index: 999999;
+  box-shadow: 0 0 15px rgba(245, 166, 35, 0.3);
+}
+
+.a11y-reading-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+  z-index: 999998;
+  backdrop-filter: blur(1px);
+}
+
+.a11y-mask-top {
+  top: 0;
+}
+
+.a11y-mask-bottom {
+  bottom: 0;
 }

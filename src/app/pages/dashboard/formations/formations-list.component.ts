@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FormationService } from '../../../core/services/formation.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Formation } from '../../../core/models/formation.model';
 import { User } from '../../../core/models/user.model';
@@ -36,21 +37,30 @@ import { User } from '../../../core/models/user.model';
           </div>
           <div>
             <h1 class="font-syne font-bold text-2xl md:text-3xl text-white">
-              {{ isAdmin ? 'Gestion des Formations' : 'Mes Programmes de Formation' }}
+              {{
+                isAdmin
+                  ? 'Gestion des Formations'
+                  : isStagiaire
+                    ? 'Catalogue & Mes Formations'
+                    : 'Mes Programmes de Formation'
+              }}
             </h1>
             <p class="text-[var(--bridge-text-muted)] text-sm mt-0.5">
               {{
                 isAdmin
                   ? 'Supervision des cursus, phases pédagogiques et inscriptions'
-                  : "Consultez le catalogue et l'avancement de vos programmes de formation"
+                  : isStagiaire
+                    ? 'Inscrivez-vous aux programmes disponibles et accédez à vos cursus en cours'
+                    : 'Consultez vos programmes assignés et le suivi de vos apprenants'
               }}
             </p>
           </div>
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Archive toggle -->
+          <!-- Archive toggle (Admin only) -->
           <button
+            *ngIf="isAdmin"
             (click)="showArchived = !showArchived"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer"
             [class]="
@@ -62,14 +72,62 @@ import { User } from '../../../core/models/user.model';
             📦 {{ showArchived ? 'Actives' : 'Archivées' }}
           </button>
 
+          <!-- Add formation button (Admin only) -->
           <button
-            *ngIf="canCreate"
+            *ngIf="isAdmin"
             routerLink="/dashboard/formations/new"
             class="bridge-btn-primary px-4 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-lg"
           >
             <span>➕ Nouvelle Formation</span>
           </button>
         </div>
+      </div>
+
+      <!-- ─── Stagiaire Filter Tabs (Toutes / Mes Inscriptions / Disponibles) ─── -->
+      <div
+        *ngIf="isStagiaire"
+        class="flex items-center gap-2 border-b border-white/10 pb-3 flex-wrap"
+      >
+        <button
+          (click)="stagiaireViewFilter = 'all'"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+          [class]="
+            stagiaireViewFilter === 'all'
+              ? 'bg-white/10 text-white border border-white/20 shadow-md'
+              : 'text-white/50 hover:text-white hover:bg-white/5'
+          "
+        >
+          <span>🌐 Toutes les formations</span>
+          <span class="text-[10px] font-mono opacity-70">({{ formations.length }})</span>
+        </button>
+
+        <button
+          (click)="stagiaireViewFilter = 'mine'"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+          [class]="
+            stagiaireViewFilter === 'mine'
+              ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-lg'
+              : 'text-white/50 hover:text-white hover:bg-white/5'
+          "
+        >
+          <span>🎓 Mes inscriptions</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/20">
+            {{ myEnrolledCount }}
+          </span>
+        </button>
+
+        <button
+          (click)="stagiaireViewFilter = 'available'"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+          [class]="
+            stagiaireViewFilter === 'available'
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-md'
+              : 'text-white/50 hover:text-white hover:bg-white/5'
+          "
+        >
+          <span>✨ Disponibles à l'inscription</span>
+          <span class="text-[10px] font-mono opacity-70">({{ availableCount }})</span>
+        </button>
       </div>
 
       <!-- Loading Skeleton -->
@@ -93,20 +151,18 @@ import { User } from '../../../core/models/user.model';
       <!-- Search + Filter Bar -->
       <div *ngIf="!loading" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]"
-            ><svg
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--bridge-text-muted)]">
+            <svg
               class="w-4 h-4 inline-block"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
             >
               <circle cx="11" cy="11" r="7" />
-              <line x1="20" y1="20" x2="16.65" y2="16.65" /></svg
-          ></span>
+              <line x1="20" y1="20" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
           <input
             [(ngModel)]="searchQuery"
             type="text"
@@ -128,7 +184,7 @@ import { User } from '../../../core/models/user.model';
         <div class="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl p-1">
           <button
             (click)="viewMode = 'grid'"
-            class="px-3 py-2 rounded-lg text-sm transition-all"
+            class="px-3 py-2 rounded-lg text-sm transition-all cursor-pointer"
             [class]="
               viewMode === 'grid'
                 ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white'
@@ -139,7 +195,7 @@ import { User } from '../../../core/models/user.model';
           </button>
           <button
             (click)="viewMode = 'list'"
-            class="px-3 py-2 rounded-lg text-sm transition-all"
+            class="px-3 py-2 rounded-lg text-sm transition-all cursor-pointer"
             [class]="
               viewMode === 'list'
                 ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white'
@@ -151,7 +207,9 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
 
-      <!-- Grid View -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- GRID VIEW                                                   -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
       <div *ngIf="!loading && viewMode === 'grid'" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           *ngFor="let f of filteredFormations; let i = index"
@@ -163,6 +221,7 @@ import { User } from '../../../core/models/user.model';
           "
           [style.animation-delay]="i * 70 + 'ms'"
           style="animation: fadeSlideIn 0.4s ease both"
+          (click)="openFormation(f)"
         >
           <!-- Archived ribbon -->
           <div
@@ -181,15 +240,30 @@ import { User } from '../../../core/models/user.model';
                 {{ f.category || 'Général' }}
               </span>
               <div class="flex items-center gap-2">
+                <!-- Stagiaire Enrollment Badge -->
                 <span
+                  *ngIf="isStagiaire && isEnrolled(f.id)"
+                  class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                >
+                  ✓ Inscrit
+                </span>
+                <span
+                  *ngIf="isStagiaire && !isEnrolled(f.id)"
+                  class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)]"
+                >
+                  ✨ Disponible
+                </span>
+
+                <span
+                  *ngIf="!isStagiaire"
                   class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border"
                   [class]="getStatusClass(f.status)"
                 >
                   {{ getStatusLabel(f.status) }}
                 </span>
-                <span class="text-xs font-mono font-bold text-[#F5A623]"
-                  >{{ f.totalPrice | number }} TND</span
-                >
+                <span class="text-xs font-mono font-bold text-[#F5A623]">
+                  {{ f.totalPrice | number }} TND
+                </span>
               </div>
             </div>
 
@@ -203,7 +277,7 @@ import { User } from '../../../core/models/user.model';
             </p>
           </div>
 
-          <!-- Progress -->
+          <!-- Progress / Phases info -->
           <div>
             <div class="mb-4 space-y-1.5">
               <div class="flex justify-between text-[10px] text-white/40">
@@ -222,26 +296,57 @@ import { User } from '../../../core/models/user.model';
             <div class="border-t border-white/5 pt-4 space-y-2.5">
               <div class="flex justify-between text-xs text-[var(--bridge-text-muted)]">
                 <span>Formateur :</span>
-                <span class="font-semibold text-[#C62761] truncate max-w-[140px]">{{
-                  f.formateurNom || 'Non assigné'
-                }}</span>
+                <span class="font-semibold text-[#C62761] truncate max-w-[140px]">
+                  {{ f.formateurNom || 'Non assigné' }}
+                </span>
               </div>
               <div class="flex justify-between text-xs text-[var(--bridge-text-muted)]">
-                <span>Stagiaires :</span>
-                <span class="font-semibold text-white/60">{{ f.stagiaires.length }}</span>
+                <span>Phases :</span>
+                <span class="font-semibold text-white/70"
+                  >{{ f.phases.length }} module{{ f.phases.length > 1 ? 's' : '' }}</span
+                >
               </div>
             </div>
 
             <!-- Actions Bar -->
             <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-white/5">
+              <!-- Admin / Formateur default button -->
               <button
+                *ngIf="!isStagiaire"
                 class="text-xs text-[#C62761] font-semibold hover:text-[#F5A623] transition-colors"
                 (click)="openFormation(f)"
               >
                 Voir les détails →
               </button>
+
+              <!-- Stagiaire dynamic action button -->
+              <div *ngIf="isStagiaire" class="w-full flex items-center justify-between gap-2">
+                <button
+                  *ngIf="!isEnrolled(f.id)"
+                  (click)="enrollFormation(f, $event)"
+                  [disabled]="enrollingId === f.id"
+                  class="w-full py-2 px-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span *ngIf="enrollingId === f.id" class="animate-spin">⏳</span>
+                  <span>{{
+                    enrollingId === f.id
+                      ? 'Inscription...'
+                      : "S'inscrire (" + (f.totalPrice || 0) + ' TND) →'
+                  }}</span>
+                </button>
+
+                <button
+                  *ngIf="isEnrolled(f.id)"
+                  (click)="openFormation(f)"
+                  class="w-full py-2 px-4 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Accéder à mon cursus →</span>
+                </button>
+              </div>
+
+              <!-- Admin controls -->
               <div
-                *ngIf="canManage(f)"
+                *ngIf="isAdmin"
                 class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <!-- Edit -->
@@ -265,9 +370,8 @@ import { User } from '../../../core/models/user.model';
                 >
                   {{ f.archived ? '📂' : '📦' }}
                 </button>
-                <!-- Delete (admin or formateur owner) -->
+                <!-- Delete -->
                 <button
-                  *ngIf="canManage(f)"
                   (click)="$event.stopPropagation(); confirmDelete(f)"
                   class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-sm transition-all"
                   title="Supprimer"
@@ -280,7 +384,9 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
 
-      <!-- List View -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- LIST VIEW                                                   -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
       <div
         *ngIf="!loading && viewMode === 'list'"
         class="glass-card border border-[var(--bridge-border)] overflow-hidden"
@@ -288,7 +394,7 @@ import { User } from '../../../core/models/user.model';
         <div
           class="grid gap-4 px-5 py-3 bg-white/[0.02] border-b border-white/5"
           [class]="
-            canCreateAny ? 'grid-cols-[1fr_auto_auto_auto_auto]' : 'grid-cols-[1fr_auto_auto_auto]'
+            isAdmin ? 'grid-cols-[1fr_auto_auto_auto_auto]' : 'grid-cols-[1fr_auto_auto_auto_auto]'
           "
         >
           <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold"
@@ -300,14 +406,12 @@ import { User } from '../../../core/models/user.model';
           >
           <span
             class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-center"
-            >Statut</span
+            >Statut / Inscription</span
           >
           <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-right"
             >Prix</span
           >
-          <span
-            *ngIf="canCreateAny"
-            class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-right"
+          <span class="text-[10px] text-white/40 uppercase tracking-widest font-semibold text-right"
             >Actions</span
           >
         </div>
@@ -316,9 +420,9 @@ import { User } from '../../../core/models/user.model';
             *ngFor="let f of filteredFormations; let i = index"
             class="grid gap-4 px-5 py-4 hover:bg-white/[0.02] cursor-pointer transition-colors group items-center"
             [class]="
-              (canCreateAny
+              (isAdmin
                 ? 'grid-cols-[1fr_auto_auto_auto_auto]'
-                : 'grid-cols-[1fr_auto_auto_auto]') + (f.archived ? ' opacity-60' : '')
+                : 'grid-cols-[1fr_auto_auto_auto_auto]') + (f.archived ? ' opacity-60' : '')
             "
             [style.animation-delay]="i * 40 + 'ms'"
             style="animation: fadeSlideIn 0.3s ease both"
@@ -336,9 +440,12 @@ import { User } from '../../../core/models/user.model';
               <span
                 *ngIf="f.archived"
                 class="text-[9px] px-1.5 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-full font-bold uppercase shrink-0"
-                >Archivée</span
               >
+                Archivée
+              </span>
             </div>
+
+            <!-- Phases Chips -->
             <div class="flex items-center justify-center gap-1">
               <span
                 *ngFor="let p of f.phases; let pi = index"
@@ -348,53 +455,86 @@ import { User } from '../../../core/models/user.model';
                 {{ pi + 1 }}
               </span>
             </div>
+
+            <!-- Statut / Inscription -->
             <div class="flex items-center justify-center">
               <span
+                *ngIf="isStagiaire && isEnrolled(f.id)"
+                class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+              >
+                ✓ Inscrit
+              </span>
+              <span
+                *ngIf="isStagiaire && !isEnrolled(f.id)"
+                class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)]"
+              >
+                ✨ Disponible
+              </span>
+              <span
+                *ngIf="!isStagiaire"
                 class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest border"
                 [class]="getStatusClass(f.status)"
               >
                 {{ getStatusLabel(f.status) }}
               </span>
             </div>
+
+            <!-- Prix -->
             <div class="flex items-center justify-end">
-              <span class="text-sm font-mono font-bold text-[#F5A623]"
-                >{{ f.totalPrice | number }} TND</span
-              >
+              <span class="text-sm font-mono font-bold text-[#F5A623]">
+                {{ f.totalPrice | number }} TND
+              </span>
             </div>
-            <div
-              *ngIf="canCreateAny"
-              class="flex items-center justify-end gap-1.5"
-              (click)="$event.stopPropagation()"
-            >
+
+            <!-- Actions Column -->
+            <div class="flex items-center justify-end gap-1.5" (click)="$event.stopPropagation()">
+              <!-- Stagiaire button -->
               <button
-                *ngIf="canManage(f)"
-                (click)="openEditModal(f)"
-                class="w-7 h-7 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
-                title="Modifier"
+                *ngIf="isStagiaire && !isEnrolled(f.id)"
+                (click)="enrollFormation(f, $event)"
+                [disabled]="enrollingId === f.id"
+                class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow"
               >
-                ✏️
+                {{ enrollingId === f.id ? '...' : "S'inscrire" }}
               </button>
+
               <button
-                *ngIf="canManage(f)"
-                (click)="toggleArchive(f)"
-                class="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
-                [class]="
-                  f.archived
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
-                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400'
-                "
-                [title]="f.archived ? 'Désarchiver' : 'Archiver'"
+                *ngIf="isStagiaire && isEnrolled(f.id)"
+                (click)="openFormation(f)"
+                class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-pointer"
               >
-                {{ f.archived ? '📂' : '📦' }}
+                Accéder →
               </button>
-              <button
-                *ngIf="canManage(f)"
-                (click)="confirmDelete(f)"
-                class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
-                title="Supprimer"
-              >
-                🗑️
-              </button>
+
+              <!-- Admin action buttons -->
+              <ng-container *ngIf="isAdmin">
+                <button
+                  (click)="openEditModal(f)"
+                  class="w-7 h-7 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
+                  title="Modifier"
+                >
+                  ✏️
+                </button>
+                <button
+                  (click)="toggleArchive(f)"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
+                  [class]="
+                    f.archived
+                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
+                      : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400'
+                  "
+                  [title]="f.archived ? 'Désarchiver' : 'Archiver'"
+                >
+                  {{ f.archived ? '📂' : '📦' }}
+                </button>
+                <button
+                  (click)="confirmDelete(f)"
+                  class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-xs transition-all opacity-0 group-hover:opacity-100"
+                  title="Supprimer"
+                >
+                  🗑️
+                </button>
+              </ng-container>
             </div>
           </div>
         </div>
@@ -416,7 +556,11 @@ import { User } from '../../../core/models/user.model';
         <p
           class="text-[var(--bridge-text-muted)] text-sm mt-3 mb-8 max-w-md mx-auto leading-relaxed"
         >
-          {{ showArchived ? 'Les formations archivées apparaîtront ici.' : 'Créez le tout premier programme d'enseignement.' }}
+          {{
+            showArchived
+              ? 'Les formations archivées apparaîtront ici.'
+              : 'Aucun programme ne correspond à vos filtres actuels.'
+          }}
         </p>
         <button
           *ngIf="canCreate && !showArchived"
@@ -453,80 +597,65 @@ import { User } from '../../../core/models/user.model';
 
               <div class="space-y-4">
                 <div>
-                  <label class="block text-xs text-white/50 uppercase tracking-wider mb-1.5"
-                    >Titre</label
+                  <label
+                    class="text-xs text-white/60 font-semibold uppercase tracking-wider block mb-1.5"
                   >
+                    Titre
+                  </label>
                   <input
                     [(ngModel)]="editForm.nom"
-                    type="text"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#C62761]"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs text-white/50 uppercase tracking-wider mb-1.5"
-                    >Description</label
+                  <label
+                    class="text-xs text-white/60 font-semibold uppercase tracking-wider block mb-1.5"
                   >
+                    Description
+                  </label>
                   <textarea
                     [(ngModel)]="editForm.description"
                     rows="3"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:border-[#C62761] transition-colors"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#C62761]"
                   ></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs text-white/50 uppercase tracking-wider mb-1.5"
-                      >Catégorie</label
+                    <label
+                      class="text-xs text-white/60 font-semibold uppercase tracking-wider block mb-1.5"
                     >
+                      Catégorie
+                    </label>
                     <input
                       [(ngModel)]="editForm.category"
-                      type="text"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#C62761]"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs text-white/50 uppercase tracking-wider mb-1.5"
-                      >Prix total (TND)</label
+                    <label
+                      class="text-xs text-white/60 font-semibold uppercase tracking-wider block mb-1.5"
                     >
+                      Prix Total (TND)
+                    </label>
                     <input
-                      [(ngModel)]="editForm.totalPrice"
                       type="number"
-                      min="0"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
+                      [(ngModel)]="editForm.totalPrice"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-[#C62761]"
                     />
                   </div>
                 </div>
-                <div>
-                  <label class="block text-xs text-white/50 uppercase tracking-wider mb-1.5"
-                    >Statut</label
-                  >
-                  <select
-                    [(ngModel)]="editForm.status"
-                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C62761] transition-colors"
-                  >
-                    <option value="PLANIFIEE" class="bg-[#10102A]">Planifiée</option>
-                    <option value="ACTIVE" class="bg-[#10102A]">Active</option>
-                    <option value="TERMINEE" class="bg-[#10102A]">Terminée</option>
-                  </select>
-                </div>
               </div>
 
-              <div class="flex gap-3 mt-6">
-                <button
-                  (click)="closeEditModal()"
-                  class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold text-sm transition-all border border-white/10"
-                >
+              <div class="flex justify-end gap-3 mt-6">
+                <button (click)="closeEditModal()" class="bridge-btn-secondary px-4 py-2 text-xs">
                   Annuler
                 </button>
                 <button
                   (click)="saveEdit()"
                   [disabled]="saving"
-                  class="flex-1 py-3 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white rounded-xl font-bold text-sm hover:opacity-90 disabled:opacity-60 transition-all flex items-center justify-center gap-2"
+                  class="bridge-btn-primary px-5 py-2 text-xs font-bold"
                 >
-                  <span
-                    *ngIf="saving"
-                    class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
-                  ></span>
-                  {{ saving ? 'Enregistrement…' : '✓ Sauvegarder' }}
+                  {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
                 </button>
               </div>
             </div>
@@ -534,69 +663,61 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
 
-      <!-- ═══ INLINE DELETE CONFIRMATION TOAST BANNER ═══ -->
+      <!-- ═══ DELETE MODAL ═══ -->
       <div
-        *ngIf="formationToDelete"
-        class="fixed top-6 right-6 z-50 animate-fadein p-5 rounded-2xl glass-card border border-red-500/40 shadow-[0_10px_40px_rgba(239,68,68,0.25)] flex flex-col sm:flex-row items-center gap-4 max-w-lg bg-[#12122b]"
+        *ngIf="showDeleteModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        (click)="closeDeleteModal()"
       >
-        <div
-          class="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-2xl flex-shrink-0"
-        >
-          ⚠️
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-bold text-white">Supprimer "{{ formationToDelete.nom }}" ?</p>
-          <p class="text-xs text-white/50 mt-0.5">
-            Cette action est irréversible et supprimera tout le contenu.
-          </p>
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <button
-            (click)="closeDeleteModal()"
-            class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-xs border border-white/10 transition-all"
-          >
-            Annuler
-          </button>
-          <button
-            (click)="executeDelete()"
-            [disabled]="saving"
-            class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-1.5"
-          >
-            <span
-              *ngIf="saving"
-              class="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin"
-            ></span>
-            {{ saving ? 'Suppression…' : '🗑️ Supprimer' }}
-          </button>
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="relative z-10 w-full max-w-md" (click)="$event.stopPropagation()">
+          <div class="glass-card border border-red-500/20 overflow-hidden">
+            <div class="h-1 bg-red-500"></div>
+            <div class="p-6 text-center">
+              <div
+                class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-2xl mx-auto mb-4"
+              >
+                🗑️
+              </div>
+              <h3 class="font-syne font-bold text-lg text-white mb-2">Supprimer la formation ?</h3>
+              <p class="text-xs text-white/60 mb-6">
+                Êtes-vous sûr de vouloir supprimer définitivement « {{ formationToDelete?.nom }} » ?
+                Cette action est irréversible.
+              </p>
+              <div class="flex justify-center gap-3">
+                <button (click)="closeDeleteModal()" class="bridge-btn-secondary px-4 py-2 text-xs">
+                  Annuler
+                </button>
+                <button
+                  (click)="executeDelete()"
+                  [disabled]="saving"
+                  class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                >
+                  {{ saving ? 'Suppression...' : 'Confirmer la suppression' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <style>
-      @keyframes fadeSlideIn {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .animate-fadein {
-        animation: fadeSlideIn 0.4s ease both;
-      }
-    </style>
   `,
 })
 export class FormationsListComponent implements OnInit {
-  formations: Formation[] = [];
   user: User | null = null;
+  formations: Formation[] = [];
   loading = true;
-  searchQuery = '';
-  filterCategory = '';
   viewMode: 'grid' | 'list' = 'grid';
   showArchived = false;
+
+  // Search & Filters
+  searchQuery = '';
+  filterCategory = '';
+  stagiaireViewFilter: 'all' | 'mine' | 'available' = 'all';
+
+  // Stagiaire Enrolled IDs Set
+  enrolledFormationIds: Set<string> = new Set();
+  enrollingId: string | null = null;
 
   // Edit modal
   showEditModal = false;
@@ -620,24 +741,35 @@ export class FormationsListComponent implements OnInit {
   get isFormateur(): boolean {
     return this.user?.role === 'FORMATEUR';
   }
+  get isStagiaire(): boolean {
+    return this.user?.role === 'STAGIAIRE';
+  }
 
   get canCreate(): boolean {
-    return this.user?.role === 'ADMIN' || this.user?.role === 'FORMATEUR';
+    return this.isAdmin;
   }
-
   get canCreateAny(): boolean {
-    return this.user?.role === 'ADMIN' || this.user?.role === 'FORMATEUR';
+    return this.isAdmin;
   }
-
   canManage(f: Formation): boolean {
-    if (this.isAdmin) return true;
-    if (this.isFormateur && f.formateurId === this.user?.id) return true;
-    return false;
+    return this.isAdmin;
   }
 
   get categories(): string[] {
     const set = new Set(this.formations.map((f) => f.category).filter(Boolean) as string[]);
     return Array.from(set);
+  }
+
+  isEnrolled(formationId: string): boolean {
+    return this.enrolledFormationIds.has(formationId.toString());
+  }
+
+  get myEnrolledCount(): number {
+    return this.formations.filter((f) => this.isEnrolled(f.id)).length;
+  }
+
+  get availableCount(): number {
+    return this.formations.filter((f) => !this.isEnrolled(f.id) && !f.archived).length;
   }
 
   get filteredFormations(): Formation[] {
@@ -649,13 +781,25 @@ export class FormationsListComponent implements OnInit {
         (f.description || '').toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         (f.formateurNom || '').toLowerCase().includes(this.searchQuery.toLowerCase());
       const matchCat = !this.filterCategory || f.category === this.filterCategory;
-      return matchArchived && matchSearch && matchCat;
+
+      // Stagiaire Sub-filter: all / mine / available
+      let matchStagiaireTab = true;
+      if (this.isStagiaire) {
+        if (this.stagiaireViewFilter === 'mine') {
+          matchStagiaireTab = this.isEnrolled(f.id);
+        } else if (this.stagiaireViewFilter === 'available') {
+          matchStagiaireTab = !this.isEnrolled(f.id);
+        }
+      }
+
+      return matchArchived && matchSearch && matchCat && matchStagiaireTab;
     });
   }
 
   constructor(
     private formationService: FormationService,
     private authService: AuthService,
+    private enrollmentService: EnrollmentService,
     private toastService: ToastService,
     private router: Router,
   ) {}
@@ -663,6 +807,9 @@ export class FormationsListComponent implements OnInit {
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadFormations();
+    if (this.isStagiaire && this.user) {
+      this.loadStagiaireEnrollments();
+    }
   }
 
   loadFormations(): void {
@@ -673,11 +820,48 @@ export class FormationsListComponent implements OnInit {
         : this.formationService.getFormations();
     obs.subscribe({
       next: (data) => {
-        this.formations = data;
+        this.formations = data || [];
         this.loading = false;
       },
       error: () => {
         this.loading = false;
+      },
+    });
+  }
+
+  loadStagiaireEnrollments(): void {
+    if (!this.user) return;
+    this.formationService.getFormationsByStagiaire(this.user.id).subscribe({
+      next: (myList) => {
+        this.enrolledFormationIds = new Set((myList || []).map((f) => f.id.toString()));
+      },
+      error: () => {},
+    });
+  }
+
+  enrollFormation(f: Formation, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!this.user) return;
+
+    this.enrollingId = f.id;
+    const studentId = parseInt(this.user.id);
+    const formationId = parseInt(f.id);
+
+    this.enrollmentService.enrollStudent(studentId, formationId).subscribe({
+      next: () => {
+        this.enrollingId = null;
+        this.enrolledFormationIds.add(f.id.toString());
+        this.toastService.success(
+          `Vous êtes désormais inscrit à la formation « ${f.nom} » !`,
+          '🎉 Inscription validée',
+        );
+      },
+      error: (err: any) => {
+        this.enrollingId = null;
+        this.toastService.error(
+          err?.error?.message || "Erreur lors de l'inscription à la formation.",
+          'Inscription',
+        );
       },
     });
   }
@@ -694,7 +878,6 @@ export class FormationsListComponent implements OnInit {
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   openEditModal(f: Formation): void {
-    // Navigate to wizard mode for editing
     this.router.navigate(['/dashboard/formations/new'], { queryParams: { editId: f.id } });
   }
 

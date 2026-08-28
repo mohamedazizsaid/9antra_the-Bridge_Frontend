@@ -547,22 +547,34 @@ export class FormationWizardComponent implements OnInit {
   submit(): void {
     this.loading = true;
     const computedTotal =
-      this.calculatedTotalPrice > 0 ? this.calculatedTotalPrice : this.formation.totalPrice || 0;
-    const trainersMapped = this.selectedTrainers.map((id) => ({ id: parseInt(id) }));
-    const phasesMapped = this.formation.phases.map((p, idx) => ({
+      this.calculatedTotalPrice > 0
+        ? this.calculatedTotalPrice
+        : Number(this.formation.totalPrice) || 0;
+    const trainersMapped = (this.selectedTrainers || [])
+      .filter((id) => id !== null && id !== undefined && !isNaN(parseInt(id, 10)))
+      .map((id) => ({ id: parseInt(id, 10) }));
+
+    const phasesMapped = (this.formation.phases || []).map((p, idx) => ({
       phaseOrder: idx + 1,
       title: p.title,
       content: p.content,
-      price: p.price || 0,
-      minimumAttendance: p.minimumAttendance || 75,
-      minimumGrade: p.minimumGrade || 10,
-      sessions: p.sessions.map((s) => ({
-        sessionDate: s.sessionDate,
-        startTime: s.startTime,
-        duration: s.duration || 2,
-        location: s.location || 'Salle Virtuelle',
-        meetingLink: s.meetingLink || '',
-      })),
+      price: Number(p.price) || 0,
+      minimumAttendance: Number(p.minimumAttendance) || 75,
+      minimumGrade: Number(p.minimumGrade) || 10,
+      sessions: (p.sessions || [])
+        .filter((s) => !!s.sessionDate)
+        .map((s) => ({
+          sessionDate: s.sessionDate,
+          startTime: s.startTime
+            ? s.startTime.length === 5
+              ? `${s.startTime}:00`
+              : s.startTime
+            : null,
+          duration: Number(s.duration) || 2,
+          closed: false,
+          location: s.location || 'Salle Virtuelle',
+          meetingLink: s.meetingLink || '',
+        })),
     }));
 
     const payload = {

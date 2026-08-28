@@ -1130,8 +1130,11 @@ interface EnrollmentInfo {
         </div>
       </ng-container>
 
-      <!-- ─── Inline : Feuille de Présence ─── -->
-      <div *ngIf="showAttendanceModal" class="bridge-card overflow-hidden inline-view-card">
+      <!-- ─── Inline : Feuille de Présence (avec slide animation) ─── -->
+      <div
+        *ngIf="showAttendanceModal"
+        class="bridge-card overflow-hidden inline-view-card presence-slide-panel shadow-2xl"
+      >
         <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
         <!-- Header -->
         <div
@@ -1454,8 +1457,21 @@ interface EnrollmentInfo {
           transform: translateY(0);
         }
       }
+      @keyframes presenceSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-24px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .presence-slide-panel {
+        animation: presenceSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
       .inline-view-card {
-        animation: inlineCardIn 0.3s cubic-bezier(0.34, 1.15, 0.64, 1) both;
+        animation: presenceSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
       }
       @keyframes fadeSlideIn {
         from {
@@ -1663,9 +1679,13 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate([
-      this.user?.role === 'FORMATEUR' ? '/dashboard/formateur/formations' : '/dashboard/formations',
-    ]);
+    if (this.user?.role === 'STAGIAIRE') {
+      this.router.navigate(['/dashboard/stagiaire/formations']);
+    } else if (this.user?.role === 'FORMATEUR') {
+      this.router.navigate(['/dashboard/formateur/formations']);
+    } else {
+      this.router.navigate(['/dashboard/formations']);
+    }
   }
 
   togglePhase(id: string): void {
@@ -1682,6 +1702,12 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     this.selectedSeance = seance;
     this.activePresences = seance.presences ? JSON.parse(JSON.stringify(seance.presences)) : [];
     this.showAttendanceModal = true;
+    setTimeout(() => {
+      const el = document.querySelector('.presence-slide-panel');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 60);
   }
 
   closeAttendance(): void {
