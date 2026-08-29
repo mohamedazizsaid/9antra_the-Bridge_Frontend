@@ -7,6 +7,7 @@ export interface Formation {
   formateurAvatar?: string;
   dateDebut?: Date;
   dateFin?: Date;
+  defaultDurationWeeks?: number; // Calculé automatiquement depuis startDate/endDate
   phases: Phase[];
   stagiaires: string[]; // enrolled student IDs
   status: 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE';

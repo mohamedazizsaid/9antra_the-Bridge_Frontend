@@ -16,13 +16,14 @@ import { Certificat } from '../../../../core/models/certificat.model';
 import { Notification } from '../../../../core/models/notification.model';
 import { Subscription } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
+import { EnrollmentStepperComponent } from '../../formations/enrollment-stepper.component';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-stagiaire-overview',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, EnrollmentStepperComponent],
   template: `
     <div class="min-h-screen space-y-6">
       <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
@@ -560,6 +561,11 @@ Chart.register(...registerables);
                     class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                     >✓ Inscrit</span
                   >
+                  <span
+                    *ngIf="isPending(f.id)"
+                    class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    >⏳ En attente</span
+                  >
                 </div>
                 <h3
                   class="font-syne font-bold text-white text-base leading-tight group-hover:text-[#F5A623] transition-colors"
@@ -621,12 +627,18 @@ Chart.register(...registerables);
                     </p>
                   </div>
                   <button
-                    *ngIf="!isEnrolled(f.id)"
-                    (click)="enrollFormation(f)"
-                    [disabled]="enrollingId === f.id"
-                    class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)]"
+                    *ngIf="!isEnrolled(f.id) && !isPending(f.id)"
+                    (click)="openEnrollStepper(f)"
+                    class="px-4 py-2 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-[rgba(198,39,97,0.2)] cursor-pointer"
                   >
-                    {{ enrollingId === f.id ? '⏳...' : "S'inscrire →" }}
+                    S'inscrire →
+                  </button>
+                  <button
+                    *ngIf="isPending(f.id)"
+                    disabled
+                    class="px-4 py-2 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-xl border border-amber-500/20 cursor-not-allowed"
+                  >
+                    ⏳ En attente
                   </button>
                   <button
                     *ngIf="isEnrolled(f.id)"
@@ -2066,6 +2078,15 @@ Chart.register(...registerables);
         </div>
       </div>
     </div>
+
+    <!-- ═══ ENROLLMENT STEPPER MODAL ═══ -->
+    <app-enrollment-stepper
+      *ngIf="showStepper && stepperFormation"
+      [formation]="stepperFormation!"
+      [user]="user"
+      (closed)="closeStepper()"
+      (enrolled)="onEnrollmentComplete($event)"
+    ></app-enrollment-stepper>
   `,
 })
 export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -2104,7 +2125,12 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
   // My formations
   myFormations: Formation[] = [];
   enrolledIds: Set<string> = new Set();
+  pendingIds: Set<string> = new Set();
   loadingMine = true;
+
+  // Enrollment stepper
+  showStepper = false;
+  stepperFormation: Formation | null = null;
 
   // Upcoming sessions
   upcomingSeances: Seance[] = [];
@@ -2404,29 +2430,32 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
   }
 
   enrollFormation(f: Formation): void {
-    if (!this.user) return;
-    this.enrollingId = f.id;
-    this.enrollSuccessId = null;
-    this.enrollErrorId = null;
-    this.enrollmentService.enrollStudent(parseInt(this.user.id), parseInt(f.id)).subscribe({
-      next: () => {
-        this.enrollingId = null;
-        this.enrollSuccessId = f.id;
-        this.enrolledIds.add(f.id);
-        this.myFormations = [...this.myFormations, f];
-        setTimeout(() => {
-          this.enrollSuccessId = null;
-        }, 3000);
-      },
-      error: (e: any) => {
-        this.enrollingId = null;
-        this.enrollErrorId = f.id;
-        this.enrollError = e?.error?.message || 'Déjà inscrit ou erreur';
-        setTimeout(() => {
-          this.enrollErrorId = null;
-        }, 4000);
-      },
-    });
+    this.openEnrollStepper(f);
+  }
+
+  openEnrollStepper(f: Formation): void {
+    this.stepperFormation = f;
+    this.showStepper = true;
+  }
+
+  closeStepper(): void {
+    this.showStepper = false;
+    this.stepperFormation = null;
+  }
+
+  onEnrollmentComplete(result: { enrollment: any; formation: Formation }): void {
+    const fid = result.formation.id.toString();
+    if (result.enrollment.status === 'APPROVED') {
+      this.enrolledIds.add(fid);
+      this.myFormations = [...this.myFormations, result.formation];
+    } else if (result.enrollment.status === 'PENDING') {
+      this.pendingIds.add(fid);
+    }
+    setTimeout(() => this.closeStepper(), 4500);
+  }
+
+  isPending(formationId: string): boolean {
+    return this.pendingIds.has(formationId.toString());
   }
 
   unenrollFormation(f: Formation): void {

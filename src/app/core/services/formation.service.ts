@@ -46,6 +46,7 @@ export class FormationService {
       formateurAvatar: mainTrainer ? mainTrainer.avatar : '',
       dateDebut: f.startDate ? new Date(f.startDate) : undefined,
       dateFin: f.endDate ? new Date(f.endDate) : undefined,
+      defaultDurationWeeks: f.defaultDurationWeeks ?? undefined,
       status: (f.status as 'ACTIVE' | 'TERMINEE' | 'PLANIFIEE') || 'PLANIFIEE',
       archived: f.archived || false,
       stagiaires: studentIds,

@@ -8,6 +8,10 @@ import { EvaluationService } from '../../../../core/services/evaluation.service'
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UserService } from '../../../../core/services/user.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import {
+  EnrollmentService,
+  EnrollmentResponse,
+} from '../../../../core/services/enrollment.service';
 import { User } from '../../../../core/models/user.model';
 import { Formation, Phase, Seance, Presence } from '../../../../core/models/formation.model';
 import { Subscription } from 'rxjs';
@@ -1441,6 +1445,198 @@ Chart.register(...registerables);
         </div>
       </div>
     </ng-container>
+    <br />
+    <!-- ═══════════════════════════════ DEMANDES D'INSCRIPTION EN ATTENTE ═══════════════════════════════ -->
+    <div *ngIf="pendingEnrollments.length > 0 || loadingPending" class="space-y-4 animate-fadein">
+      <!-- Section header -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-400/10 border border-amber-500/30 flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-amber-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="12 7 12 12 15 15" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="font-syne font-bold text-white text-lg">
+              Demandes d'inscription en attente
+            </h2>
+            <p class="text-[var(--bridge-text-muted)] text-xs">
+              Stagiaires ayant demandé une durée de formation personnalisée
+            </p>
+          </div>
+        </div>
+        <span
+          *ngIf="pendingEnrollments.length > 0"
+          class="text-xs font-bold px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"
+        >
+          {{ pendingEnrollments.length }} en attente
+        </span>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div *ngIf="loadingPending" class="grid md:grid-cols-2 gap-4">
+        <div
+          *ngFor="let _ of [1, 2]"
+          class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse space-y-3"
+        >
+          <div class="h-3 bg-white/10 rounded w-3/4"></div>
+          <div class="h-2 bg-white/5 rounded w-full"></div>
+          <div class="h-2 bg-white/5 rounded w-2/3"></div>
+        </div>
+      </div>
+
+      <!-- Enrollment request cards -->
+      <div *ngIf="!loadingPending" class="grid md:grid-cols-2 gap-4">
+        <div
+          *ngFor="let e of pendingEnrollments"
+          class="glass-card border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 overflow-hidden"
+        >
+          <!-- Amber top bar -->
+          <div class="h-1 bg-gradient-to-r from-amber-500 to-[#F5A623]"></div>
+          <div class="p-5 space-y-4">
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <!-- Avatar -->
+                <div
+                  class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20 border border-white/10 flex items-center justify-center text-sm font-bold text-[#F5A623] flex-shrink-0 overflow-hidden"
+                >
+                  <img
+                    *ngIf="e.studentAvatar"
+                    [src]="e.studentAvatar"
+                    class="w-full h-full object-cover"
+                    [alt]="e.studentFirstName || ''"
+                  />
+                  <span *ngIf="!e.studentAvatar">{{ (e.studentFirstName || 'S')[0] }}</span>
+                </div>
+                <div>
+                  <p class="font-syne font-bold text-white text-sm">
+                    {{ e.studentFirstName }} {{ e.studentLastName }}
+                  </p>
+                  <p class="text-[10px] text-[var(--bridge-text-muted)]">{{ e.studentEmail }}</p>
+                </div>
+              </div>
+              <span
+                class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex-shrink-0"
+              >
+                ⏳ En attente
+              </span>
+            </div>
+
+            <!-- Formation + duration info -->
+            <div class="rounded-xl border border-white/5 bg-white/[0.02] p-3 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-[var(--bridge-text-muted)]">Formation</span>
+                <span class="text-white font-semibold truncate max-w-[180px]">{{
+                  e.formationTitle
+                }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[var(--bridge-text-muted)]">Durée standard</span>
+                <span class="text-white/70">{{
+                  e.formationDefaultDurationWeeks
+                    ? e.formationDefaultDurationWeeks + ' sem.'
+                    : 'N/A'
+                }}</span>
+              </div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-1.5 mt-1.5">
+                <span class="text-[var(--bridge-text-muted)]">Durée demandée</span>
+                <span class="font-mono font-bold text-[#F5A623]"
+                  >{{ e.customDurationWeeks }} semaine(s)</span
+                >
+              </div>
+              <div *ngIf="e.enrollmentDate" class="flex items-center justify-between">
+                <span class="text-[var(--bridge-text-muted)]">Demande le</span>
+                <span class="text-white/60 font-mono text-[10px]">{{
+                  e.enrollmentDate | date: 'dd/MM/yyyy'
+                }}</span>
+              </div>
+            </div>
+
+            <!-- Motivation message -->
+            <div
+              *ngIf="e.motivationMessage"
+              class="rounded-xl border border-white/5 bg-white/[0.02] p-3"
+            >
+              <p class="text-[10px] text-white/50 uppercase tracking-wider font-semibold mb-1">
+                Message du stagiaire
+              </p>
+              <p class="text-xs text-white/70 italic leading-relaxed">
+                « {{ e.motivationMessage }} »
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-2">
+              <!-- Approve button -->
+              <button
+                (click)="approveEnrollment(e)"
+                [disabled]="respondingEnrollmentId === e.id || rejectingId === e.id"
+                class="w-full py-2 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-500/20"
+              >
+                <span
+                  *ngIf="respondingEnrollmentId === e.id"
+                  class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                ></span>
+                <span>{{
+                  respondingEnrollmentId === e.id ? 'Traitement...' : '✓ Approuver la demande'
+                }}</span>
+              </button>
+
+              <!-- Reject toggle -->
+              <button
+                *ngIf="showRejectFormId !== e.id"
+                (click)="showRejectFormId = e.id"
+                [disabled]="respondingEnrollmentId === e.id"
+                class="w-full py-2 px-4 bg-red-500/10 text-red-400 text-xs font-bold rounded-xl border border-red-500/20 hover:bg-red-500/20 disabled:opacity-40 transition-all cursor-pointer"
+              >
+                ✕ Refuser la demande
+              </button>
+
+              <!-- Reject form -->
+              <div *ngIf="showRejectFormId === e.id" class="space-y-2 animate-fadein">
+                <textarea
+                  [(ngModel)]="rejectionReasonMap[e.id!]"
+                  rows="2"
+                  placeholder="Motif du refus (obligatoire)..."
+                  class="w-full bg-white/5 border border-red-500/20 focus:border-red-500/50 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none transition-colors resize-none"
+                ></textarea>
+                <div class="flex gap-2">
+                  <button
+                    (click)="rejectEnrollment(e)"
+                    [disabled]="rejectingId === e.id || !rejectionReasonMap[e.id!]?.trim()"
+                    class="flex-1 py-2 px-3 bg-red-500/80 hover:bg-red-500 text-white text-xs font-bold rounded-xl disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span
+                      *ngIf="rejectingId === e.id"
+                      class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                    ></span>
+                    {{ rejectingId === e.id ? '...' : 'Confirmer le refus' }}
+                  </button>
+                  <button
+                    (click)="showRejectFormId = null"
+                    class="px-3 py-2 bg-white/5 hover:bg-white/10 text-white/60 text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <style>
       @keyframes fadeSlideIn {
@@ -1524,6 +1720,14 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
   availableStudentsForEval: User[] = [];
   availablePhasesForEval: Phase[] = [];
 
+  // Pending enrollment requests
+  pendingEnrollments: EnrollmentResponse[] = [];
+  loadingPending = false;
+  respondingEnrollmentId: number | null = null;
+  rejectingId: number | null = null;
+  rejectionReasonMap: Record<number, string> = {};
+  showRejectFormId: number | null = null;
+
   gradeBands = [
     { label: '🏆 ≥16', min: 16, max: 20, color: 'text-emerald-400', bg: 'bg-emerald-500/60' },
     { label: '⭐ 14-16', min: 14, max: 15.99, color: 'text-[#F5A623]', bg: 'bg-[#F5A623]/60' },
@@ -1556,6 +1760,7 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
     private formationService: FormationService,
     private evaluationService: EvaluationService,
     private notificationService: NotificationService,
+    private enrollmentService: EnrollmentService,
     private toastService: ToastService,
     private router: Router,
   ) {}
@@ -1598,6 +1803,8 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
         this.renderFormateurCharts();
       }),
     );
+
+    this.loadPendingEnrollments();
   }
 
   ngAfterViewInit(): void {
@@ -2007,5 +2214,64 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
     if (grade >= 14) return 'text-[#F5A623]';
     if (grade >= 10) return 'text-blue-400';
     return 'text-red-400';
+  }
+
+  // ─── Pending enrollment management ────────────────────────────────────────────
+  loadPendingEnrollments(): void {
+    if (!this.user) return;
+    this.loadingPending = true;
+    this.enrollmentService.getPendingEnrollmentsForFormateur(parseInt(this.user.id)).subscribe({
+      next: (data) => {
+        this.pendingEnrollments = data;
+        this.loadingPending = false;
+      },
+      error: () => {
+        this.loadingPending = false;
+      },
+    });
+  }
+
+  approveEnrollment(enrollment: EnrollmentResponse): void {
+    if (!enrollment.id) return;
+    this.respondingEnrollmentId = enrollment.id;
+    this.enrollmentService.respondToEnrollment(enrollment.id, true).subscribe({
+      next: () => {
+        this.respondingEnrollmentId = null;
+        this.pendingEnrollments = this.pendingEnrollments.filter((e) => e.id !== enrollment.id);
+        this.toastService.success(
+          `L'inscription de ${enrollment.studentFirstName} ${enrollment.studentLastName} pour « ${enrollment.formationTitle} » a été approuvée.`,
+          '✅ Inscription approuvée',
+        );
+      },
+      error: (err: any) => {
+        this.respondingEnrollmentId = null;
+        this.toastService.error(err?.error?.message || 'Erreur lors de l’approbation.', 'Erreur');
+      },
+    });
+  }
+
+  rejectEnrollment(enrollment: EnrollmentResponse): void {
+    if (!enrollment.id) return;
+    const reason = this.rejectionReasonMap[enrollment.id] || '';
+    if (!reason.trim()) {
+      this.toastService.warning('Veuillez indiquer un motif de rejet.', 'Motif requis');
+      return;
+    }
+    this.rejectingId = enrollment.id;
+    this.enrollmentService.respondToEnrollment(enrollment.id, false, reason).subscribe({
+      next: () => {
+        this.rejectingId = null;
+        this.showRejectFormId = null;
+        this.pendingEnrollments = this.pendingEnrollments.filter((e) => e.id !== enrollment.id);
+        this.toastService.info(
+          `La demande de ${enrollment.studentFirstName} ${enrollment.studentLastName} a été refusée.`,
+          '❌ Demande refusée',
+        );
+      },
+      error: (err: any) => {
+        this.rejectingId = null;
+        this.toastService.error(err?.error?.message || 'Erreur lors du rejet.', 'Erreur');
+      },
+    });
   }
 }

@@ -8,11 +8,12 @@ import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Formation } from '../../../core/models/formation.model';
 import { User } from '../../../core/models/user.model';
+import { EnrollmentStepperComponent } from './enrollment-stepper.component';
 
 @Component({
   selector: 'app-formations-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, EnrollmentStepperComponent],
   template: `
     <div class="space-y-8 animate-fadein">
       <!-- ─── Header Synchronisé ─── -->
@@ -248,7 +249,13 @@ import { User } from '../../../core/models/user.model';
                   ✓ Inscrit
                 </span>
                 <span
-                  *ngIf="isStagiaire && !isEnrolled(f.id)"
+                  *ngIf="isStagiaire && isPending(f.id)"
+                  class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                >
+                  ⏳ En attente
+                </span>
+                <span
+                  *ngIf="isStagiaire && !isEnrolled(f.id) && !isPending(f.id)"
                   class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)]"
                 >
                   ✨ Disponible
@@ -322,17 +329,20 @@ import { User } from '../../../core/models/user.model';
               <!-- Stagiaire dynamic action button -->
               <div *ngIf="isStagiaire" class="w-full flex items-center justify-between gap-2">
                 <button
-                  *ngIf="!isEnrolled(f.id)"
-                  (click)="enrollFormation(f, $event)"
+                  *ngIf="!isEnrolled(f.id) && !isPending(f.id)"
+                  (click)="openEnrollStepper(f, $event)"
                   [disabled]="enrollingId === f.id"
                   class="w-full py-2 px-4 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span *ngIf="enrollingId === f.id" class="animate-spin">⏳</span>
-                  <span>{{
-                    enrollingId === f.id
-                      ? 'Inscription...'
-                      : "S'inscrire (" + (f.totalPrice || 0) + ' TND) →'
-                  }}</span>
+                  <span>S'inscrire ({{ f.totalPrice || 0 | number }} TND) →</span>
+                </button>
+
+                <button
+                  *ngIf="isPending(f.id)"
+                  disabled
+                  class="w-full py-2 px-4 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-xl border border-amber-500/20 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                >
+                  ⏳ Validation en attente
                 </button>
 
                 <button
@@ -490,13 +500,20 @@ import { User } from '../../../core/models/user.model';
             <div class="flex items-center justify-end gap-1.5" (click)="$event.stopPropagation()">
               <!-- Stagiaire button -->
               <button
-                *ngIf="isStagiaire && !isEnrolled(f.id)"
-                (click)="enrollFormation(f, $event)"
+                *ngIf="isStagiaire && !isEnrolled(f.id) && !isPending(f.id)"
+                (click)="openEnrollStepper(f, $event)"
                 [disabled]="enrollingId === f.id"
                 class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow"
               >
-                {{ enrollingId === f.id ? '...' : "S'inscrire" }}
+                S'inscrire
               </button>
+
+              <span
+                *ngIf="isStagiaire && isPending(f.id)"
+                class="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/20 cursor-not-allowed"
+              >
+                ⏳ En attente
+              </span>
 
               <button
                 *ngIf="isStagiaire && isEnrolled(f.id)"
@@ -701,6 +718,15 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
     </div>
+
+    <!-- ═══ ENROLLMENT STEPPER MODAL ═══ -->
+    <app-enrollment-stepper
+      *ngIf="showStepper && stepperFormation"
+      [formation]="stepperFormation"
+      [user]="user"
+      (closed)="closeStepper()"
+      (enrolled)="onEnrollmentComplete($event)"
+    ></app-enrollment-stepper>
   `,
 })
 export class FormationsListComponent implements OnInit {
@@ -717,7 +743,12 @@ export class FormationsListComponent implements OnInit {
 
   // Stagiaire Enrolled IDs Set
   enrolledFormationIds: Set<string> = new Set();
+  pendingFormationIds: Set<string> = new Set();
   enrollingId: string | null = null;
+
+  // Enrollment stepper
+  showStepper = false;
+  stepperFormation: Formation | null = null;
 
   // Edit modal
   showEditModal = false;
@@ -831,39 +862,51 @@ export class FormationsListComponent implements OnInit {
 
   loadStagiaireEnrollments(): void {
     if (!this.user) return;
-    this.formationService.getFormationsByStagiaire(this.user.id).subscribe({
-      next: (myList) => {
-        this.enrolledFormationIds = new Set((myList || []).map((f) => f.id.toString()));
+    this.enrollmentService.getEnrollmentsByStudent(parseInt(this.user.id)).subscribe({
+      next: (enrollments) => {
+        this.enrolledFormationIds = new Set();
+        this.pendingFormationIds = new Set();
+        (enrollments || []).forEach((e) => {
+          const fid = e.formationId?.toString() || '';
+          if (!fid) return;
+          if (e.status === 'APPROVED') this.enrolledFormationIds.add(fid);
+          else if (e.status === 'PENDING') this.pendingFormationIds.add(fid);
+        });
       },
       error: () => {},
     });
   }
 
-  enrollFormation(f: Formation, event?: Event): void {
+  // ── Stepper enrollment (remplace l'ancien enrollFormation direct) ──────────
+  openEnrollStepper(f: Formation, event?: Event): void {
     if (event) event.stopPropagation();
-    if (!this.user) return;
+    this.stepperFormation = f;
+    this.showStepper = true;
+  }
 
-    this.enrollingId = f.id;
-    const studentId = parseInt(this.user.id);
-    const formationId = parseInt(f.id);
+  closeStepper(): void {
+    this.showStepper = false;
+    this.stepperFormation = null;
+  }
 
-    this.enrollmentService.enrollStudent(studentId, formationId).subscribe({
-      next: () => {
-        this.enrollingId = null;
-        this.enrolledFormationIds.add(f.id.toString());
-        this.toastService.success(
-          `Vous êtes désormais inscrit à la formation « ${f.nom} » !`,
-          '🎉 Inscription validée',
-        );
-      },
-      error: (err: any) => {
-        this.enrollingId = null;
-        this.toastService.error(
-          err?.error?.message || "Erreur lors de l'inscription à la formation.",
-          'Inscription',
-        );
-      },
-    });
+  onEnrollmentComplete(result: { enrollment: any; formation: Formation }): void {
+    const fid = result.formation.id.toString();
+    if (result.enrollment.status === 'APPROVED') {
+      this.enrolledFormationIds.add(fid);
+    } else if (result.enrollment.status === 'PENDING') {
+      this.pendingFormationIds.add(fid);
+    }
+    // Close stepper after a brief delay (success step is shown inside)
+    setTimeout(() => this.closeStepper(), 4000);
+  }
+
+  isPending(formationId: string): boolean {
+    return this.pendingFormationIds.has(formationId.toString());
+  }
+
+  /** @deprecated Remplacé par openEnrollStepper — conservé pour rétrocompatibilité */
+  enrollFormation(f: Formation, event?: Event): void {
+    this.openEnrollStepper(f, event);
   }
 
   openFormation(f: Formation): void {

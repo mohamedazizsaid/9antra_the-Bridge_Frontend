@@ -72,8 +72,18 @@ export class NotificationService implements OnDestroy {
       type = 'PHASE_DEBLOQUEE';
     else if (t.includes('évaluation') || t.includes('evaluation') || t.includes('note'))
       type = 'EVALUATION_PUBLIEE';
+    else if (t.includes('demande') && t.includes('inscription')) type = 'INSCRIPTION_DEMANDE';
+    else if (
+      t.includes('approuvée') ||
+      t.includes('approuvee') ||
+      t.includes('refusée') ||
+      t.includes('refusee') ||
+      t.includes('rejetée') ||
+      t.includes('rejetee')
+    )
+      type = 'INSCRIPTION_REPONSE';
     else if (t.includes('inscription') || t.includes('inscrit') || t.includes('bienvenu'))
-      type = 'NOUVELLE_INSCRIPTION';
+      type = 'INSCRIPTION_REPONSE';
     return {
       id: n.id.toString(),
       type: type,

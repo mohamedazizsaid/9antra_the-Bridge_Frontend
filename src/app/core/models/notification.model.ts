@@ -5,6 +5,8 @@ export type NotificationType =
   | 'CERTIFICAT_GENERE'
   | 'SEANCE_PLANIFIEE'
   | 'EVALUATION_PUBLIEE'
+  | 'INSCRIPTION_DEMANDE'
+  | 'INSCRIPTION_REPONSE'
   | 'ANNONCE';
 
 export interface Notification {
@@ -24,5 +26,7 @@ export const NOTIFICATION_COLORS: Record<NotificationType, string> = {
   CERTIFICAT_GENERE: '#C62761',
   SEANCE_PLANIFIEE: '#3B82F6',
   EVALUATION_PUBLIEE: '#8B5CF6',
+  INSCRIPTION_DEMANDE: '#F5A623',
+  INSCRIPTION_REPONSE: '#10B981',
   ANNONCE: '#F0F0FF',
 };

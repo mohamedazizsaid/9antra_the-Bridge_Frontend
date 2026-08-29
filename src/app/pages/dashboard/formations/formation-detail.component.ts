@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,43 @@ import { Subscription, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
+import { EnrollmentService, EnrollmentResponse } from '../../../core/services/enrollment.service';
+
+export interface CustomPlanSession {
+  titre: string;
+  date: string;
+  heureDebut: string;
+  dureeMinutes: number;
+  type: 'PRESENTIEL' | 'EN_LIGNE';
+  salleOuLien: string;
+  description?: string;
+  present?: boolean | null;
+  markedAt?: string;
+}
+
+export interface CustomPlanPhase {
+  numero: number;
+  nom: string;
+  description: string;
+  dureeSemaines: number;
+  minimumAttendance: number;
+  minimumGrade: number;
+  seances: CustomPlanSession[];
+}
+
+export interface CustomPlanData {
+  formationId: string;
+  formationNom: string;
+  studentId: number;
+  studentNom: string;
+  totalDurationWeeks: number;
+  dateDebut: string;
+  dateFinPrevue?: string;
+  phases: CustomPlanPhase[];
+  noteFormateur?: string;
+  updatedAt: string;
+}
+
 interface EnrollmentInfo {
   id: string;
   studentId: number;
@@ -22,6 +59,12 @@ interface EnrollmentInfo {
   studentEmail: string;
   studentAvatar?: string;
   enrollmentDate: string;
+  status?: string;
+  customDurationWeeks?: number | null;
+  motivationMessage?: string | null;
+  rejectionReason?: string | null;
+  respondedAt?: string | null;
+  customPlan?: string | null;
 }
 
 @Component({
@@ -134,9 +177,9 @@ interface EnrollmentInfo {
         <!-- Tab Navigation -->
         <div class="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl w-fit">
           <button
-            *ngFor="let tab of tabs"
-            (click)="activeTab = tab.id"
-            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+            *ngFor="let tab of tabs; trackBy: trackTab"
+            (click)="setTab(tab.id)"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer"
             [class]="
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_15px_rgba(198,39,97,0.3)]'
@@ -193,6 +236,38 @@ interface EnrollmentInfo {
                 ></div>
               </div>
             </div>
+          </div>
+
+          <!-- Custom Path Banner (Stagiaire) -->
+          <div
+            *ngIf="myCustomPlan"
+            class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#C62761]/10 to-transparent border border-amber-500/30 space-y-3 animate-fadein"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">⚡</span>
+                <div>
+                  <h4 class="font-syne font-bold text-white text-base">
+                    Votre Parcours Personnalisé
+                  </h4>
+                  <p class="text-xs text-amber-300 font-mono">
+                    Durée d'engagement : {{ myCustomPlan?.totalDurationWeeks }} semaines · Début :
+                    {{ myCustomPlan?.dateDebut | date: 'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+              <span
+                class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30"
+              >
+                Programme Sur Mesure
+              </span>
+            </div>
+            <p
+              *ngIf="myCustomPlan?.noteFormateur"
+              class="text-xs text-white/80 italic p-3 rounded-xl bg-white/[0.03] border border-white/5"
+            >
+              💬 Message du formateur : « {{ myCustomPlan?.noteFormateur }} »
+            </p>
           </div>
 
           <!-- Phases Timeline -->
@@ -355,104 +430,200 @@ interface EnrollmentInfo {
           </div>
 
           <!-- Presences per phase -->
-          <div
-            *ngFor="let phase of formation?.phases"
-            class="glass-card border border-[var(--bridge-border)] overflow-hidden"
-          >
-            <div class="p-4 border-b border-[var(--bridge-border)] flex items-center gap-3">
+          <!-- Custom Plan Presences per Phase (if custom plan exists) -->
+          <ng-container *ngIf="myCustomPlan">
+            <div
+              *ngFor="let phase of myCustomPlan.phases"
+              class="glass-card border border-[var(--bridge-border)] overflow-hidden rounded-2xl mb-4"
+            >
               <div
-                class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white"
+                class="p-4 border-b border-[var(--bridge-border)] flex items-center justify-between flex-wrap gap-2"
               >
-                {{ phase.numero }}
-              </div>
-              <div>
-                <h4 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h4>
-                <p class="text-xs text-[var(--bridge-text-muted)]">
-                  {{ phase.seances?.length || 0 }} séance(s)
-                </p>
-              </div>
-            </div>
-            <div class="divide-y divide-white/[0.03]">
-              <div
-                *ngFor="let seance of phase.seances"
-                class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
-              >
-                <!-- Date -->
-                <div class="text-center w-12 flex-shrink-0">
-                  <div class="text-[10px] font-bold uppercase text-[#F5A623]">
-                    {{ formatDay(seance.date) }}
-                  </div>
-                  <div class="text-lg font-mono font-bold text-white">
-                    {{ formatDayNum(seance.date) }}
-                  </div>
-                </div>
-                <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
-                <!-- Session info -->
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-white">{{
-                      seance.heureDebut || '—'
-                    }}</span>
-                    <span
-                      *ngIf="seance.type === 'EN_LIGNE'"
-                      class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full"
-                      >🌐 EN LIGNE</span
-                    >
-                    <span
-                      *ngIf="seance.type !== 'EN_LIGNE'"
-                      class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full"
-                      >🏫 PRÉSENTIEL</span
-                    >
-                  </div>
-                  <p class="text-xs text-white/40 mt-0.5">
-                    📍 {{ seance.salle || 'Salle non définie' }}
-                  </p>
-                  <!-- My presence status -->
+                <div class="flex items-center gap-3">
                   <div
-                    *ngIf="getMyPresenceForSeance(seance) as pres"
-                    class="flex items-center gap-3 mt-2"
+                    class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xs font-bold font-mono"
                   >
-                    <span
-                      class="text-[11px] font-bold px-2.5 py-1 rounded-full border"
-                      [class]="
-                        pres.present
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-red-500/10 text-red-400 border-red-500/20'
-                      "
-                    >
-                      {{ pres.present ? '✓ Présent' : '✗ Absent' }}
-                    </span>
-                    <div *ngIf="pres.starRating" class="flex items-center gap-0.5">
-                      <span
-                        *ngFor="let s of [1, 2, 3, 4, 5]"
-                        [class]="s <= pres.starRating ? 'text-[#F5A623]' : 'text-white/15'"
-                        class="text-sm"
-                        >★</span
-                      >
-                    </div>
-                    <p
-                      *ngIf="pres.sessionNote"
-                      class="text-xs text-white/40 italic truncate max-w-xs"
-                    >
-                      "{{ pres.sessionNote }}"
+                    {{ phase.numero }}
+                  </div>
+                  <div>
+                    <h4 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h4>
+                    <p class="text-xs text-[var(--bridge-text-muted)]">
+                      {{ phase.seances?.length || 0 }} séance(s) sur mesure
                     </p>
                   </div>
-                  <p
-                    *ngIf="!getMyPresenceForSeance(seance)"
-                    class="text-xs text-white/20 italic mt-1"
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-mono font-bold text-amber-400"
+                    >Assiduité phase : {{ getCustomPhaseAttendance(phase) }}%</span
                   >
-                    Non enregistrée
-                  </p>
+                </div>
+              </div>
+
+              <div class="divide-y divide-white/[0.03]">
+                <div
+                  *ngFor="let seance of phase.seances"
+                  class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
+                >
+                  <div class="text-center w-12 flex-shrink-0">
+                    <div class="text-[10px] font-bold uppercase text-[#F5A623]">
+                      {{ formatDay(seance.date) }}
+                    </div>
+                    <div class="text-lg font-mono font-bold text-white">
+                      {{ formatDayNum(seance.date) }}
+                    </div>
+                  </div>
+                  <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-semibold text-white">{{
+                        seance.heureDebut || '—'
+                      }}</span>
+                      <span class="text-xs text-white/50 truncate">{{ seance.titre }}</span>
+                      <span
+                        class="text-[9px] px-2 py-0.5 rounded-full font-mono"
+                        [class]="
+                          seance.type === 'EN_LIGNE'
+                            ? 'bg-blue-500/10 text-blue-400'
+                            : 'bg-emerald-500/10 text-emerald-400'
+                        "
+                      >
+                        {{ seance.type === 'EN_LIGNE' ? '🌐 EN LIGNE' : '🏫 PRÉSENTIEL' }}
+                      </span>
+                    </div>
+                    <p class="text-xs text-white/40 mt-0.5">
+                      📍 {{ seance.salleOuLien || 'Non définie' }} ({{ seance.dureeMinutes }} min)
+                    </p>
+                    <div class="flex items-center gap-3 mt-1.5">
+                      <span
+                        *ngIf="seance.present === true"
+                        class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      >
+                        ✓ Présent
+                      </span>
+                      <span
+                        *ngIf="seance.present === false"
+                        class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20"
+                      >
+                        ✗ Absent
+                      </span>
+                      <span
+                        *ngIf="seance.present === undefined || seance.present === null"
+                        class="text-xs text-white/30 italic"
+                      >
+                        {{
+                          isToday(seance.date)
+                            ? "⚠️ Séance aujourd'hui (En attente d'émargement formateur)"
+                            : 'Non enregistrée'
+                        }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          </ng-container>
+
+          <!-- Standard Presences per phase -->
+          <ng-container *ngIf="!myCustomPlan">
             <div
-              *ngIf="!phase.seances || phase.seances.length === 0"
-              class="p-6 text-center text-xs text-white/30 italic"
+              *ngFor="let phase of formation?.phases"
+              class="glass-card border border-[var(--bridge-border)] overflow-hidden"
             >
-              Aucune séance dans cette phase
+              <div class="p-4 border-b border-[var(--bridge-border)] flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761] to-[#F5A623] flex items-center justify-center text-xs font-bold text-white"
+                >
+                  {{ phase.numero }}
+                </div>
+                <div>
+                  <h4 class="font-syne font-bold text-white text-sm">{{ phase.nom }}</h4>
+                  <p class="text-xs text-[var(--bridge-text-muted)]">
+                    {{ phase.seances?.length || 0 }} séance(s)
+                  </p>
+                </div>
+              </div>
+              <div class="divide-y divide-white/[0.03]">
+                <div
+                  *ngFor="let seance of phase.seances"
+                  class="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-all"
+                >
+                  <!-- Date -->
+                  <div class="text-center w-12 flex-shrink-0">
+                    <div class="text-[10px] font-bold uppercase text-[#F5A623]">
+                      {{ formatDay(seance.date) }}
+                    </div>
+                    <div class="text-lg font-mono font-bold text-white">
+                      {{ formatDayNum(seance.date) }}
+                    </div>
+                  </div>
+                  <div class="w-px h-8 bg-white/10 flex-shrink-0"></div>
+                  <!-- Session info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-semibold text-white">{{
+                        seance.heureDebut || '—'
+                      }}</span>
+                      <span
+                        *ngIf="seance.type === 'EN_LIGNE'"
+                        class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full"
+                        >🌐 EN LIGNE</span
+                      >
+                      <span
+                        *ngIf="seance.type !== 'EN_LIGNE'"
+                        class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full"
+                        >🏫 PRÉSENTIEL</span
+                      >
+                    </div>
+                    <p class="text-xs text-white/40 mt-0.5">
+                      📍 {{ seance.salle || 'Salle non définie' }}
+                    </p>
+                    <!-- My presence status -->
+                    <div
+                      *ngIf="getMyPresenceForSeance(seance) as pres"
+                      class="flex items-center gap-3 mt-2"
+                    >
+                      <span
+                        class="text-[11px] font-bold px-2.5 py-1 rounded-full border"
+                        [class]="
+                          pres.present
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-red-500/10 text-red-400 border-red-500/20'
+                        "
+                      >
+                        {{ pres.present ? '✓ Présent' : '✗ Absent' }}
+                      </span>
+                      <div *ngIf="pres.starRating" class="flex items-center gap-0.5">
+                        <span
+                          *ngFor="let s of [1, 2, 3, 4, 5]"
+                          [class]="s <= pres.starRating ? 'text-[#F5A623]' : 'text-white/15'"
+                          class="text-sm"
+                          >★</span
+                        >
+                      </div>
+                      <p
+                        *ngIf="pres.sessionNote"
+                        class="text-xs text-white/40 italic truncate max-w-xs"
+                      >
+                        "{{ pres.sessionNote }}"
+                      </p>
+                    </div>
+                    <p
+                      *ngIf="!getMyPresenceForSeance(seance)"
+                      class="text-xs text-white/20 italic mt-1"
+                    >
+                      Non enregistrée
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                *ngIf="!phase.seances || phase.seances.length === 0"
+                class="p-6 text-center text-xs text-white/30 italic"
+              >
+                Aucune séance dans cette phase
+              </div>
             </div>
-          </div>
+          </ng-container>
         </div>
 
         <!-- Tab: Mon Évaluation (Stagiaire) -->
@@ -962,24 +1133,24 @@ interface EnrollmentInfo {
           </div>
         </div>
 
-        <!-- Tab: Stagiaires -->
+        <!-- Tab: Stagiaires Standards -->
         <div *ngIf="activeTab === 'stagiaires'" class="space-y-4">
-          <div *ngIf="enrollments.length > 0">
+          <div *ngIf="standardEnrollments.length > 0">
             <!-- Search Bar -->
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">🔍</span>
               <input
                 [(ngModel)]="searchQuery"
                 type="text"
-                placeholder="Rechercher un stagiaire..."
+                placeholder="Rechercher un stagiaire standard..."
                 class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C62761] transition-colors"
               />
             </div>
-
+            <br />
             <!-- Student Cards -->
             <div class="grid md:grid-cols-2 gap-4">
               <div
-                *ngFor="let e of filteredEnrollments; let i = index"
+                *ngFor="let e of filteredStandardEnrollments; let i = index"
                 class="glass-card border border-[var(--bridge-border)] p-5 hover:border-[rgba(198,39,97,0.3)] transition-all group"
                 [style.animation-delay]="i * 60 + 'ms'"
                 style="animation: fadeSlideIn 0.4s ease both"
@@ -1004,9 +1175,16 @@ interface EnrollmentInfo {
                   </div>
                   <!-- Info -->
                   <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-white text-sm">
-                      {{ e.studentFirstName }} {{ e.studentLastName }}
-                    </p>
+                    <div class="flex items-center gap-2">
+                      <p class="font-semibold text-white text-sm">
+                        {{ e.studentFirstName }} {{ e.studentLastName }}
+                      </p>
+                      <span
+                        class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase"
+                      >
+                        Standard
+                      </span>
+                    </div>
                     <p class="text-xs text-white/40 truncate">{{ e.studentEmail }}</p>
                     <p class="text-[10px] text-white/30 mt-1">
                       Inscrit le {{ e.enrollmentDate | date: 'd MMM y' }}
@@ -1017,7 +1195,7 @@ interface EnrollmentInfo {
                     <button
                       *ngIf="canManage && canEvaluate()"
                       (click)="openEvalForStudent(e)"
-                      class="px-3 py-1.5 text-[11px] font-bold bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      class="px-3 py-1.5 text-[11px] font-bold bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
                     >
                       ⭐ Évaluer
                     </button>
@@ -1027,12 +1205,405 @@ interface EnrollmentInfo {
             </div>
           </div>
           <div
-            *ngIf="enrollments.length === 0"
+            *ngIf="standardEnrollments.length === 0"
             class="glass-card border border-[var(--bridge-border)] p-12 text-center"
           >
             <div class="text-5xl mb-4">👥</div>
-            <p class="font-syne font-bold text-lg text-white">Aucun stagiaire inscrit</p>
-            <p class="text-white/40 text-sm mt-2">Les inscriptions n'ont pas encore commencé.</p>
+            <p class="font-syne font-bold text-lg text-white">Aucun stagiaire standard inscrit</p>
+            <p class="text-white/40 text-sm mt-2">
+              Les inscriptions au parcours standard apparaîtront ici.
+            </p>
+          </div>
+        </div>
+
+        <!-- ══ TAB: PARCOURS SUR MESURE (INSCRIPTIONS PERSONNALISÉES) ══ -->
+        <div *ngIf="activeTab === 'custom-enrollments'" class="space-y-6 animate-fadein">
+          <!-- Header Banner -->
+          <div
+            class="glass-card border border-amber-500/20 p-6 rounded-2xl relative overflow-hidden bg-gradient-to-r from-amber-500/5 via-transparent to-[#C62761]/5"
+          >
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-[#F5A623]/20 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0 shadow-lg"
+                >
+                  ⚡
+                </div>
+                <div>
+                  <h3 class="font-syne font-bold text-lg text-white flex items-center gap-2">
+                    Parcours & Inscriptions Personnalisées
+                    <span
+                      class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono"
+                    >
+                      {{ customEnrollments.length }} stagiaire(s)
+                    </span>
+                  </h3>
+                  <p class="text-xs text-[var(--bridge-text-muted)] mt-1">
+                    Gérez et concevez les phases et séances sur mesure selon la durée d'engagement
+                    choisie par chaque stagiaire.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Search & Filter Controls -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <div class="relative min-w-[200px]">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-xs"
+                    >🔍</span
+                  >
+                  <input
+                    [(ngModel)]="customSearchQuery"
+                    type="text"
+                    placeholder="Chercher stagiaire..."
+                    class="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors"
+                  />
+                </div>
+                <select
+                  [(ngModel)]="customPlanStatusFilter"
+                  class="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+                >
+                  <option value="ALL">Tous les statuts</option>
+                  <option value="APPROVED">Validés</option>
+                  <option value="PENDING">En attente</option>
+                  <option value="REJECTED">Refusés</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Enrollments List -->
+          <div *ngIf="filteredCustomEnrollments.length > 0" class="space-y-4">
+            <div
+              *ngFor="let e of filteredCustomEnrollments; let i = index"
+              class="glass-card border border-[var(--bridge-border)] hover:border-amber-500/30 transition-all rounded-2xl overflow-hidden"
+              [style.animation-delay]="i * 50 + 'ms'"
+              style="animation: fadeSlideIn 0.35s ease both"
+            >
+              <!-- Card Header Bar -->
+              <div class="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <!-- Stagiaire Info -->
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-[#C62761]/20 border border-white/10 flex items-center justify-center font-bold text-amber-400 text-sm overflow-hidden flex-shrink-0 shadow-md"
+                  >
+                    <img
+                      *ngIf="e.studentAvatar"
+                      [src]="e.studentAvatar"
+                      class="w-full h-full object-cover"
+                      [alt]="e.studentFirstName"
+                    />
+                    <span *ngIf="!e.studentAvatar"
+                      >{{ e.studentFirstName[0] }}{{ e.studentLastName[0] }}</span
+                    >
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h4 class="font-syne font-bold text-white text-base">
+                        {{ e.studentFirstName }} {{ e.studentLastName }}
+                      </h4>
+                      <!-- Status Badge -->
+                      <span
+                        class="text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border"
+                        [class]="
+                          e.status === 'APPROVED'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : e.status === 'PENDING'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : 'bg-red-500/10 text-red-400 border-red-500/20'
+                        "
+                      >
+                        {{
+                          e.status === 'APPROVED'
+                            ? '✓ Validé'
+                            : e.status === 'PENDING'
+                              ? '⏳ En attente'
+                              : '✕ Refusé'
+                        }}
+                      </span>
+                      <!-- Plan Status Badge -->
+                      <span
+                        *ngIf="e.customPlan"
+                        class="text-[9px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1"
+                      >
+                        ✨ Planning configuré ({{ getPlanPhasesCount(e.customPlan) }} phases,
+                        {{ getPlanSessionsCount(e.customPlan) }} séances)
+                      </span>
+                      <span
+                        *ngIf="!e.customPlan && e.status === 'APPROVED'"
+                        class="text-[9px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1"
+                      >
+                        ⚠️ À planifier
+                      </span>
+                    </div>
+                    <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                      {{ e.studentEmail }} · Demande du {{ e.enrollmentDate | date: 'd MMM y' }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Engagement Duration & Actions -->
+                <div class="flex items-center gap-3 flex-wrap lg:justify-end">
+                  <!-- Duration chip -->
+                  <div
+                    class="text-center px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/5"
+                  >
+                    <p class="text-[10px] text-white/40 uppercase tracking-wider">Durée choisie</p>
+                    <p class="text-sm font-mono font-bold text-[#F5A623]">
+                      {{ e.customDurationWeeks }} semaines
+                    </p>
+                  </div>
+
+                  <!-- Actions buttons -->
+                  <button
+                    *ngIf="e.customPlan"
+                    (click)="toggleCustomPlanPreview(e.id)"
+                    class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{{
+                      expandedCustomPlanEnrollmentId === e.id
+                        ? '▲ Masquer plan'
+                        : '👁️ Voir planning'
+                    }}</span>
+                  </button>
+
+                  <button
+                    *ngIf="canManage"
+                    (click)="openCustomPlanWizard(e)"
+                    class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-[#C62761] text-white hover:opacity-90 transition-all shadow-md shadow-amber-500/10 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{{
+                      e.customPlan ? '✏️ Modifier le parcours' : '✨ Configurer le parcours'
+                    }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Motivation message (if present) -->
+              <div
+                *ngIf="e.motivationMessage"
+                class="mx-5 mb-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-start gap-2.5"
+              >
+                <span class="text-amber-400 text-xs mt-0.5">💬</span>
+                <div>
+                  <p class="text-[10px] text-white/40 uppercase font-semibold">
+                    Motivation / Contraintes du stagiaire :
+                  </p>
+                  <p class="text-xs text-white/70 italic mt-0.5">« {{ e.motivationMessage }} »</p>
+                </div>
+              </div>
+
+              <!-- Interactive Accordion Preview: Custom Phases & Sessions Timeline -->
+              <div
+                *ngIf="expandedCustomPlanEnrollmentId === e.id && e.customPlan"
+                class="border-t border-white/5 bg-black/25 p-5 space-y-4 animate-fadein"
+              >
+                <div class="flex items-center justify-between">
+                  <h5 class="font-syne font-bold text-sm text-white flex items-center gap-2">
+                    <span>📅 Programme sur mesure ({{ e.customDurationWeeks }} semaines)</span>
+                    <span
+                      *ngIf="getParsedPlan(e)?.dateDebut"
+                      class="text-xs text-white/40 font-mono font-normal"
+                    >
+                      · Début le {{ getParsedPlan(e)?.dateDebut | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </h5>
+                  <span class="text-[10px] text-emerald-400 font-mono"
+                    >Dernière mise à jour : {{ getParsedPlan(e)?.updatedAt | date: 'short' }}</span
+                  >
+                </div>
+
+                <!-- Note from formateur -->
+                <div
+                  *ngIf="getParsedPlan(e)?.noteFormateur"
+                  class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200"
+                >
+                  <span class="font-bold text-purple-300">Note du formateur : </span>
+                  {{ getParsedPlan(e)?.noteFormateur }}
+                </div>
+
+                <!-- Phases Timeline -->
+                <div class="space-y-3">
+                  <div
+                    *ngFor="let p of getParsedPlan(e)?.phases; let pi = index"
+                    class="rounded-xl border border-white/5 bg-white/[0.02] p-4 space-y-3"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono font-bold text-xs flex items-center justify-center"
+                        >
+                          {{ p.numero }}
+                        </div>
+                        <div>
+                          <p class="font-syne font-bold text-white text-xs">{{ p.nom }}</p>
+                          <p class="text-[11px] text-white/50">{{ p.description }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Phase Metrics & Goals -->
+                    <div
+                      class="flex items-center justify-between flex-wrap gap-2 text-[10px] font-mono text-white/50 bg-white/[0.02] px-3 py-1.5 rounded-lg border border-white/5"
+                    >
+                      <span>⏱️ {{ p.dureeSemaines }} sem.</span>
+                      <span
+                        >📊 Assiduité actuelle :
+                        <strong class="text-amber-400 font-bold"
+                          >{{ getCustomPhaseAttendance(p) }}%</strong
+                        >
+                        (min: {{ p.minimumAttendance }}%)</span
+                      >
+                      <span
+                        >📈 Progression phase :
+                        <strong class="text-emerald-400 font-bold"
+                          >{{ getCustomPhaseProgression(p) }}%</strong
+                        ></span
+                      >
+                      <span>🎯 Note min : {{ p.minimumGrade }}/20</span>
+                    </div>
+
+                    <!-- Sessions list with attendance tracking -->
+                    <div
+                      *ngIf="p.seances && p.seances.length > 0"
+                      class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 border-t border-white/5"
+                    >
+                      <div
+                        *ngFor="let s of p.seances; let si = index"
+                        class="p-3.5 rounded-xl border transition-all space-y-2.5 relative"
+                        [ngClass]="{
+                          'bg-emerald-500/[0.04] border-emerald-500/30': s.present === true,
+                          'bg-red-500/[0.04] border-red-500/30': s.present === false,
+                          'bg-amber-500/[0.05] border-amber-500/40 shadow-[0_0_20px_rgba(245,166,35,0.1)] ring-1 ring-amber-500/30':
+                            isToday(s.date) && s.present !== true && s.present !== false,
+                          'bg-white/[0.02] border-white/5':
+                            !isToday(s.date) && s.present !== true && s.present !== false,
+                        }"
+                      >
+                        <!-- Header of session card -->
+                        <div class="flex items-center justify-between">
+                          <span
+                            class="font-bold font-mono text-xs flex items-center gap-1.5"
+                            [class]="isToday(s.date) ? 'text-[#F5A623]' : 'text-white/70'"
+                          >
+                            {{ s.date | date: 'dd/MM' }} · {{ s.heureDebut }}
+                            <span
+                              *ngIf="isToday(s.date)"
+                              class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 font-sans font-extrabold uppercase animate-pulse"
+                            >
+                              Aujourd'hui
+                            </span>
+                          </span>
+                          <span
+                            class="text-[9px] px-1.5 py-0.5 rounded font-mono"
+                            [class]="
+                              s.type === 'EN_LIGNE'
+                                ? 'bg-blue-500/10 text-blue-400'
+                                : 'bg-emerald-500/10 text-emerald-400'
+                            "
+                          >
+                            {{ s.type === 'EN_LIGNE' ? '🌐 En ligne' : '📍 Présentiel' }}
+                          </span>
+                        </div>
+
+                        <div>
+                          <p class="font-semibold text-white text-xs truncate">{{ s.titre }}</p>
+                          <p class="text-[10px] text-white/40 truncate">
+                            {{ s.salleOuLien }} ({{ s.dureeMinutes }} min)
+                          </p>
+                        </div>
+
+                        <!-- Attendance marking actions & status -->
+                        <div
+                          class="pt-2 border-t border-white/5 flex items-center justify-between gap-2"
+                        >
+                          <!-- Status Badge if marked or pending -->
+                          <div>
+                            <span
+                              *ngIf="s.present === true"
+                              class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1"
+                            >
+                              ✓ Présent
+                            </span>
+                            <span
+                              *ngIf="s.present === false"
+                              class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 font-bold border border-red-500/30 flex items-center gap-1"
+                            >
+                              ✕ Absent
+                            </span>
+                            <span
+                              *ngIf="s.present === undefined || s.present === null"
+                              class="text-[10px] text-white/40 italic"
+                            >
+                              {{
+                                isToday(s.date)
+                                  ? '⚠️ À émarger'
+                                  : isPast(s.date)
+                                    ? 'Non émargé'
+                                    : 'À venir'
+                              }}
+                            </span>
+                          </div>
+
+                          <!-- Action buttons for Trainer: displayed for today's and past sessions -->
+                          <div
+                            *ngIf="canManage && (isToday(s.date) || isPast(s.date))"
+                            class="flex items-center gap-1.5 ml-auto"
+                          >
+                            <button
+                              type="button"
+                              (click)="
+                                $event.stopPropagation();
+                                markCustomSessionAttendance(e, pi, si, true)
+                              "
+                              [title]="'Marquer ' + e.studentFirstName + ' Présent'"
+                              class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 border"
+                              [ngClass]="{
+                                'bg-emerald-500 text-black border-emerald-500 shadow-md shadow-emerald-500/30':
+                                  s.present === true,
+                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/25':
+                                  s.present !== true,
+                              }"
+                            >
+                              ✓ Présent
+                            </button>
+                            <button
+                              type="button"
+                              (click)="
+                                $event.stopPropagation();
+                                markCustomSessionAttendance(e, pi, si, false)
+                              "
+                              [title]="'Marquer ' + e.studentFirstName + ' Absent'"
+                              class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 border"
+                              [ngClass]="{
+                                'bg-red-500 text-white border-red-500 shadow-md shadow-red-500/30':
+                                  s.present === false,
+                                'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/25':
+                                  s.present !== false,
+                              }"
+                            >
+                              ✕ Absent
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div
+            *ngIf="filteredCustomEnrollments.length === 0"
+            class="glass-card border border-[var(--bridge-border)] p-12 text-center rounded-2xl"
+          >
+            <div class="text-5xl mb-4">⚡</div>
+            <p class="font-syne font-bold text-lg text-white">Aucun parcours personnalisé trouvé</p>
+            <p class="text-white/40 text-sm mt-2">
+              Les stagiaires choisissant une durée de formation sur mesure apparaîtront dans cet
+              espace.
+            </p>
           </div>
         </div>
 
@@ -1256,7 +1827,11 @@ interface EnrollmentInfo {
             [disabled]="savingAttendance"
             class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 transition-all"
           >
-            {{ savingAttendance ? 'Enregistrement...' : 'Valider l'Appel (' + getPresentInModal() + '/' + activePresences.length + ')' }}
+            {{
+              savingAttendance
+                ? 'Enregistrement...'
+                : "Valider l'Appel (" + getPresentInModal() + '/' + activePresences.length + ')'
+            }}
           </button>
         </div>
       </div>
@@ -1431,14 +2006,14 @@ interface EnrollmentInfo {
         <div class="flex gap-3 px-5 py-4 border-t border-[var(--bridge-border)]">
           <button
             (click)="closeEvalModal()"
-            class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all"
+            class="py-2.5 px-5 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm rounded-xl border border-white/5 transition-all cursor-pointer"
           >
             Annuler
           </button>
           <button
             (click)="submitEvaluation()"
             [disabled]="!evalForm.phaseId || evalForm.grade === null || submittingEval"
-            class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
             {{ submittingEval ? '✓ Enregistrement...' : 'Enregistrer l'évaluation' }}
           </button>
@@ -1446,7 +2021,586 @@ interface EnrollmentInfo {
       </div>
     </div>
 
-    <style>
+    <!-- ═══════════════════════════════════════════════════════════════════════════════ -->
+    <!-- ═══ MODAL ASSISTANT MULTI-ÉTAPES : PARCOURS SUR MESURE (WIZARD) ═════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════════════════════ -->
+    <div
+      *ngIf="showCustomPlanWizard && selectedCustomEnrollment"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadein overflow-y-auto"
+    >
+      <div
+        class="glass-card border border-amber-500/30 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(245,166,35,0.15)] bg-[var(--bridge-card-bg,#12121e)] my-auto"
+      >
+        <!-- Modal Header -->
+        <div
+          class="p-6 border-b border-white/10 bg-gradient-to-r from-amber-500/10 via-transparent to-[#C62761]/10 flex items-center justify-between flex-shrink-0"
+        >
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500/20 to-[#F5A623]/20 border border-amber-500/30 flex items-center justify-center text-xl text-amber-400"
+            >
+              ⚡
+            </div>
+            <div>
+              <h3 class="font-syne font-bold text-lg text-white">
+                Programme Personnalisé — {{ selectedCustomEnrollment.studentFirstName }}
+                {{ selectedCustomEnrollment.studentLastName }}
+              </h3>
+              <p class="text-xs text-[var(--bridge-text-muted)]">
+                Engagement :
+                <span class="text-amber-400 font-bold font-mono"
+                  >{{ selectedCustomEnrollment.customDurationWeeks }} semaines</span
+                >
+                · Formation : {{ formation?.nom }}
+              </p>
+            </div>
+          </div>
+          <button
+            (click)="closeCustomPlanWizard()"
+            class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center text-sm transition-all cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Stepper Navigation Bar -->
+        <div class="px-6 py-3 border-b border-white/5 bg-white/[0.02] flex-shrink-0">
+          <div class="grid grid-cols-4 gap-2">
+            <div
+              *ngFor="
+                let step of [
+                  { num: 1, label: 'Paramètres' },
+                  { num: 2, label: 'Phases' },
+                  { num: 3, label: 'Séances' },
+                  { num: 4, label: 'Récap & Envoi' },
+                ]
+              "
+              class="flex items-center gap-2 p-2 rounded-xl text-xs font-semibold transition-all"
+              [class]="
+                wizardStep === step.num
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                  : wizardStep > step.num
+                    ? 'text-emerald-400 bg-emerald-500/5'
+                    : 'text-white/30'
+              "
+            >
+              <div
+                class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono"
+                [class]="
+                  wizardStep === step.num
+                    ? 'bg-amber-500 text-black'
+                    : wizardStep > step.num
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-white/5 text-white/40'
+                "
+              >
+                {{ wizardStep > step.num ? '✓' : step.num }}
+              </div>
+              <span class="truncate hidden sm:inline">{{ step.label }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Validation Errors Banner -->
+        <div
+          *ngIf="wizardValidationErrors.length > 0"
+          class="mx-6 mt-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300 space-y-1 animate-fadein flex-shrink-0"
+        >
+          <p class="font-bold flex items-center gap-1.5 text-red-400">
+            <span>⚠️</span> Veuillez corriger les éléments suivants :
+          </p>
+          <ul class="list-disc list-inside space-y-0.5 text-[11px] pl-1">
+            <li *ngFor="let err of wizardValidationErrors">{{ err }}</li>
+          </ul>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div class="p-6 overflow-y-auto flex-1 space-y-6 custom-scroll">
+          <!-- ═════ ÉTAPE 1 : PARAMÈTRES & STRUCTURE ═════ -->
+          <div *ngIf="wizardStep === 1" class="space-y-5 animate-fadein">
+            <!-- Student Request Card -->
+            <div class="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider"
+                  >Demande du Stagiaire</span
+                >
+                <span
+                  class="text-xs font-mono font-bold text-white bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30"
+                >
+                  {{ selectedCustomEnrollment.customDurationWeeks }} semaines demandées
+                </span>
+              </div>
+              <p
+                *ngIf="selectedCustomEnrollment.motivationMessage"
+                class="text-xs text-white/70 italic"
+              >
+                « {{ selectedCustomEnrollment.motivationMessage }} »
+              </p>
+            </div>
+
+            <!-- Parameters Grid -->
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- Date de début -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-white/70"
+                  >Date de début du parcours sur mesure *</label
+                >
+                <input
+                  type="date"
+                  [(ngModel)]="wizardStartDate"
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
+                />
+                <p class="text-[11px] text-white/40">
+                  Les séances seront planifiées à partir de cette date.
+                </p>
+              </div>
+
+              <!-- Durée totale verrouillée -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-white/70"
+                  >Durée contractuelle de l'engagement</label
+                >
+                <div
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-amber-400 font-mono font-bold flex items-center justify-between"
+                >
+                  <span>{{ wizardTargetWeeks }} semaines</span>
+                  <span class="text-xs text-emerald-400 font-normal"
+                    >Verrouillé selon la demande</span
+                  >
+                </div>
+                <p class="text-[11px] text-white/40">
+                  La somme des phases à l'étape suivante doit totaliser
+                  {{ wizardTargetWeeks }} semaines.
+                </p>
+              </div>
+            </div>
+
+            <!-- Nombre de phases suggéré -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white"
+                  >Structure des phases ({{ wizardPhases.length }} phase(s))</span
+                >
+                <button
+                  (click)="addWizardPhase()"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-all cursor-pointer flex items-center gap-1"
+                >
+                  + Ajouter une phase
+                </button>
+              </div>
+              <p class="text-xs text-white/50">
+                Vous pourrez détailler les objectifs et la durée de chaque phase à l'étape 2.
+              </p>
+            </div>
+          </div>
+
+          <!-- ═════ ÉTAPE 2 : DÉFINITION DES PHASES ═════ -->
+          <div *ngIf="wizardStep === 2" class="space-y-5 animate-fadein">
+            <!-- Weeks Check Banner -->
+            <div
+              class="p-4 rounded-2xl border flex items-center justify-between"
+              [class]="
+                wizardTotalWeeks === wizardTargetWeeks
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+              "
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">{{
+                  wizardTotalWeeks === wizardTargetWeeks ? '✓' : '⚖️'
+                }}</span>
+                <span class="text-xs font-semibold">
+                  Total configuré :
+                  <strong class="font-mono text-sm">{{ wizardTotalWeeks }} sem.</strong> / Cible :
+                  <strong class="font-mono text-sm">{{ wizardTargetWeeks }} sem.</strong>
+                </span>
+              </div>
+              <span class="text-xs font-bold" *ngIf="wizardTotalWeeks === wizardTargetWeeks">
+                Parfaitement équilibré !
+              </span>
+              <span class="text-xs font-bold" *ngIf="wizardTotalWeeks !== wizardTargetWeeks">
+                Différence : {{ wizardTargetWeeks - wizardTotalWeeks }} sem.
+              </span>
+            </div>
+
+            <!-- Phases Forms -->
+            <div class="space-y-4">
+              <div
+                *ngFor="let p of wizardPhases; let pi = index"
+                class="glass-card border border-white/10 p-5 rounded-2xl space-y-4 bg-white/[0.01]"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div
+                      class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono font-bold text-xs flex items-center justify-center"
+                    >
+                      {{ p.numero }}
+                    </div>
+                    <span class="font-syne font-bold text-white text-sm">Phase {{ p.numero }}</span>
+                  </div>
+                  <button
+                    *ngIf="wizardPhases.length > 1"
+                    (click)="removeWizardPhase(pi)"
+                    class="text-red-400 hover:text-red-300 text-xs px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 transition-all cursor-pointer"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-3">
+                  <!-- Titre de la phase -->
+                  <div class="md:col-span-2 space-y-1">
+                    <label class="text-[11px] font-semibold text-white/60"
+                      >Titre de la phase *</label
+                    >
+                    <input
+                      type="text"
+                      [(ngModel)]="p.nom"
+                      placeholder="Ex: Fondamentaux & Architecture Docker"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors"
+                    />
+                  </div>
+
+                  <!-- Durée en semaines -->
+                  <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-white/60"
+                      >Durée (semaines) *</label
+                    >
+                    <input
+                      type="number"
+                      min="1"
+                      [(ngModel)]="p.dureeSemaines"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold focus:outline-none focus:border-amber-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-1">
+                  <label class="text-[11px] font-semibold text-white/60"
+                    >Description & Objectifs d'apprentissage</label
+                  >
+                  <textarea
+                    [(ngModel)]="p.description"
+                    rows="2"
+                    placeholder="Objectifs clés abordés durant cette phase..."
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors resize-none"
+                  ></textarea>
+                </div>
+
+                <!-- Min Grade & Attendance -->
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-white/50">Note minimale de passage (/20)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      [(ngModel)]="p.minimumGrade"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white font-mono"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-white/50">Assiduité minimale requise (%)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      [(ngModel)]="p.minimumAttendance"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              (click)="addWizardPhase()"
+              class="w-full py-2.5 rounded-xl border border-dashed border-white/20 text-xs font-semibold text-white/60 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/5 transition-all cursor-pointer"
+            >
+              + Ajouter une phase supplémentaire
+            </button>
+          </div>
+
+          <!-- ═════ ÉTAPE 3 : PLANIFICATION DES SÉANCES ═════ -->
+          <div *ngIf="wizardStep === 3" class="space-y-6 animate-fadein">
+            <div
+              class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-white/60 flex items-center justify-between"
+            >
+              <span
+                >Programmez les séances pour chaque phase. Total planifié :
+                <strong class="text-amber-400 font-mono"
+                  >{{ wizardTotalSessions }} séance(s)</strong
+                ></span
+              >
+            </div>
+
+            <!-- Per Phase Sessions Manager -->
+            <div
+              *ngFor="let p of wizardPhases; let pi = index"
+              class="space-y-3 p-5 rounded-2xl border border-white/10 bg-white/[0.01]"
+            >
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold font-mono flex items-center justify-center"
+                  >
+                    {{ p.numero }}
+                  </span>
+                  <h4 class="font-syne font-bold text-white text-sm">{{ p.nom }}</h4>
+                  <span class="text-xs text-white/40 font-mono"
+                    >({{ p.dureeSemaines }} sem. · {{ p.seances.length }} séances)</span
+                  >
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    (click)="autoGenerateSessions(pi)"
+                    class="px-2.5 py-1 text-[11px] font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    ⚡ Auto-générer
+                  </button>
+                  <button
+                    (click)="addWizardSession(pi)"
+                    class="px-2.5 py-1 text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    + Séance
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sessions List -->
+              <div *ngIf="p.seances && p.seances.length > 0" class="space-y-2.5 pt-2">
+                <div
+                  *ngFor="let s of p.seances; let si = index"
+                  class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/15 transition-all space-y-2.5"
+                >
+                  <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 items-center">
+                    <!-- Date -->
+                    <div class="space-y-0.5">
+                      <label class="text-[10px] text-white/40 font-semibold">Date *</label>
+                      <input
+                        type="date"
+                        [(ngModel)]="s.date"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <!-- Heure début -->
+                    <div class="space-y-0.5">
+                      <label class="text-[10px] text-white/40 font-semibold">Heure début</label>
+                      <input
+                        type="time"
+                        [(ngModel)]="s.heureDebut"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <!-- Durée en minutes -->
+                    <div class="space-y-0.5">
+                      <label class="text-[10px] text-white/40 font-semibold">Durée (min)</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="s.dureeMinutes"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <!-- Type -->
+                    <div class="space-y-0.5">
+                      <label class="text-[10px] text-white/40 font-semibold">Format</label>
+                      <select
+                        [(ngModel)]="s.type"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                      >
+                        <option value="EN_LIGNE">🌐 En ligne</option>
+                        <option value="PRESENTIEL">📍 Présentiel</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center">
+                    <!-- Titre de la séance -->
+                    <div class="sm:col-span-2 space-y-0.5">
+                      <label class="text-[10px] text-white/40 font-semibold"
+                        >Titre / Sujet de la séance</label
+                      >
+                      <input
+                        type="text"
+                        [(ngModel)]="s.titre"
+                        placeholder="Ex: TP Conteneurisation & Dockerfiles"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <!-- Salle / Lien Meet -->
+                    <div class="space-y-0.5 relative">
+                      <label class="text-[10px] text-white/40 font-semibold"
+                        >Salle / Lien Meet</label
+                      >
+                      <div class="flex items-center gap-1">
+                        <input
+                          type="text"
+                          [(ngModel)]="s.salleOuLien"
+                          placeholder="Ex: Lab A1 ou Lien Meet"
+                          class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                        />
+                        <button
+                          (click)="removeWizardSession(pi, si)"
+                          title="Supprimer la séance"
+                          class="text-red-400 hover:text-red-300 px-2 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all text-xs cursor-pointer flex-shrink-0"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                *ngIf="!p.seances || p.seances.length === 0"
+                class="text-center py-4 text-xs text-white/30 border border-dashed border-white/10 rounded-xl"
+              >
+                Aucune séance programmée pour cette phase. Cliquez sur « Auto-générer » ou « +
+                Séance ».
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════ ÉTAPE 4 : RÉCAPITULATIF & NOTIFICATION ═════ -->
+          <div *ngIf="wizardStep === 4" class="space-y-5 animate-fadein">
+            <!-- Full Recap Banner -->
+            <div
+              class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-emerald-500/10 border border-amber-500/20 space-y-3"
+            >
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <h4 class="font-syne font-bold text-white text-base">
+                    Récapitulatif du Parcours Sur Mesure
+                  </h4>
+                  <p class="text-xs text-[var(--bridge-text-muted)]">
+                    Stagiaire :
+                    <strong class="text-white"
+                      >{{ selectedCustomEnrollment.studentFirstName }}
+                      {{ selectedCustomEnrollment.studentLastName }}</strong
+                    >
+                    · Début :
+                    <strong class="text-white">{{ wizardStartDate | date: 'dd/MM/yyyy' }}</strong>
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30"
+                  >
+                    ⏱️ {{ wizardTotalWeeks }} semaines
+                  </span>
+                  <span
+                    class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/30"
+                  >
+                    📅 {{ wizardTotalSessions }} séances
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary Timeline -->
+            <div class="space-y-3">
+              <div
+                *ngFor="let p of wizardPhases"
+                class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <span
+                      class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold font-mono flex items-center justify-center"
+                    >
+                      {{ p.numero }}
+                    </span>
+                    <span class="font-syne font-bold text-white text-sm">{{ p.nom }}</span>
+                  </div>
+                  <span class="text-xs text-amber-400 font-mono font-bold"
+                    >{{ p.dureeSemaines }} sem. ({{ p.seances?.length || 0 }} séances)</span
+                  >
+                </div>
+                <p class="text-xs text-white/50 pl-9">{{ p.description }}</p>
+              </div>
+            </div>
+
+            <!-- Formateur Note for Notification -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+              <label class="text-xs font-semibold text-white/80"
+                >Message personnalisé d'accompagnement (inclus dans la notification) :</label
+              >
+              <textarea
+                [(ngModel)]="wizardNote"
+                rows="2"
+                placeholder="Ex: Bonjour, j'ai adapté votre calendrier pour concentrer les séances sur les technologies Docker et Kubernetes..."
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors resize-none"
+              ></textarea>
+              <p class="text-[11px] text-white/40">
+                🔔 Dès que vous validez, une notification sera envoyée au stagiaire avec le détail
+                de son planning.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div
+          class="p-6 border-t border-white/10 bg-white/[0.02] flex items-center justify-between flex-shrink-0"
+        >
+          <button
+            *ngIf="wizardStep > 1"
+            (click)="wizardPrevStep()"
+            [disabled]="savingCustomPlan"
+            class="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white/80 font-semibold text-xs rounded-xl border border-white/10 transition-all cursor-pointer"
+          >
+            ← Étape précédente
+          </button>
+          <div *ngIf="wizardStep === 1"></div>
+
+          <div class="flex items-center gap-3">
+            <button
+              (click)="closeCustomPlanWizard()"
+              [disabled]="savingCustomPlan"
+              class="px-5 py-2.5 text-white/50 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+            >
+              Annuler
+            </button>
+
+            <!-- Next Button (Steps 1 to 3) -->
+            <button
+              *ngIf="wizardStep < 4"
+              (click)="wizardNextStep()"
+              class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-[#F5A623] text-black font-bold text-xs rounded-xl hover:opacity-90 transition-all shadow-md cursor-pointer"
+            >
+              Continuer →
+            </button>
+
+            <!-- Confirm & Save Button (Step 4) -->
+            <button
+              *ngIf="wizardStep === 4"
+              (click)="saveCustomPlanSubmit()"
+              [disabled]="savingCustomPlan || wizardTotalWeeks !== wizardTargetWeeks"
+              class="px-7 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer"
+            >
+              <span
+                *ngIf="savingCustomPlan"
+                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+              ></span>
+              <span>{{
+                savingCustomPlan
+                  ? 'Enregistrement & Envoi...'
+                  : '🚀 Enregistrer & Notifier le Stagiaire'
+              }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
       @keyframes inlineCardIn {
         from {
           opacity: 0;
@@ -1486,8 +2640,8 @@ interface EnrollmentInfo {
       .animate-fadein {
         animation: fadeSlideIn 0.4s ease both;
       }
-    </style>
-  `,
+    `,
+  ],
 })
 export class FormationDetailComponent implements OnInit, OnDestroy {
   formation: Formation | null = null;
@@ -1522,17 +2676,58 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   get tabs() {
+    // Toujours retourner un tableau stable basé sur le rôle courant
     if (this.isStagiaire) {
-      return [
-        { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
-        { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
-        { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() },
-        { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined },
-      ];
+      return this._stagiaireTabsDef;
     }
+    return this._formateurTabsDef;
+  }
+
+  // Custom enrollment filters & wizard state
+  customSearchQuery = '';
+  customPlanStatusFilter: 'ALL' | 'APPROVED' | 'PENDING' | 'REJECTED' = 'ALL';
+  expandedCustomPlanEnrollmentId: string | null = null;
+  showCustomPlanWizard = false;
+  selectedCustomEnrollment: EnrollmentInfo | null = null;
+  wizardStep = 1;
+  wizardStartDate = '';
+  wizardNote = '';
+  wizardPhases: CustomPlanPhase[] = [];
+  savingCustomPlan = false;
+  wizardValidationErrors: string[] = [];
+
+  // Cache des plans parsés (évite le re-parsing JSON à chaque cycle de détection)
+  private parsedCustomPlans: Map<string, CustomPlanData> = new Map();
+
+  private get _stagiaireTabsDef() {
     return [
-      { id: 'phases', label: 'Phases & Séances', icon: '🗂️', count: this.formation?.phases.length },
-      { id: 'stagiaires', label: 'Stagiaires', icon: '👥', count: this.enrollments.length },
+      { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
+      { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
+      { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() },
+      { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined },
+    ];
+  }
+
+  private get _formateurTabsDef() {
+    return [
+      {
+        id: 'phases',
+        label: 'Phases & Séances',
+        icon: '🗂️',
+        count: this.formation?.phases?.length,
+      },
+      {
+        id: 'stagiaires',
+        label: 'Stagiaires Standards',
+        icon: '👥',
+        count: this.standardEnrollments.length,
+      },
+      {
+        id: 'custom-enrollments',
+        label: 'Parcours Sur Mesure',
+        icon: '⚡',
+        count: this.customEnrollments.length,
+      },
       { id: 'evaluations', label: 'Évaluations', icon: '📝', count: this.phaseEvaluations.length },
     ];
   }
@@ -1542,12 +2737,21 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getMyPresenceCount(): number {
+    if (this.myCustomPlan) {
+      let count = 0;
+      this.myCustomPlan.phases?.forEach((p) => {
+        p.seances?.forEach((s) => {
+          if (s.present === true) count++;
+        });
+      });
+      return count;
+    }
     if (!this.formation || !this.user) return 0;
     let count = 0;
     this.formation.phases.forEach((p) => {
       p.seances?.forEach((s) => {
         const pres = s.presences?.find((pr) => pr.stagiaireId === this.user!.id);
-        if (pres) count++;
+        if (pres && pres.present) count++;
       });
     });
     return count;
@@ -1565,6 +2769,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getMyAttendanceRate(): number {
+    if (this.myCustomPlan) {
+      return this.getCustomPlanAttendance(this.myCustomPlan);
+    }
     if (!this.formation || !this.user) return 0;
     let total = 0,
       present = 0;
@@ -1587,21 +2794,59 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getMyFormationProgress(): number {
+    if (this.myCustomPlan) {
+      return this.getCustomPlanProgression(this.myCustomPlan);
+    }
     if (!this.formation) return 0;
     const phases = this.formation.phases || [];
     if (phases.length === 0) return 0;
     return Math.round(phases.reduce((s, p) => s + (p.progression || 0), 0) / phases.length);
   }
 
-  get filteredEnrollments(): EnrollmentInfo[] {
-    if (!this.searchQuery.trim()) return this.enrollments;
+  get standardEnrollments(): EnrollmentInfo[] {
+    return this.enrollments.filter((e) => !e.customDurationWeeks || e.customDurationWeeks <= 0);
+  }
+
+  get customEnrollments(): EnrollmentInfo[] {
+    return this.enrollments.filter((e) => !!(e.customDurationWeeks && e.customDurationWeeks > 0));
+  }
+
+  get filteredStandardEnrollments(): EnrollmentInfo[] {
+    if (!this.searchQuery.trim()) return this.standardEnrollments;
     const q = this.searchQuery.toLowerCase();
-    return this.enrollments.filter(
+    return this.standardEnrollments.filter(
       (e) =>
-        e.studentFirstName.toLowerCase().includes(q) ||
-        e.studentLastName.toLowerCase().includes(q) ||
-        e.studentEmail.toLowerCase().includes(q),
+        (e.studentFirstName || '').toLowerCase().includes(q) ||
+        (e.studentLastName || '').toLowerCase().includes(q) ||
+        (e.studentEmail || '').toLowerCase().includes(q),
     );
+  }
+
+  get filteredCustomEnrollments(): EnrollmentInfo[] {
+    let list = this.customEnrollments;
+    if (this.customPlanStatusFilter !== 'ALL') {
+      list = list.filter((e) => e.status === this.customPlanStatusFilter);
+    }
+    if (!this.customSearchQuery.trim()) return list;
+    const q = this.customSearchQuery.toLowerCase();
+    return list.filter(
+      (e) =>
+        (e.studentFirstName || '').toLowerCase().includes(q) ||
+        (e.studentLastName || '').toLowerCase().includes(q) ||
+        (e.studentEmail || '').toLowerCase().includes(q),
+    );
+  }
+
+  get wizardTotalWeeks(): number {
+    return this.wizardPhases.reduce((sum, p) => sum + (Number(p.dureeSemaines) || 0), 0);
+  }
+
+  get wizardTargetWeeks(): number {
+    return this.selectedCustomEnrollment?.customDurationWeeks || 0;
+  }
+
+  get wizardTotalSessions(): number {
+    return this.wizardPhases.reduce((sum, p) => sum + (p.seances ? p.seances.length : 0), 0);
   }
 
   constructor(
@@ -1612,7 +2857,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private http: HttpClient,
     private paiementService: PaiementService,
+    private enrollmentService: EnrollmentService,
     private toastService: ToastService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -1624,6 +2871,18 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
       this.activeTab = 'my-progress';
       this.loadPaiements();
     }
+  }
+
+  /** Change l'onglet actif et force la détection de changements */
+  setTab(id: string): void {
+    if (this.activeTab === id) return;
+    this.activeTab = id;
+    this.cdr.detectChanges();
+  }
+
+  /** trackBy pour le *ngFor des tabs — évite le re-render complet des boutons */
+  trackTab(index: number, tab: { id: string }): string {
+    return tab.id;
   }
 
   ngOnDestroy(): void {
@@ -1656,6 +2915,8 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (data) => {
             this.enrollments = data || [];
+            // Invalider le cache des plans parsés pour forcer le re-parsing avec les données fraîches
+            this.parsedCustomPlans.clear();
           },
           error: () => {},
         }),
@@ -1804,9 +3065,18 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     return seance.presences?.filter((p) => p.present).length || 0;
   }
 
-  isToday(date: Date): boolean {
-    const d = new Date(date);
+  isToday(date: Date | string | null | undefined): boolean {
+    if (!date) return false;
     const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    if (typeof date === 'string') {
+      const dateOnly = date.split('T')[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+        return dateOnly === todayStr;
+      }
+    }
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return false;
     return (
       d.getFullYear() === today.getFullYear() &&
       d.getMonth() === today.getMonth() &&
@@ -1814,20 +3084,37 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  isPast(date: Date): boolean {
-    return new Date(date) < new Date(new Date().setHours(0, 0, 0, 0));
+  isPast(date: Date | string | null | undefined): boolean {
+    if (!date) return false;
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    if (typeof date === 'string') {
+      const dateOnly = date.split('T')[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+        return dateOnly < todayStr;
+      }
+    }
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return false;
+    return d < new Date(new Date().setHours(0, 0, 0, 0));
   }
 
   getTotalSessions(): number {
     return this.formation?.phases.reduce((sum, p) => sum + (p.seances?.length || 0), 0) || 0;
   }
 
-  formatDay(date: Date): string {
-    return new Date(date).toLocaleDateString('fr-FR', { weekday: 'short' }).toUpperCase();
+  formatDay(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('fr-FR', { weekday: 'short' }).toUpperCase();
   }
 
-  formatDayNum(date: Date): string {
-    return new Date(date).getDate().toString().padStart(2, '0');
+  formatDayNum(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return d.getDate().toString().padStart(2, '0');
   }
 
   getStatusClass(status: string): string {
@@ -2024,5 +3311,449 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
           );
         },
       });
+  }
+
+  // ── Custom Plan Wizard & Preview Methods ───────────────────────────────────────
+
+  toggleCustomPlanPreview(enrollmentId: string): void {
+    if (this.expandedCustomPlanEnrollmentId === enrollmentId) {
+      this.expandedCustomPlanEnrollmentId = null;
+    } else {
+      this.expandedCustomPlanEnrollmentId = enrollmentId;
+    }
+  }
+
+  parseCustomPlan(jsonString?: string | null): CustomPlanData | null {
+    if (!jsonString) return null;
+    try {
+      return JSON.parse(jsonString) as CustomPlanData;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Retourne le plan depuis le cache (Map) — évite le re-parsing à chaque cycle */
+  getParsedPlan(enrollment: EnrollmentInfo): CustomPlanData | null {
+    if (!enrollment || !enrollment.customPlan) return null;
+    const key = enrollment.id.toString();
+    if (!this.parsedCustomPlans.has(key)) {
+      const plan = this.parseCustomPlan(enrollment.customPlan);
+      if (plan) this.parsedCustomPlans.set(key, plan);
+      return plan;
+    }
+    return this.parsedCustomPlans.get(key) || null;
+  }
+
+  getPlanPhasesCount(jsonString?: string | null): number {
+    const plan = this.parseCustomPlan(jsonString);
+    return plan?.phases?.length || 0;
+  }
+
+  getPlanSessionsCount(jsonString?: string | null): number {
+    const plan = this.parseCustomPlan(jsonString);
+    if (!plan || !plan.phases) return 0;
+    return plan.phases.reduce((sum, p) => sum + (p.seances ? p.seances.length : 0), 0);
+  }
+
+  openCustomPlanWizard(enrollment: EnrollmentInfo): void {
+    this.selectedCustomEnrollment = enrollment;
+    this.wizardStep = 1;
+    this.wizardValidationErrors = [];
+
+    const existingPlan = this.parseCustomPlan(enrollment.customPlan);
+    if (existingPlan) {
+      this.wizardStartDate = existingPlan.dateDebut || new Date().toISOString().split('T')[0];
+      this.wizardNote = existingPlan.noteFormateur || '';
+      this.wizardPhases = JSON.parse(JSON.stringify(existingPlan.phases || []));
+    } else {
+      this.wizardStartDate = this.formation?.dateDebut
+        ? new Date(this.formation.dateDebut).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+      this.wizardNote = '';
+
+      // Auto initialize default phases based on custom duration
+      const totalWeeks = enrollment.customDurationWeeks || 4;
+      const numPhases = totalWeeks >= 8 ? 3 : totalWeeks >= 4 ? 2 : 1;
+      const weeksPerPhase = Math.max(1, Math.floor(totalWeeks / numPhases));
+
+      this.wizardPhases = [];
+      for (let i = 1; i <= numPhases; i++) {
+        const pWeeks =
+          i === numPhases ? totalWeeks - weeksPerPhase * (numPhases - 1) : weeksPerPhase;
+        this.wizardPhases.push({
+          numero: i,
+          nom: `Phase ${i} : ${i === 1 ? 'Fondamentaux & Prise en main' : i === 2 ? 'Pratique avancée & Projet' : 'Perfectionnement & Soutenance'}`,
+          description: `Parcours intensif sur mesure sur ${pWeeks} semaine(s)`,
+          dureeSemaines: pWeeks,
+          minimumAttendance: 75,
+          minimumGrade: 10,
+          seances: [],
+        });
+      }
+
+      // Auto-generate initial sessions for each phase
+      this.wizardPhases.forEach((p, pIdx) => {
+        this.autoGenerateSessions(pIdx);
+      });
+    }
+
+    this.showCustomPlanWizard = true;
+  }
+
+  closeCustomPlanWizard(): void {
+    if (this.savingCustomPlan) return;
+    this.showCustomPlanWizard = false;
+    this.selectedCustomEnrollment = null;
+    this.wizardPhases = [];
+    this.wizardValidationErrors = [];
+  }
+
+  wizardNextStep(): void {
+    this.wizardValidationErrors = [];
+
+    if (this.wizardStep === 1) {
+      if (!this.wizardStartDate) {
+        this.wizardValidationErrors.push('Veuillez renseigner une date de début pour le parcours.');
+        return;
+      }
+      if (this.wizardPhases.length === 0) {
+        this.wizardValidationErrors.push('Veuillez ajouter au moins une phase.');
+        return;
+      }
+    } else if (this.wizardStep === 2) {
+      for (let i = 0; i < this.wizardPhases.length; i++) {
+        const p = this.wizardPhases[i];
+        if (!p.nom || !p.nom.trim()) {
+          this.wizardValidationErrors.push(`Le titre de la Phase ${p.numero} est obligatoire.`);
+        }
+        if (!p.dureeSemaines || p.dureeSemaines <= 0) {
+          this.wizardValidationErrors.push(
+            `La durée de la Phase ${p.numero} doit être d'au moins 1 semaine.`,
+          );
+        }
+      }
+      if (this.wizardTotalWeeks !== this.wizardTargetWeeks) {
+        this.wizardValidationErrors.push(
+          `La somme des durées des phases (${this.wizardTotalWeeks} sem.) doit correspondre exactement à l'engagement du stagiaire (${this.wizardTargetWeeks} sem.).`,
+        );
+      }
+      if (this.wizardValidationErrors.length > 0) return;
+    } else if (this.wizardStep === 3) {
+      for (let i = 0; i < this.wizardPhases.length; i++) {
+        const p = this.wizardPhases[i];
+        if (!p.seances || p.seances.length === 0) {
+          this.wizardValidationErrors.push(
+            `Veuillez programmer au moins une séance pour la Phase ${p.numero}.`,
+          );
+        }
+      }
+      if (this.wizardValidationErrors.length > 0) return;
+    }
+
+    this.wizardStep = Math.min(this.wizardStep + 1, 4);
+  }
+
+  wizardPrevStep(): void {
+    this.wizardValidationErrors = [];
+    this.wizardStep = Math.max(this.wizardStep - 1, 1);
+  }
+
+  addWizardPhase(): void {
+    const nextNum = this.wizardPhases.length + 1;
+    this.wizardPhases.push({
+      numero: nextNum,
+      nom: `Phase ${nextNum} : Nouvel Objectif`,
+      description: 'Description des compétences ciblées',
+      dureeSemaines: 1,
+      minimumAttendance: 75,
+      minimumGrade: 10,
+      seances: [],
+    });
+  }
+
+  removeWizardPhase(index: number): void {
+    if (this.wizardPhases.length <= 1) {
+      this.toastService.warning('Il faut au moins une phase dans le parcours.', 'Structure');
+      return;
+    }
+    this.wizardPhases.splice(index, 1);
+    this.wizardPhases.forEach((p, idx) => (p.numero = idx + 1));
+  }
+
+  addWizardSession(phaseIndex: number): void {
+    const p = this.wizardPhases[phaseIndex];
+    if (!p.seances) p.seances = [];
+
+    const baseDate = this.wizardStartDate ? new Date(this.wizardStartDate) : new Date();
+    let weekOffset = 0;
+    for (let i = 0; i < phaseIndex; i++) {
+      weekOffset += Number(this.wizardPhases[i].dureeSemaines) || 1;
+    }
+    baseDate.setDate(baseDate.getDate() + weekOffset * 7 + p.seances.length * 3);
+
+    p.seances.push({
+      titre: `Séance ${p.seances.length + 1} : Atelier pratique`,
+      date: baseDate.toISOString().split('T')[0],
+      heureDebut: '18:30',
+      dureeMinutes: 90,
+      type: 'EN_LIGNE',
+      salleOuLien: 'https://meet.google.com/the-bridge',
+      description: 'Session interactive avec le formateur',
+    });
+  }
+
+  removeWizardSession(phaseIndex: number, sessionIndex: number): void {
+    this.wizardPhases[phaseIndex].seances.splice(sessionIndex, 1);
+  }
+
+  autoGenerateSessions(phaseIndex: number): void {
+    const p = this.wizardPhases[phaseIndex];
+    p.seances = [];
+    const weeks = Number(p.dureeSemaines) || 2;
+    const baseDate = this.wizardStartDate ? new Date(this.wizardStartDate) : new Date();
+
+    let weekOffset = 0;
+    for (let i = 0; i < phaseIndex; i++) {
+      weekOffset += Number(this.wizardPhases[i].dureeSemaines) || 1;
+    }
+
+    for (let w = 0; w < weeks; w++) {
+      const d1 = new Date(baseDate);
+      d1.setDate(d1.getDate() + (weekOffset + w) * 7 + 1); // Tuesday
+      p.seances.push({
+        titre: `S${w * 2 + 1} : Théorie & Fondamentaux (Semaine ${w + 1})`,
+        date: d1.toISOString().split('T')[0],
+        heureDebut: '18:30',
+        dureeMinutes: 90,
+        type: 'EN_LIGNE',
+        salleOuLien: 'https://meet.google.com/the-bridge',
+        description: `Cours interactif et notions clés semaine ${w + 1}`,
+      });
+
+      const d2 = new Date(baseDate);
+      d2.setDate(d2.getDate() + (weekOffset + w) * 7 + 3); // Thursday
+      p.seances.push({
+        titre: `S${w * 2 + 2} : TP & Exercices Pratiques (Semaine ${w + 1})`,
+        date: d2.toISOString().split('T')[0],
+        heureDebut: '18:30',
+        dureeMinutes: 120,
+        type: 'PRESENTIEL',
+        salleOuLien: 'Lab Bridge A1',
+        description: `Mise en pratique encadrée semaine ${w + 1}`,
+      });
+    }
+    this.toastService.info(
+      `${p.seances.length} séances générées pour la Phase ${p.numero}`,
+      'Planning automatique',
+    );
+  }
+
+  saveCustomPlanSubmit(): void {
+    if (!this.selectedCustomEnrollment) return;
+    this.savingCustomPlan = true;
+    this.wizardValidationErrors = [];
+
+    const planData: CustomPlanData = {
+      formationId: this.formationId,
+      formationNom: this.formation?.nom || '',
+      studentId: this.selectedCustomEnrollment.studentId,
+      studentNom: `${this.selectedCustomEnrollment.studentFirstName} ${this.selectedCustomEnrollment.studentLastName}`,
+      totalDurationWeeks:
+        this.selectedCustomEnrollment.customDurationWeeks || this.wizardTotalWeeks,
+      dateDebut: this.wizardStartDate,
+      phases: this.wizardPhases,
+      noteFormateur: this.wizardNote.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const jsonStr = JSON.stringify(planData);
+    const enrollmentId = Number(this.selectedCustomEnrollment.id);
+
+    this.enrollmentService.saveCustomPlan(enrollmentId, jsonStr, this.wizardNote).subscribe({
+      next: (res) => {
+        this.savingCustomPlan = false;
+        // Update local enrollment state
+        const target = this.enrollments.find(
+          (e) => e.id.toString() === this.selectedCustomEnrollment!.id.toString(),
+        );
+        if (target) {
+          target.customPlan = jsonStr;
+        }
+        this.toastService.success(
+          `Le parcours sur mesure de ${this.selectedCustomEnrollment?.studentFirstName} a été enregistré et notifié avec succès !`,
+          '🎉 Planning configuré',
+        );
+        this.showCustomPlanWizard = false;
+        this.selectedCustomEnrollment = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.savingCustomPlan = false;
+        this.wizardValidationErrors = [
+          err?.error?.message || "Erreur lors de l'enregistrement du plan personnalisé.",
+        ];
+        this.toastService.error("Erreur lors de l'enregistrement du plan", 'Erreur');
+      },
+    });
+  }
+
+  get myCustomPlan(): CustomPlanData | null {
+    if (!this.isStagiaire || !this.user) return null;
+    const myEnroll = this.enrollments.find(
+      (e) => e.studentId.toString() === this.user!.id.toString(),
+    );
+    return myEnroll ? this.parseCustomPlan(myEnroll.customPlan) : null;
+  }
+
+  getCustomPlanAttendance(plan: CustomPlanData | null): number {
+    if (!plan || !plan.phases) return 0;
+    let totalMarked = 0;
+    let presentCount = 0;
+    plan.phases.forEach((p) => {
+      p.seances?.forEach((s) => {
+        if (s.present === true) {
+          totalMarked++;
+          presentCount++;
+        } else if (s.present === false) {
+          totalMarked++;
+        }
+      });
+    });
+    return totalMarked > 0 ? Math.round((presentCount / totalMarked) * 100) : 100;
+  }
+
+  getCustomPlanProgression(plan: CustomPlanData | null): number {
+    if (!plan || !plan.phases) return 0;
+    let totalSessions = 0;
+    let completedSessions = 0;
+    plan.phases.forEach((p) => {
+      p.seances?.forEach((s) => {
+        totalSessions++;
+        if (s.present !== undefined && s.present !== null) {
+          completedSessions++;
+        } else if (this.isPast(s.date)) {
+          completedSessions++;
+        }
+      });
+    });
+    return totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+  }
+
+  getCustomPhaseAttendance(phase: CustomPlanPhase): number {
+    if (!phase.seances || phase.seances.length === 0) return 0;
+    let totalMarked = 0;
+    let presentCount = 0;
+    phase.seances.forEach((s) => {
+      if (s.present === true) {
+        totalMarked++;
+        presentCount++;
+      } else if (s.present === false) {
+        totalMarked++;
+      }
+    });
+    return totalMarked > 0 ? Math.round((presentCount / totalMarked) * 100) : 100;
+  }
+
+  getCustomPhaseProgression(phase: CustomPlanPhase): number {
+    if (!phase.seances || phase.seances.length === 0) return 0;
+    let completed = 0;
+    phase.seances.forEach((s) => {
+      if (s.present !== undefined && s.present !== null) {
+        completed++;
+      } else if (this.isPast(s.date)) {
+        completed++;
+      }
+    });
+    return Math.round((completed / phase.seances.length) * 100);
+  }
+
+  markCustomSessionAttendance(
+    enrollment: EnrollmentInfo,
+    phaseIndex: number,
+    sessionIndex: number,
+    present: boolean,
+  ): void {
+    if (!enrollment) return;
+
+    const key = enrollment.id.toString();
+
+    // Récupère le plan depuis le cache ou le parse depuis le JSON
+    const plan = this.parsedCustomPlans.get(key) || this.parseCustomPlan(enrollment.customPlan);
+    if (!plan || !plan.phases) return;
+
+    let phase = plan.phases[phaseIndex];
+    if (!phase) {
+      phase = plan.phases.find((p) => p.numero === phaseIndex + 1) || plan.phases[0];
+    }
+    if (!phase || !phase.seances || !phase.seances[sessionIndex]) return;
+
+    const targetSession = phase.seances[sessionIndex];
+    const previousVal = targetSession.present;
+
+    // Toggle : si même valeur => reset à null, sinon => nouvelle valeur
+    if (previousVal === present) {
+      targetSession.present = null;
+      targetSession.markedAt = undefined;
+    } else {
+      targetSession.present = present;
+      targetSession.markedAt = new Date().toISOString();
+    }
+
+    plan.updatedAt = new Date().toISOString();
+    const updatedJson = JSON.stringify(plan);
+
+    // Mise à jour immédiate du cache et de l'enrollment
+    this.parsedCustomPlans.set(key, plan);
+    enrollment.customPlan = updatedJson;
+    const localEnroll = this.enrollments.find((e) => e.id.toString() === key);
+    if (localEnroll) {
+      localEnroll.customPlan = updatedJson;
+    }
+    // Force Angular à re-rendre le template
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+
+    const enrollmentId = Number(enrollment.id);
+    const statusText =
+      targetSession.present === true
+        ? 'Présent'
+        : targetSession.present === false
+          ? 'Absent'
+          : 'Non émargé';
+
+    this.enrollmentService.saveCustomPlan(enrollmentId, updatedJson, plan.noteFormateur).subscribe({
+      next: (res) => {
+        // Si le serveur retourne un customPlan mis à jour, on l'utilise
+        if (res && res.customPlan && res.customPlan !== updatedJson) {
+          const serverPlan = this.parseCustomPlan(res.customPlan);
+          if (serverPlan) {
+            this.parsedCustomPlans.set(key, serverPlan);
+            enrollment.customPlan = res.customPlan;
+            if (localEnroll) localEnroll.customPlan = res.customPlan;
+          }
+        }
+        this.toastService.success(
+          `Émargement de ${enrollment.studentFirstName} enregistré : ${statusText}`,
+          '📋 Assiduité mise à jour',
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // Rollback en cas d'erreur
+        targetSession.present = previousVal;
+        targetSession.markedAt =
+          previousVal !== null && previousVal !== undefined ? targetSession.markedAt : undefined;
+        const rollbackPlan = { ...plan };
+        this.parsedCustomPlans.set(key, plan);
+        const rollbackJson = JSON.stringify(plan);
+        enrollment.customPlan = rollbackJson;
+        if (localEnroll) localEnroll.customPlan = rollbackJson;
+        this.cdr.detectChanges();
+        this.toastService.error(
+          err?.error?.message || "Erreur lors de l'enregistrement de l'émargement.",
+          'Erreur',
+        );
+      },
+    });
   }
 }
