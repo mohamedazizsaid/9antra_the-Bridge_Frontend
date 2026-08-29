@@ -18,6 +18,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { Subscription, Observable } from 'rxjs';
+import { TranslationService, SupportedLang } from '../../../core/services/translation.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface TabItem {
   key: string;
