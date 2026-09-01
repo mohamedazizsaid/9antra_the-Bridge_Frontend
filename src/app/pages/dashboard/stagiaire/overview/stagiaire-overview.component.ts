@@ -17,13 +17,22 @@ import { Notification } from '../../../../core/models/notification.model';
 import { Subscription } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { EnrollmentStepperComponent } from '../../formations/enrollment-stepper.component';
+import { ComboParcoursComponent } from '../../formations/combo-parcours.component';
+import { ComboEnrollmentService } from '../../../../core/services/combo-enrollment.service';
+import { ComboEnrollment } from '../../../../core/models/combo-enrollment.model';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-stagiaire-overview',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, EnrollmentStepperComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    EnrollmentStepperComponent,
+    ComboParcoursComponent,
+  ],
   template: `
     <div class="min-h-screen space-y-6">
       <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
@@ -86,6 +95,75 @@ Chart.register(...registerables);
               {{ unreadCount > 9 ? '9+' : unreadCount }}
             </span>
           </button>
+        </div>
+      </div>
+
+      <!-- ═══ COMBO CTA BANNER ═══════════════════════════════════════════════ -->
+      <div
+        class="relative overflow-hidden rounded-2xl border border-[#F5A623]/20 cursor-pointer group
+               bg-gradient-to-r from-[#C62761]/8 via-[#0D0D22] to-[#F5A623]/8
+               hover:border-[#F5A623]/40 transition-all duration-300"
+        (click)="showComboParcours = true"
+        id="btn-combo-parcours-overview"
+      >
+        <!-- Background blur balls -->
+        <div
+          class="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-[#F5A623]/5 blur-2xl pointer-events-none"
+        ></div>
+        <div
+          class="absolute -bottom-6 -left-6 w-32 h-32 rounded-full bg-[#C62761]/5 blur-2xl pointer-events-none"
+        ></div>
+
+        <div
+          class="relative z-10 flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-4"
+        >
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20
+                        border border-[#F5A623]/30 flex items-center justify-center text-[var(--bridge-gold)] flex-shrink-0
+                        group-hover:scale-110 transition-transform duration-300"
+            >
+              <svg
+                class="w-6 h-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="font-syne font-bold text-white text-base group-hover:text-[#F5A623] transition-colors"
+              >
+                Personnaliser votre parcours
+              </p>
+              <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
+                Composez votre combo de formations et économisez jusqu'à
+                <strong class="text-[#F5A623]">40%</strong> — remise progressive exclusive
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <div
+              class="text-center px-3 py-1.5 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20"
+            >
+              <p class="text-[9px] text-[#F5A623] uppercase tracking-wider font-bold">Remise max</p>
+              <p class="font-mono font-black text-lg text-[#F5A623]">40%</p>
+            </div>
+            <div
+              class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center
+                        text-white/40 group-hover:text-white group-hover:border-[#F5A623]/30
+                        group-hover:bg-[#F5A623]/5 transition-all"
+            >
+              →
+            </div>
+          </div>
         </div>
       </div>
 
@@ -550,22 +628,107 @@ Chart.register(...registerables);
             >
               <div class="h-2 bg-gradient-to-r from-[#C62761] to-[#F5A623]"></div>
               <div class="p-5">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
                   <span
                     class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]"
                   >
                     {{ f.category || 'Général' }}
                   </span>
-                  <span
-                    *ngIf="isEnrolled(f.id)"
-                    class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    >✓ Inscrit</span
-                  >
-                  <span
-                    *ngIf="isPending(f.id)"
-                    class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                    >⏳ En attente</span
-                  >
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <!-- Combo Tag Badge -->
+                    <span
+                      *ngIf="getComboInfoForFormation(f.id) as comboInfo"
+                      class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1"
+                      [class]="
+                        comboInfo.status === 'ACTIVE'
+                          ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+                          : comboInfo.status === 'PENDING_PAYMENT'
+                            ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 animate-pulse'
+                            : 'bg-white/10 text-white/60 border-white/20'
+                      "
+                      title="Formation incluse dans votre parcours personnalisé"
+                    >
+                      <svg
+                        class="w-3 h-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                        <polyline points="2 17 12 22 22 17" />
+                        <polyline points="2 12 12 17 22 12" />
+                      </svg>
+                      <span>{{
+                        comboInfo.status === 'ACTIVE'
+                          ? 'Combo Actif'
+                          : comboInfo.status === 'PENDING_PAYMENT'
+                            ? 'Combo en attente'
+                            : 'Combo'
+                      }}</span>
+                    </span>
+
+                    <!-- Simple Enrollment Tag Badge -->
+                    <span
+                      *ngIf="isEnrolled(f.id) && !getComboInfoForFormation(f.id)"
+                      class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1"
+                      [class]="
+                        getFormationPaymentStatus(f.id) === 'PAID'
+                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                          : getFormationPaymentStatus(f.id) === 'PARTIAL'
+                            ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30 animate-pulse'
+                      "
+                    >
+                      <svg
+                        *ngIf="getFormationPaymentStatus(f.id) === 'PAID'"
+                        class="w-2.5 h-2.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <svg
+                        *ngIf="getFormationPaymentStatus(f.id) !== 'PAID'"
+                        class="w-2.5 h-2.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>
+                        {{
+                          getFormationPaymentStatus(f.id) === 'PAID'
+                            ? '✓ Payé & Actif'
+                            : getFormationPaymentStatus(f.id) === 'PARTIAL'
+                              ? '⏳ Partiellement Payé'
+                              : '⏳ Non Payé'
+                        }}
+                      </span>
+                    </span>
+
+                    <span
+                      *ngIf="isPending(f.id)"
+                      class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      >⏳ En attente</span
+                    >
+                    <span
+                      *ngIf="!isEnrolled(f.id) && !isPending(f.id)"
+                      class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[rgba(245,166,35,0.1)] text-[#F5A623] border border-[rgba(245,166,35,0.2)]"
+                      >✨ Disponible</span
+                    >
+                  </div>
                 </div>
                 <h3
                   class="font-syne font-bold text-white text-base leading-tight group-hover:text-[#F5A623] transition-colors"
@@ -751,16 +914,92 @@ Chart.register(...registerables);
                 <div class="h-2 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
                 <div class="p-5">
                   <!-- Badges -->
-                  <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
                     <span
-                      class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      >✓ Inscrit</span
-                    >
-                    <span
-                      class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]"
+                      class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-[rgba(198,39,97,0.1)] text-[#C62761] border border-[rgba(198,39,97,0.2)]"
                     >
                       {{ f.category || 'Général' }}
                     </span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <!-- Combo Tag Badge -->
+                      <span
+                        *ngIf="getComboInfoForFormation(f.id) as comboInfo"
+                        class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1"
+                        [class]="
+                          comboInfo.status === 'ACTIVE'
+                            ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+                            : comboInfo.status === 'PENDING_PAYMENT'
+                              ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 animate-pulse'
+                              : 'bg-white/10 text-white/60 border-white/20'
+                        "
+                        title="Formation issue de votre combo personnalisé"
+                      >
+                        <svg
+                          class="w-3 h-3"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                          <polyline points="2 17 12 22 22 17" />
+                          <polyline points="2 12 12 17 22 12" />
+                        </svg>
+                        <span>{{
+                          comboInfo.status === 'ACTIVE' ? 'Parcours Combo' : 'Combo en attente'
+                        }}</span>
+                      </span>
+
+                      <!-- Simple Enrollment Tag Badge -->
+                      <span
+                        *ngIf="!getComboInfoForFormation(f.id)"
+                        class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1"
+                        [class]="
+                          getFormationPaymentStatus(f.id) === 'PAID'
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            : getFormationPaymentStatus(f.id) === 'PARTIAL'
+                              ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                              : 'bg-amber-500/15 text-amber-300 border-amber-500/30 animate-pulse'
+                        "
+                      >
+                        <svg
+                          *ngIf="getFormationPaymentStatus(f.id) === 'PAID'"
+                          class="w-2.5 h-2.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <svg
+                          *ngIf="getFormationPaymentStatus(f.id) !== 'PAID'"
+                          class="w-2.5 h-2.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>
+                          {{
+                            getFormationPaymentStatus(f.id) === 'PAID'
+                              ? '✓ Payé & Actif'
+                              : getFormationPaymentStatus(f.id) === 'PARTIAL'
+                                ? '⏳ Partiellement Payé'
+                                : '⏳ Non Payé'
+                          }}
+                        </span>
+                      </span>
+                    </div>
                   </div>
                   <!-- Title -->
                   <h3
@@ -2087,6 +2326,13 @@ Chart.register(...registerables);
       (closed)="closeStepper()"
       (enrolled)="onEnrollmentComplete($event)"
     ></app-enrollment-stepper>
+
+    <!-- ═══ COMBO PARCOURS MODAL ═══ -->
+    <app-combo-parcours
+      *ngIf="showComboParcours"
+      [user]="user"
+      (closed)="showComboParcours = false"
+    ></app-combo-parcours>
   `,
 })
 export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -2095,6 +2341,9 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
 
   user: User | null = null;
   activeTab = 'catalogue';
+
+  // Combo parcours modal
+  showComboParcours = false;
 
   // Catalogue view toggle
   catalogView: 'all' | 'mine' = 'all';
@@ -2185,6 +2434,10 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
     return `${Math.round((paid / this.paiements.length) * 100)}%`;
   }
 
+  // Combos data & mapping
+  myCombos: ComboEnrollment[] = [];
+  comboFormationMap = new Map<string, { comboId: number; receiptRef?: string; status: string }>();
+
   constructor(
     private authService: AuthService,
     private formationService: FormationService,
@@ -2193,8 +2446,61 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
     private notificationService: NotificationService,
     private enrollmentService: EnrollmentService,
     private toastService: ToastService,
+    private comboService: ComboEnrollmentService,
     private router: Router,
   ) {}
+
+  loadStagiaireCombos(): void {
+    if (!this.user?.id) return;
+    this.sub.add(
+      this.comboService.getCombosByStudent(parseInt(this.user.id)).subscribe({
+        next: (combos: ComboEnrollment[]) => {
+          this.myCombos = combos || [];
+          this.comboFormationMap.clear();
+          (combos || []).forEach((c: ComboEnrollment) => {
+            (c.formations || []).forEach((f) => {
+              if (f.id) {
+                this.comboFormationMap.set(f.id.toString(), {
+                  comboId: c.id,
+                  receiptRef: c.receiptRef,
+                  status: c.status,
+                });
+              }
+            });
+          });
+        },
+        error: () => {},
+      }),
+    );
+  }
+
+  getComboInfoForFormation(
+    formationId: string | number,
+  ): { comboId: number; receiptRef?: string; status: string } | null {
+    if (!formationId) return null;
+    return this.comboFormationMap.get(formationId.toString()) || null;
+  }
+
+  isFormationInCombo(formationId: string | number): boolean {
+    return this.getComboInfoForFormation(formationId) !== null;
+  }
+
+  getFormationPaymentStatus(
+    formationId: string | number,
+  ): 'PAID' | 'PARTIAL' | 'PENDING' | 'LATE' | 'NONE' {
+    if (!formationId || !this.paiements || this.paiements.length === 0) return 'NONE';
+    const fPaiements = this.paiements.filter(
+      (p) => p.formationId?.toString() === formationId.toString(),
+    );
+    if (fPaiements.length === 0) return 'NONE';
+    const hasLate = fPaiements.some((p) => p.status === 'EN_RETARD');
+    if (hasLate) return 'LATE';
+    const allPaid = fPaiements.every((p) => p.status === 'PAYE');
+    if (allPaid) return 'PAID';
+    const hasPaid = fPaiements.some((p) => p.status === 'PAYE');
+    if (hasPaid) return 'PARTIAL';
+    return 'PENDING';
+  }
 
   // Certificates
   certificats: Certificat[] = [];
@@ -2251,6 +2557,7 @@ export class StagiaireOverviewComponent implements OnInit, AfterViewInit, OnDest
       }),
     );
     this.syncTabWithUrl();
+    this.loadStagiaireCombos();
 
     // Load catalogue (all formations)
     this.sub.add(

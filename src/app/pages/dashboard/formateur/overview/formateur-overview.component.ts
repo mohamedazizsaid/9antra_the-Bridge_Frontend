@@ -1,4 +1,12 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -1763,6 +1771,7 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
     private enrollmentService: EnrollmentService,
     private toastService: ToastService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -1922,6 +1931,23 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
   }
 
   getAttendanceRate(formation: Formation): number {
+    // 1. Calculate from marked session presences if available
+    let totalPresences = 0;
+    let presentCount = 0;
+    formation.phases?.forEach((p) => {
+      p.seances?.forEach((s) => {
+        if (s.presences && s.presences.length > 0) {
+          totalPresences += s.presences.length;
+          presentCount += s.presences.filter((pr) => pr.present).length;
+        }
+      });
+    });
+
+    if (totalPresences > 0) {
+      return Math.round((presentCount / totalPresences) * 100);
+    }
+
+    // 2. Fallback: average of phase progressions
     if (!formation.phases?.length) return 0;
     const total = formation.phases.reduce((sum, p) => sum + (p.progression || 0), 0);
     return Math.round(total / formation.phases.length);
@@ -2019,11 +2045,14 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
   saveAttendance(): void {
     if (this.selectedSeance && !this.savingAttendance) {
       this.savingAttendance = true;
-      this.formationService.savePresence(this.selectedSeance.id, this.activePresences).subscribe({
+      const seanceId = this.selectedSeance.id;
+      const updatedPresences = [...this.activePresences];
+      this.formationService.savePresence(seanceId, updatedPresences).subscribe({
         next: () => {
-          this.selectedSeance!.presences = [...this.activePresences];
+          this.selectedSeance!.presences = [...updatedPresences];
           this.attendanceValidated = true;
           this.savingAttendance = false;
+          this.applyLocalPresenceUpdate(seanceId, updatedPresences);
           this.toastService.success('Feuille de présence validée avec succès !', 'Appel');
         },
         error: (e) => {
@@ -2038,42 +2067,105 @@ export class FormateurOverviewComponent implements OnInit, AfterViewInit, OnDest
   }
 
   closeSession(): void {
-    if (this.selectedSeance) {
-      if (
-        confirm(
-          "Voulez-vous vraiment enregistrer l'appel et clôturer définitivement cette séance ? Cela recalculera la progression et l'assiduité des stagiaires.",
-        )
-      ) {
-        this.savingAttendance = true;
-        // 1. Save attendance first
-        this.formationService.savePresence(this.selectedSeance.id, this.activePresences).subscribe({
+    if (!this.selectedSeance || this.savingAttendance) return;
+    this.savingAttendance = true;
+    const seanceId = this.selectedSeance.id;
+    const updatedPresences = [...this.activePresences];
+
+    // 1. Save attendance first
+    this.formationService.savePresence(seanceId, updatedPresences).subscribe({
+      next: () => {
+        // 2. Then close session
+        this.formationService.closeSession(seanceId).subscribe({
           next: () => {
-            // 2. Then close session
-            this.formationService.closeSession(this.selectedSeance!.id).subscribe({
-              next: () => {
-                if (this.selectedSeance) this.selectedSeance.status = 'CLOTUREE';
-                this.closeAttendanceModal();
-                this.toastService.success('Séance clôturée avec succès !', 'Séance');
-              },
-              error: (e) => {
-                this.savingAttendance = false;
-                this.toastService.error(
-                  e?.error?.message || 'Erreur lors de la clôture de la séance.',
-                  'Clôture',
-                );
-              },
-            });
+            if (this.selectedSeance) {
+              this.selectedSeance.status = 'CLOTUREE';
+              this.selectedSeance.presences = [...updatedPresences];
+            }
+            this.applyLocalPresenceUpdate(seanceId, updatedPresences, 'CLOTUREE');
+            this.closeAttendanceModal();
+            this.toastService.success(
+              'Séance clôturée et présences enregistrées avec succès !',
+              'Séance clôturée',
+            );
+
+            // 3. Reload latest stats in background to keep all counters in sync
+            if (this.user) {
+              this.sub.add(
+                this.formationService.getFormationsByFormateur(this.user.id).subscribe({
+                  next: (data) => {
+                    this.formations = data;
+                    this.renderFormateurCharts();
+                    this.cdr.detectChanges();
+                  },
+                }),
+              );
+              this.sub.add(
+                this.formationService.getTodaySeances(this.user.id).subscribe({
+                  next: (data) => {
+                    this.todaySeances = data;
+                    this.cdr.detectChanges();
+                  },
+                }),
+              );
+            }
           },
           error: (e) => {
             this.savingAttendance = false;
             this.toastService.error(
-              e?.error?.message || 'Erreur lors de la sauvegarde des présences.',
-              'Appel',
+              e?.error?.message || 'Erreur lors de la clôture de la séance.',
+              'Erreur de clôture',
             );
           },
         });
+      },
+      error: (e) => {
+        this.savingAttendance = false;
+        this.toastService.error(
+          e?.error?.message || 'Erreur lors de la sauvegarde des présences.',
+          'Appel',
+        );
+      },
+    });
+  }
+
+  private applyLocalPresenceUpdate(
+    seanceId: string,
+    presences: Presence[],
+    status?: 'OUVERTE' | 'CLOTUREE',
+  ): void {
+    // 1. Update in this.formations
+    this.formations = this.formations.map((f) => {
+      const updatedPhases = (f.phases || []).map((p) => {
+        const updatedSeances = (p.seances || []).map((s) => {
+          if (s.id === seanceId) {
+            return {
+              ...s,
+              presences: [...presences],
+              status: status || s.status,
+            };
+          }
+          return s;
+        });
+        return { ...p, seances: updatedSeances };
+      });
+      return { ...f, phases: updatedPhases };
+    });
+
+    // 2. Update in this.todaySeances
+    this.todaySeances = this.todaySeances.map((s) => {
+      if (s.id === seanceId) {
+        return {
+          ...s,
+          presences: [...presences],
+          status: status || s.status,
+        };
       }
-    }
+      return s;
+    });
+
+    // 3. Force change detection so donut chart & percentages update instantly
+    this.cdr.detectChanges();
   }
 
   openEvalModal(): void {

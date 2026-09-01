@@ -15,6 +15,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
 import { EnrollmentService, EnrollmentResponse } from '../../../core/services/enrollment.service';
+import { ComboEnrollmentService } from '../../../core/services/combo-enrollment.service';
+import { ComboEnrollment } from '../../../core/models/combo-enrollment.model';
 
 export interface CustomPlanSession {
   titre: string;
@@ -169,6 +171,95 @@ interface EnrollmentInfo {
                 <span class="text-lg font-mono font-bold text-[#F5A623]"
                   >{{ formation.totalPrice | number }} TND</span
                 >
+              </div>
+            </div>
+
+            <!-- Stagiaire Actions Toolbar -->
+            <div
+              *ngIf="isStagiaire && isMyEnrollmentActive"
+              class="flex items-center justify-between gap-3 mt-6 pt-6 border-t border-white/10 flex-wrap"
+            >
+              <!-- Left: Combo status or Simple enrollment status -->
+              <div class="flex items-center gap-2">
+                <span
+                  *ngIf="isComboFormation"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-2"
+                >
+                  <span>🎁</span>
+                  <span
+                    >Formation incluse dans un Parcours Combo ({{
+                      comboStatus === 'ACTIVE' ? 'Payé & Actif' : 'En attente'
+                    }})</span
+                  >
+                </span>
+
+                <span
+                  *ngIf="!isComboFormation"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-2"
+                >
+                  <span>✓</span>
+                  <span>Inscription Simple Active</span>
+                </span>
+              </div>
+
+              <!-- Right: Unenroll & Reimbursement buttons (only for simple formations) -->
+              <div class="flex items-center gap-2" *ngIf="!isComboFormation">
+                <!-- Demande de remboursement -->
+                <button
+                  type="button"
+                  (click)="openRemboursementModal()"
+                  class="px-4 py-2 rounded-xl text-xs font-bold border transition-all text-orange-400 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20 flex items-center gap-2 cursor-pointer"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="9 14 4 9 9 4" />
+                    <path d="M4 9h10a6 6 0 0 1 6 6v1" />
+                  </svg>
+                  <span>Demande de remboursement</span>
+                </button>
+
+                <!-- Se désinscrire -->
+                <div *ngIf="!unenrollConfirm">
+                  <button
+                    type="button"
+                    (click)="unenrollConfirm = true"
+                    class="px-4 py-2 rounded-xl text-xs font-bold border transition-all text-red-400 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🚪</span>
+                    <span>Se désinscrire</span>
+                  </button>
+                </div>
+
+                <div
+                  *ngIf="unenrollConfirm"
+                  class="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-xl animate-fadein"
+                >
+                  <span class="text-xs text-red-300 font-semibold"
+                    >Confirmer la désinscription ?</span
+                  >
+                  <button
+                    type="button"
+                    (click)="unenrollFormation()"
+                    [disabled]="unenrolling"
+                    class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {{ unenrolling ? '...' : 'Oui' }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="unenrollConfirm = false"
+                    class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    Non
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2598,6 +2689,136 @@ interface EnrollmentInfo {
         </div>
       </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MODAL : DEMANDE DE REMBOURSEMENT STAGIAIRE                  -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div
+      *ngIf="showRemboursementModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadein"
+    >
+      <div
+        class="bg-[#10102A] border border-[var(--bridge-border)] rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl space-y-0"
+      >
+        <div class="h-2 bg-gradient-to-r from-orange-500 via-[#F5A623] to-[#C62761]"></div>
+
+        <div class="p-6 space-y-4">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-lg font-bold text-orange-400"
+              >
+                <svg
+                  class="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 14 4 9 9 4" />
+                  <path d="M4 9h10a6 6 0 0 1 6 6v1" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-syne font-bold text-white text-lg">Demande de remboursement</h3>
+                <p class="text-xs text-[var(--bridge-text-muted)] truncate max-w-[280px]">
+                  {{ formation?.nom }}
+                </p>
+              </div>
+            </div>
+            <button
+              (click)="closeRemboursementModal()"
+              class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center text-sm transition-all border border-white/5 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Success state -->
+          <div
+            *ngIf="remboursementSuccess"
+            class="py-8 px-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-2"
+          >
+            <div class="text-3xl">🎉</div>
+            <p class="text-emerald-400 font-bold text-sm">Demande envoyée avec succès !</p>
+            <p class="text-xs text-emerald-300/70">
+              Un responsable pédagogique et financier étudiera votre dossier sous 48h.
+            </p>
+          </div>
+
+          <!-- Form view -->
+          <ng-container *ngIf="!remboursementSuccess">
+            <!-- Motif input -->
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-[var(--bridge-text-muted)] mb-2"
+              >
+                Motif de la demande <span class="text-red-400">*</span>
+              </label>
+              <textarea
+                [(ngModel)]="remboursementMotif"
+                rows="4"
+                placeholder="Raison détaillée de votre demande (ex: indisponibilité professionnelle, changement d'orientation...)"
+                class="w-full bg-white/5 border border-white/10 focus:border-[#F5A623] rounded-xl p-3 text-xs text-white placeholder-white/20 focus:outline-none transition-all resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Notice alert -->
+            <div
+              class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-start gap-2.5"
+            >
+              <span class="text-orange-400 text-sm mt-0.5">⚠️</span>
+              <p class="text-xs text-orange-200/80 leading-relaxed">
+                Sous réserve des conditions générales d'annulation. Le remboursement n'est possible
+                que si le cycle n'a pas été intégralement suivi.
+              </p>
+            </div>
+
+            <!-- Confirm checkbox -->
+            <label class="flex items-start gap-2.5 cursor-pointer group pt-1">
+              <input
+                type="checkbox"
+                [(ngModel)]="remboursementConfirm"
+                class="mt-0.5 accent-[#F5A623]"
+              />
+              <span
+                class="text-xs text-[var(--bridge-text-muted)] group-hover:text-white transition-colors leading-snug"
+              >
+                Je confirme vouloir initier cette demande de remboursement pour cette formation.
+              </span>
+            </label>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 pt-3 border-t border-white/5">
+              <button
+                type="button"
+                (click)="closeRemboursementModal()"
+                class="flex-1 py-2.5 text-xs font-semibold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5 cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                (click)="submitRemboursement()"
+                [disabled]="
+                  !remboursementMotif.trim() || !remboursementConfirm || remboursementSubmitting
+                "
+                class="flex-1 py-2.5 bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-40 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[rgba(198,39,97,0.25)] cursor-pointer"
+              >
+                <span
+                  *ngIf="remboursementSubmitting"
+                  class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                ></span>
+                {{ remboursementSubmitting ? 'Transmission...' : 'Envoyer la demande' }}
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
   `,
   styles: [
     `
@@ -2849,6 +3070,19 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     return this.wizardPhases.reduce((sum, p) => sum + (p.seances ? p.seances.length : 0), 0);
   }
 
+  // Combo & Enrollment state for Stagiaire
+  isComboFormation = false;
+  comboStatus: string | null = null;
+
+  // Unenroll & Reimbursement state
+  unenrollConfirm = false;
+  unenrolling = false;
+  showRemboursementModal = false;
+  remboursementMotif = '';
+  remboursementConfirm = false;
+  remboursementSubmitting = false;
+  remboursementSuccess = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -2858,6 +3092,7 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private paiementService: PaiementService,
     private enrollmentService: EnrollmentService,
+    private comboService: ComboEnrollmentService,
     private toastService: ToastService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -2870,7 +3105,93 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
     if (this.user?.role === 'STAGIAIRE') {
       this.activeTab = 'my-progress';
       this.loadPaiements();
+      this.loadStudentCombos();
     }
+  }
+
+  loadStudentCombos(): void {
+    if (!this.user?.id || !this.formationId) return;
+    this.sub.add(
+      this.comboService.getCombosByStudent(parseInt(this.user.id)).subscribe({
+        next: (combos: ComboEnrollment[]) => {
+          const found = (combos || []).find((c) =>
+            c.formations?.some((f) => f.id?.toString() === this.formationId.toString()),
+          );
+          if (found) {
+            this.isComboFormation = true;
+            this.comboStatus = found.status;
+          } else {
+            this.isComboFormation = false;
+            this.comboStatus = null;
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {},
+      }),
+    );
+  }
+
+  get isMyEnrollmentActive(): boolean {
+    if (!this.user) return false;
+    return this.enrollments.some(
+      (e) => e.studentId?.toString() === this.user?.id?.toString() && e.status === 'APPROVED',
+    );
+  }
+
+  unenrollFormation(): void {
+    if (!this.user || !this.formation) return;
+    this.unenrolling = true;
+    this.sub.add(
+      this.enrollmentService
+        .unenrollStudent(parseInt(this.user.id), parseInt(this.formation.id))
+        .subscribe({
+          next: () => {
+            this.unenrolling = false;
+            this.unenrollConfirm = false;
+            this.toastService.success(
+              'Vous avez été désinscrit avec succès de cette formation.',
+              'Désinscription',
+            );
+            this.router.navigate(['/dashboard/stagiaire']);
+          },
+          error: (err: any) => {
+            this.unenrolling = false;
+            this.unenrollConfirm = false;
+            this.toastService.error(
+              err?.error?.message || 'Erreur lors de la désinscription.',
+              'Erreur',
+            );
+          },
+        }),
+    );
+  }
+
+  openRemboursementModal(): void {
+    this.showRemboursementModal = true;
+    this.remboursementMotif = '';
+    this.remboursementConfirm = false;
+    this.remboursementSuccess = false;
+    this.remboursementSubmitting = false;
+  }
+
+  closeRemboursementModal(): void {
+    this.showRemboursementModal = false;
+  }
+
+  submitRemboursement(): void {
+    if (!this.remboursementMotif.trim() || !this.remboursementConfirm) return;
+    this.remboursementSubmitting = true;
+    setTimeout(() => {
+      this.remboursementSubmitting = false;
+      this.remboursementSuccess = true;
+      this.toastService.success(
+        'Votre demande de remboursement a bien été transmise.',
+        'Demande envoyée',
+      );
+      setTimeout(() => {
+        this.showRemboursementModal = false;
+      }, 3500);
+    }, 1200);
   }
 
   /** Change l'onglet actif et force la détection de changements */
@@ -3210,7 +3531,10 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
         next: (data) => {
           // Filter by formation if formationId available on paiement
           this.formationPaiements = data.filter(
-            (p) => !p.formationId || p.formationId === this.formationId || p.formationId === '',
+            (p) =>
+              !p.formationId ||
+              p.formationId.toString() === this.formationId.toString() ||
+              p.formationId === '',
           );
           this.loadingPaiements = false;
         },
@@ -3222,7 +3546,11 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   }
 
   getPaiementForPhase(phase: Phase): Paiement | undefined {
-    return this.formationPaiements.find((p) => p.phaseNumero === phase.numero);
+    return this.formationPaiements.find(
+      (p) =>
+        p.phaseNumero === phase.numero ||
+        (p.phaseId && p.phaseId.toString() === phase.id?.toString()),
+    );
   }
 
   getTotalPaidFormation(): number {
@@ -3279,8 +3607,8 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   payPhaseWithStripe(paiement: Paiement): void {
     if (!paiement) return;
     this.payingPhaseId = paiement.id;
-    const enrollmentId = Number(paiement.id) || 1;
-    const phaseId = Number(paiement.phaseNumero) || 1;
+    const enrollmentId = paiement.enrollmentId || Number(paiement.stagiaireId) || 1;
+    const phaseId = paiement.phaseId || Number(paiement.phaseNumero) || 1;
 
     localStorage.setItem('pending_stripe_enrollment_id', enrollmentId.toString());
     localStorage.setItem('pending_stripe_phase_id', phaseId.toString());

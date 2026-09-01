@@ -30,9 +30,11 @@ export class PaiementService {
     }
 
     return {
-      id: p.id.toString(),
+      id: p.id ? p.id.toString() : '',
       stagiaireId: p.studentId?.toString() ?? '',
       formationId: p.formationId ? p.formationId.toString() : '',
+      enrollmentId: p.enrollmentId,
+      phaseId: p.phaseId,
       phaseNumero: p.phaseOrder || 1,
       montant: p.amount || 0,
       devise: 'TND',

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PaiementService } from '../../core/services/paiement.service';
+import { ComboEnrollmentService } from '../../core/services/combo-enrollment.service';
 
 @Component({
   selector: 'app-payment-callback',
@@ -43,14 +44,14 @@ import { PaiementService } from '../../core/services/paiement.service';
           <div>
             <h2 class="text-2xl font-bold text-white font-syne">Paiement Réussi !</h2>
             <p class="text-sm text-emerald-300/80 mt-2">
-              Votre règlement Stripe a été validé avec succès. Votre accès et votre progression ont
-              été mis à jour.
+              Votre règlement Stripe a été validé avec succès. Votre accès et votre parcours
+              personnalisé ont été activés en base de données.
             </p>
           </div>
           <div class="pt-4">
             <button
               (click)="goToDashboard()"
-              class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm hover:opacity-90 transition-all shadow-lg"
+              class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm hover:opacity-90 transition-all shadow-lg cursor-pointer"
             >
               Retour au Tableau de Bord →
             </button>
@@ -75,7 +76,7 @@ import { PaiementService } from '../../core/services/paiement.service';
           <div class="pt-4 flex gap-3">
             <button
               (click)="goToDashboard()"
-              class="flex-1 py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold text-xs hover:bg-white/10 transition-all"
+              class="flex-1 py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold text-xs hover:bg-white/10 transition-all cursor-pointer"
             >
               Tableau de bord
             </button>
@@ -94,10 +95,13 @@ export class PaymentCallbackComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private paiementService: PaiementService,
+    private comboEnrollmentService: ComboEnrollmentService,
   ) {}
 
   ngOnInit(): void {
     const sessionId = this.route.snapshot.queryParamMap.get('session_id');
+    const comboId =
+      this.route.snapshot.queryParamMap.get('comboId') || sessionStorage.getItem('pendingComboId');
     const enrollmentId =
       this.route.snapshot.queryParamMap.get('enrollmentId') ||
       localStorage.getItem('pending_stripe_enrollment_id');
@@ -105,7 +109,24 @@ export class PaymentCallbackComponent implements OnInit {
       this.route.snapshot.queryParamMap.get('phaseId') ||
       localStorage.getItem('pending_stripe_phase_id');
 
-    if (sessionId && enrollmentId && phaseId) {
+    if (sessionId && comboId) {
+      // Validation du combo de formations
+      this.comboEnrollmentService.verifyComboPayment(sessionId, Number(comboId)).subscribe({
+        next: () => {
+          this.loading = false;
+          this.success = true;
+          sessionStorage.removeItem('pendingComboId');
+          sessionStorage.removeItem('pendingComboReceiptRef');
+        },
+        error: (err: any) => {
+          this.loading = false;
+          this.success = false;
+          this.errorMessage =
+            err?.error?.message || 'Erreur lors de la validation du paiement du combo.';
+        },
+      });
+    } else if (sessionId && enrollmentId && phaseId) {
+      // Validation d'une phase de formation individuelle
       this.paiementService
         .verifyStripePayment(sessionId, Number(enrollmentId), Number(phaseId))
         .subscribe({

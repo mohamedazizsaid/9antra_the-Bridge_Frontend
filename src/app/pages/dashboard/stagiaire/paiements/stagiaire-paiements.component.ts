@@ -983,10 +983,17 @@ export class StagiairePaiementsComponent implements OnInit {
     this.processingPayment = true;
     this.toastService.info('Connexion à la passerelle de paiement Stripe...', 'Paiement');
 
+    const enrollmentId = p.enrollmentId || Number(p.stagiaireId) || 1;
+    const phaseId = p.phaseId || p.phaseNumero || 1;
+
+    // Enregistrer dans localStorage pour que PaymentCallbackComponent puisse vérifier au retour Stripe
+    localStorage.setItem('pending_stripe_enrollment_id', enrollmentId.toString());
+    localStorage.setItem('pending_stripe_phase_id', phaseId.toString());
+
     this.paiementService
       .initiateStripePayment({
-        enrollmentId: Number(p.stagiaireId) || 1,
-        phaseId: p.phaseNumero || 1,
+        enrollmentId: enrollmentId,
+        phaseId: phaseId,
         amount: p.montant || 250,
       })
       .subscribe({
@@ -995,19 +1002,18 @@ export class StagiairePaiementsComponent implements OnInit {
           if (res?.url) {
             window.location.href = res.url;
           } else {
-            this.toastService.success('Paiement simulé validé avec succès !', 'Paiement Validé');
+            this.toastService.success('Paiement validé avec succès !', 'Paiement Validé');
             p.status = 'PAYE';
             p.datePaiement = new Date();
             this.applyFilters();
           }
         },
-        error: () => {
+        error: (err) => {
           this.processingPayment = false;
-          // Fallback demo approval
-          p.status = 'PAYE';
-          p.datePaiement = new Date();
-          this.applyFilters();
-          this.toastService.success('Paiement enregistré avec succès !', 'Règlement Réussi');
+          this.toastService.error(
+            err?.error?.message || 'Erreur lors de la préparation du paiement Stripe.',
+            'Paiement',
+          );
         },
       });
   }

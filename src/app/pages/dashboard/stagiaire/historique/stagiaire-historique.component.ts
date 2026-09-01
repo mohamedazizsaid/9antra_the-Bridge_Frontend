@@ -436,21 +436,20 @@ interface ProgressionItem {
       <!-- ════════════════════ NAVIGATION TABS ════════════════════ -->
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div
-          class="flex items-center gap-1.5 p-1.5 bg-[#10102A]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg"
+          class="flex items-center gap-1.5 p-1.5 bg-[#10102A]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg relative z-20"
         >
+          <!-- Tab 1: Évaluations & Notes -->
           <button
-            *ngFor="let tab of tabs"
-            (click)="activeTab = tab.key"
-            class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer"
+            type="button"
+            (click)="selectTab('evals')"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer select-none"
             [class]="
-              activeTab === tab.key
+              activeTab === 'evals'
                 ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_20px_rgba(198,39,97,0.35)] scale-[1.02]'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             "
           >
-            <!-- SVG Tab Icons -->
             <svg
-              *ngIf="tab.key === 'evals'"
               class="w-4 h-4"
               viewBox="0 0 24 24"
               fill="none"
@@ -461,8 +460,31 @@ interface ProgressionItem {
                 points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
               />
             </svg>
+            <span>Évaluations & Notes</span>
+            <span
+              class="text-[10px] font-mono px-2 py-0.5 rounded-full"
+              [class]="
+                activeTab === 'evals'
+                  ? 'bg-white/20 text-white font-bold'
+                  : 'bg-white/10 text-white/40'
+              "
+            >
+              {{ evaluations.length }}
+            </span>
+          </button>
+
+          <!-- Tab 2: Registre des Présences -->
+          <button
+            type="button"
+            (click)="selectTab('presence')"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer select-none"
+            [class]="
+              activeTab === 'presence'
+                ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_20px_rgba(198,39,97,0.35)] scale-[1.02]'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+            "
+          >
             <svg
-              *ngIf="tab.key === 'presence'"
               class="w-4 h-4"
               viewBox="0 0 24 24"
               fill="none"
@@ -474,8 +496,31 @@ interface ProgressionItem {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
+            <span>Registre des Présences</span>
+            <span
+              class="text-[10px] font-mono px-2 py-0.5 rounded-full"
+              [class]="
+                activeTab === 'presence'
+                  ? 'bg-white/20 text-white font-bold'
+                  : 'bg-white/10 text-white/40'
+              "
+            >
+              {{ attendances.length }}
+            </span>
+          </button>
+
+          <!-- Tab 3: Cursus & Jalons -->
+          <button
+            type="button"
+            (click)="selectTab('progression')"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer select-none"
+            [class]="
+              activeTab === 'progression'
+                ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-[0_0_20px_rgba(198,39,97,0.35)] scale-[1.02]'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+            "
+          >
             <svg
-              *ngIf="tab.key === 'progression'"
               class="w-4 h-4"
               viewBox="0 0 24 24"
               fill="none"
@@ -485,17 +530,16 @@ interface ProgressionItem {
               <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               <polyline points="16 7 22 7 22 13" />
             </svg>
-            <span>{{ tab.label }}</span>
+            <span>Cursus & Jalons</span>
             <span
-              *ngIf="tab.count !== undefined"
               class="text-[10px] font-mono px-2 py-0.5 rounded-full"
               [class]="
-                activeTab === tab.key
+                activeTab === 'progression'
                   ? 'bg-white/20 text-white font-bold'
                   : 'bg-white/10 text-white/40'
               "
             >
-              {{ tab.count }}
+              {{ progressions.length }}
             </span>
           </button>
         </div>
@@ -1099,6 +1143,10 @@ export class StagiaireHistoriqueComponent implements OnInit {
   searchEvalQuery = '';
   attendanceStats = { present: 0, absent: 0, rate: 100 };
   today = new Date();
+
+  selectTab(tab: string): void {
+    this.activeTab = tab;
+  }
 
   get tabs() {
     return [

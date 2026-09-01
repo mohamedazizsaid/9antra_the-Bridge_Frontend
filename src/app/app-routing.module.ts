@@ -12,7 +12,7 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
-  { path: '', component: LandingComponent },
+  { path: '', component: SplashComponent },
   { path: 'splash', component: SplashComponent },
   { path: 'home', component: LandingComponent },
   { path: 'payment-success', component: PaymentCallbackComponent },
@@ -281,7 +281,7 @@ const routes: Routes = [
             (m) => m.FormationDetailComponent,
           ),
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'FORMATEUR'] },
+        data: { roles: ['ADMIN', 'FORMATEUR', 'STAGIAIRE'] },
       },
 
       { path: '', redirectTo: 'stagiaire', pathMatch: 'full' },
