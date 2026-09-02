@@ -1308,9 +1308,7 @@ import { Formation } from '../../../../core/models/formation.model';
                   <span
                     class="px-4 py-2 bg-white/10 theme-sub-card rounded-xl font-mono font-bold text-xs text-[var(--bridge-text)] min-w-[110px] text-center border border-white/10"
                   >
-                    {{ newStageDurationWeeks }} sem. ({{
-                      (newStageDurationWeeks / 4).toFixed(1)
-                    }}
+                    {{ newStageDurationWeeks }} sem. ({{ (newStageDurationWeeks / 4).toFixed(1) }}
                     mois)
                   </span>
                 </div>

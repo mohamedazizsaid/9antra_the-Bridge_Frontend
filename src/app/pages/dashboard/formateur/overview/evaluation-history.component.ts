@@ -964,9 +964,7 @@ Chart.register(...registerables);
             class="flex items-center justify-between px-6 py-3 border-t border-[var(--bridge-border)] bg-white/[0.01]"
           >
             <p class="text-xs text-[var(--bridge-text-muted)] font-mono">
-              Page {{ currentPage }} sur {{ totalPages }} ({{
-                filteredEvaluations.length
-              }}
+              Page {{ currentPage }} sur {{ totalPages }} ({{ filteredEvaluations.length }}
               résultats)
             </p>
             <div class="flex items-center gap-1">
