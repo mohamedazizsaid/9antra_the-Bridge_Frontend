@@ -376,6 +376,45 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 </div>
               </div>
 
+              <div>
+                <label
+                  class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
+                  >N° CIN (Carte d'Identité Nationale)</label
+                >
+                <div class="relative">
+                  <span
+                    class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect width="20" height="14" x="2" y="5" rx="2" />
+                      <line x1="2" x2="22" y1="10" y2="10" />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    formControlName="cin"
+                    placeholder="08123456"
+                    maxlength="8"
+                    class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none transition-all"
+                  />
+                </div>
+                <div *ngIf="submitted && f['cin'].errors" class="text-xs text-rose-400 mt-1">
+                  <span *ngIf="f['cin'].errors['required']">Le numéro CIN est requis.</span>
+                  <span *ngIf="f['cin'].errors['pattern']"
+                    >Le CIN doit comporter exactement 8 chiffres.</span
+                  >
+                </div>
+              </div>
+
               <button
                 type="button"
                 (click)="nextStep()"
@@ -1190,6 +1229,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       {
         prenom: ['', Validators.required],
         nom: ['', Validators.required],
+        cin: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
         email: ['', [Validators.required, Validators.email]],
         telephone: [''],
         age: [null, [Validators.required, Validators.min(15), Validators.max(100)]],
@@ -1262,7 +1302,12 @@ export class RegisterComponent implements OnInit, OnDestroy {
   nextStep(): void {
     this.submitted = true;
     if (this.currentStep === 1) {
-      if (this.f['prenom'].invalid || this.f['nom'].invalid || this.f['age'].invalid) {
+      if (
+        this.f['prenom'].invalid ||
+        this.f['nom'].invalid ||
+        this.f['age'].invalid ||
+        this.f['cin'].invalid
+      ) {
         return;
       }
       this.submitted = false;
@@ -1360,7 +1405,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.errorMessage = '';
         this.showSuccessAnimation = true;
 
-        // Auto-login after 2.5s success animation
+        // Auto-login after 2.5s success animation, then redirect to /onboarding
         setTimeout(() => {
           this.authService
             .login({
@@ -1368,9 +1413,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
               password: this.f['password'].value,
             })
             .subscribe({
-              next: (res) => {
-                const redirectUrl = this.authService.getRedirectUrl(res.role);
-                this.router.navigateByUrl(redirectUrl);
+              next: () => {
+                // New stagiaires always go to /onboarding first
+                this.router.navigateByUrl('/onboarding');
               },
               error: () => {
                 // Fallback to login screen if auto login fails
@@ -1403,6 +1448,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
           email: this.registerForm.value.email,
           telephone: this.registerForm.value.telephone,
           age: this.registerForm.value.age,
+          cin: this.registerForm.value.cin,
           password: this.registerForm.value.password,
         },
         this.avatarFile,

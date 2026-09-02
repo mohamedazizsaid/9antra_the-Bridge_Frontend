@@ -132,7 +132,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
         font-family: 'Syne', sans-serif;
         font-weight: 800;
         font-size: 64px;
-        color: #f0f0ff;
+        color: var(--bridge-text, #f0f0ff);
         opacity: 0;
       }
 
@@ -153,7 +153,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
         margin-top: 24px;
         font-family: 'Inter', sans-serif;
         font-size: 16px;
-        color: #9999cc;
+        color: var(--bridge-text-muted, #9999cc);
         opacity: 0;
         text-align: center;
         max-width: 500px;
@@ -189,7 +189,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
         margin-top: 40px;
         width: 320px;
         height: 3px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--bridge-border, rgba(255, 255, 255, 0.08));
         border-radius: 2px;
         overflow: hidden;
       }

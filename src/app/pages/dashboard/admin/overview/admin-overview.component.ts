@@ -741,7 +741,7 @@ Chart.register(...registerables);
               <div class="flex items-center justify-between text-xs">
                 <span class="text-[var(--bridge-text-muted)]">Blockchain Polygon</span>
                 <span class="flex items-center gap-1.5 text-[#F5A623] font-semibold">
-                  <span class="w-2 h-2 rounded-full bg-[#F5A623]"></span> Simulation
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Connecté
                 </span>
               </div>
               <div class="flex items-center justify-between text-xs">

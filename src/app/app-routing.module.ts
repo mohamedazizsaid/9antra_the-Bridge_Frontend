@@ -22,6 +22,12 @@ const routes: Routes = [
   { path: 'auth/reset-password', component: ResetPasswordComponent },
   { path: 'auth/register', component: RegisterComponent },
   {
+    path: 'onboarding',
+    loadComponent: () =>
+      import('./pages/onboarding/onboarding.component').then((m) => m.OnboardingComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'dashboard',
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
@@ -39,6 +45,15 @@ const routes: Routes = [
         loadComponent: () =>
           import('./pages/dashboard/stagiaire/overview/stagiaire-overview.component').then(
             (m) => m.StagiaireOverviewComponent,
+          ),
+        canActivate: [RoleGuard],
+        data: { roles: ['STAGIAIRE'] },
+      },
+      {
+        path: 'stagiaire/stage',
+        loadComponent: () =>
+          import('./pages/dashboard/stagiaire/stage/stagiaire-stage.component').then(
+            (m) => m.StagiaireStageComponent,
           ),
         canActivate: [RoleGuard],
         data: { roles: ['STAGIAIRE'] },
@@ -178,6 +193,15 @@ const routes: Routes = [
         loadComponent: () =>
           import('./pages/dashboard/admin/overview/admin-overview.component').then(
             (m) => m.AdminOverviewComponent,
+          ),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'admin/stages',
+        loadComponent: () =>
+          import('./pages/dashboard/admin/stages/admin-stages.component').then(
+            (m) => m.AdminStagesComponent,
           ),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] },

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Formation } from '../../../core/models/formation.model';
 import {
+  ComboEnrollment,
   ComboFormationItem,
   computeComboDiscount,
 } from '../../../core/models/combo-enrollment.model';
@@ -17,6 +18,41 @@ import { User } from '../../../core/models/user.model';
   selector: 'app-combo-parcours',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  styles: [
+    `
+      :host {
+        display: contents;
+      }
+
+      .combo-modal-container {
+        background: var(--bridge-card, #171738);
+        color: var(--bridge-text, #f0f0ff);
+      }
+
+      :host-context([data-theme='light']) .combo-modal-container {
+        background: #ffffff !important;
+        color: #1d2433 !important;
+      }
+
+      :host-context([data-theme='light']) .combo-hero-bg {
+        background: linear-gradient(
+          135deg,
+          rgba(198, 39, 97, 0.08) 0%,
+          #ffffff 50%,
+          rgba(245, 166, 35, 0.08) 100%
+        ) !important;
+      }
+
+      :host-context([data-theme='light']) .combo-receipt-header {
+        background: #f9f6f0 !important;
+      }
+
+      :host-context([data-theme='light']) .combo-tier-box {
+        background: #f9f6f0 !important;
+        border-color: #e2d9c8 !important;
+      }
+    `,
+  ],
   template: `
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- BACKDROP                                                    -->
@@ -28,12 +64,12 @@ import { User } from '../../../core/models/user.model';
       <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
 
       <div
-        class="relative z-10 w-full max-w-4xl max-h-[92vh] flex flex-col"
+        class="relative z-10 w-full max-w-4xl max-h-[92vh] flex flex-col animate-fadeIn"
         (click)="$event.stopPropagation()"
       >
         <!-- Card principale -->
         <div
-          class="glass-card border border-[var(--bridge-border)] overflow-hidden flex flex-col max-h-[92vh]"
+          class="combo-modal-container border border-[var(--bridge-border)] overflow-hidden flex flex-col max-h-[92vh] rounded-3xl shadow-2xl"
         >
           <!-- Gradient top bar -->
           <div
@@ -42,12 +78,12 @@ import { User } from '../../../core/models/user.model';
 
           <!-- ─── Header ─── -->
           <div
-            class="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0"
+            class="flex items-center justify-between px-6 py-4 border-b border-[var(--bridge-border)] flex-shrink-0 bg-[var(--bridge-surface)]"
           >
             <div class="flex items-center gap-3">
               <div
                 class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20
-                          border border-[var(--bridge-gold)]/30 flex items-center justify-center text-[var(--bridge-gold)]"
+                          border border-[var(--bridge-gold)]/30 flex items-center justify-center text-[var(--bridge-gold)] shadow-sm"
               >
                 <svg
                   class="w-5 h-5"
@@ -64,7 +100,9 @@ import { User } from '../../../core/models/user.model';
                 </svg>
               </div>
               <div>
-                <h2 class="font-syne font-bold text-white text-lg">Personnaliser votre parcours</h2>
+                <h2 class="font-syne font-bold text-[var(--bridge-text)] text-lg">
+                  Personnaliser votre parcours
+                </h2>
                 <p class="text-xs text-[var(--bridge-text-muted)]">
                   Composez votre combo de formations avec une remise progressive
                 </p>
@@ -72,8 +110,9 @@ import { User } from '../../../core/models/user.model';
             </div>
             <button
               (click)="close()"
-              class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center
-                     text-white/50 hover:text-white transition-all text-sm cursor-pointer"
+              aria-label="Fermer"
+              class="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center
+                     text-[var(--bridge-text-muted)] hover:text-[var(--bridge-text)] transition-all text-sm cursor-pointer border border-[var(--bridge-border)]"
             >
               ✕
             </button>
@@ -81,7 +120,7 @@ import { User } from '../../../core/models/user.model';
 
           <!-- ─── Stepper Indicators ─── -->
           <div
-            class="flex items-center gap-0 px-6 py-3 border-b border-white/5 flex-shrink-0 overflow-x-auto"
+            class="flex items-center gap-0 px-6 py-3 border-b border-[var(--bridge-border)] flex-shrink-0 overflow-x-auto bg-[var(--bridge-surface)]/60"
           >
             <ng-container *ngFor="let s of steps; let i = index">
               <div class="flex items-center gap-2 flex-shrink-0">
@@ -92,7 +131,7 @@ import { User } from '../../../core/models/user.model';
                       ? 'bg-emerald-500 text-white'
                       : currentStep === i
                         ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white shadow-lg shadow-[rgba(198,39,97,0.3)]'
-                        : 'bg-white/5 text-white/30 border border-white/10'
+                        : 'bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)] border border-[var(--bridge-border)]'
                   "
                 >
                   <svg
@@ -111,7 +150,11 @@ import { User } from '../../../core/models/user.model';
                 </div>
                 <span
                   class="text-xs font-semibold whitespace-nowrap transition-colors duration-300"
-                  [class]="currentStep === i ? 'text-white' : 'text-white/30'"
+                  [class]="
+                    currentStep === i
+                      ? 'text-[var(--bridge-text)] font-bold'
+                      : 'text-[var(--bridge-text-muted)]'
+                  "
                 >
                   {{ s }}
                 </span>
@@ -119,30 +162,30 @@ import { User } from '../../../core/models/user.model';
               <div
                 *ngIf="i < steps.length - 1"
                 class="flex-1 min-w-[20px] h-px mx-3 transition-colors duration-500"
-                [class]="currentStep > i ? 'bg-emerald-500/50' : 'bg-white/5'"
+                [class]="currentStep > i ? 'bg-emerald-500/50' : 'bg-[var(--bridge-border)]'"
               ></div>
             </ng-container>
           </div>
 
           <!-- ─── Scrollable Content ─── -->
-          <div class="flex-1 overflow-y-auto min-h-0">
+          <div class="flex-1 overflow-y-auto min-h-0 custom-scrollbar">
             <!-- ══════════════════════════════════════════════════════════ -->
             <!-- ÉTAPE 0 : Introduction                                     -->
             <!-- ══════════════════════════════════════════════════════════ -->
             <div *ngIf="currentStep === 0" class="p-6 space-y-6 animate-fadein">
               <!-- Hero Banner -->
               <div
-                class="relative overflow-hidden rounded-2xl border border-[#F5A623]/20
-                          bg-gradient-to-br from-[#C62761]/10 via-[#0D0D22] to-[#F5A623]/10 p-8 text-center"
+                class="relative overflow-hidden rounded-2xl border border-[#F5A623]/30
+                       combo-hero-bg bg-gradient-to-br from-[#C62761]/10 via-[var(--bridge-surface)] to-[#F5A623]/10 p-8 text-center shadow-md"
               >
                 <div class="absolute inset-0 overflow-hidden pointer-events-none">
                   <div
                     class="absolute -top-10 -right-10 w-40 h-40 rounded-full
-                               bg-[#F5A623]/5 blur-3xl"
+                               bg-[#F5A623]/10 blur-3xl"
                   ></div>
                   <div
                     class="absolute -bottom-10 -left-10 w-40 h-40 rounded-full
-                               bg-[#C62761]/5 blur-3xl"
+                               bg-[#C62761]/10 blur-3xl"
                   ></div>
                 </div>
                 <div class="relative z-10">
@@ -162,7 +205,7 @@ import { User } from '../../../core/models/user.model';
                       <path d="M6 12v5c3 3 9 3 12 0v-5" />
                     </svg>
                   </div>
-                  <h3 class="font-syne font-bold text-2xl text-white mb-2">
+                  <h3 class="font-syne font-bold text-2xl text-[var(--bridge-text)] mb-2">
                     Votre Parcours Personnalisé
                   </h3>
                   <p
@@ -179,7 +222,7 @@ import { User } from '../../../core/models/user.model';
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
                   *ngFor="let benefit of benefits"
-                  class="glass-card border border-white/8 p-5 text-center"
+                  class="glass-card border border-[var(--bridge-border)] p-5 text-center bg-[var(--bridge-card)] shadow-sm"
                 >
                   <div
                     class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C62761]/15 to-[#F5A623]/15 border border-[#F5A623]/20 flex items-center justify-center mx-auto mb-3 text-[var(--bridge-gold)]"
@@ -229,13 +272,15 @@ import { User } from '../../../core/models/user.model';
                       <polyline points="10 9 9 9 8 9" />
                     </svg>
                   </div>
-                  <p class="text-white font-semibold text-sm">{{ benefit.title }}</p>
+                  <p class="text-[var(--bridge-text)] font-semibold text-sm">{{ benefit.title }}</p>
                   <p class="text-[var(--bridge-text-muted)] text-xs mt-1">{{ benefit.desc }}</p>
                 </div>
               </div>
 
               <!-- Barème remise -->
-              <div class="glass-card border border-[#F5A623]/20 p-5">
+              <div
+                class="glass-card border border-[#F5A623]/30 p-5 bg-[var(--bridge-card)] shadow-sm"
+              >
                 <div
                   class="flex items-center gap-2 text-xs text-[#F5A623] font-bold uppercase tracking-wider mb-4"
                 >
@@ -257,17 +302,17 @@ import { User } from '../../../core/models/user.model';
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div
                     *ngFor="let tier of discountTiers"
-                    class="text-center p-3 rounded-xl border transition-all"
+                    class="text-center p-3 rounded-xl border transition-all combo-tier-box"
                     [class]="
                       tier.highlight
-                        ? 'bg-gradient-to-b from-[#C62761]/20 to-[#F5A623]/10 border-[#F5A623]/40 shadow-lg'
-                        : 'bg-white/3 border-white/8'
+                        ? 'bg-gradient-to-b from-[#C62761]/15 to-[#F5A623]/10 border-[#F5A623]/40 shadow-md'
+                        : 'bg-[var(--bridge-surface)]/60 border-[var(--bridge-border)]'
                     "
                   >
                     <p class="text-xs text-[var(--bridge-text-muted)]">{{ tier.label }}</p>
                     <p
                       class="font-mono font-bold text-xl mt-1"
-                      [class]="tier.highlight ? 'text-[#F5A623]' : 'text-white/70'"
+                      [class]="tier.highlight ? 'text-[#F5A623]' : 'text-[var(--bridge-text)]'"
                     >
                       {{ tier.discount }}%
                     </p>
@@ -285,28 +330,28 @@ import { User } from '../../../core/models/user.model';
               <div
                 class="sticky top-0 z-10 glass-card border border-[var(--bridge-border)] p-4
                           backdrop-blur-xl rounded-2xl shadow-xl flex flex-wrap items-center
-                          justify-between gap-3"
+                          justify-between gap-3 bg-[var(--bridge-surface)]/95"
               >
                 <div class="flex items-center gap-4">
                   <div class="text-center">
                     <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider">
                       Formations
                     </p>
-                    <p class="font-mono font-bold text-xl text-white">
+                    <p class="font-mono font-bold text-xl text-[var(--bridge-text)]">
                       {{ selectedIds.size }}
                     </p>
                   </div>
-                  <div class="w-px h-8 bg-white/10"></div>
+                  <div class="w-px h-8 bg-[var(--bridge-border)]"></div>
                   <div class="text-center">
                     <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider">
                       Durée totale
                     </p>
-                    <p class="font-mono font-bold text-xl text-white">
+                    <p class="font-mono font-bold text-xl text-[var(--bridge-text)]">
                       {{ totalWeeks }}
-                      <span class="text-xs font-sans text-white/50">sem.</span>
+                      <span class="text-xs font-sans text-[var(--bridge-text-muted)]">sem.</span>
                     </p>
                   </div>
-                  <div class="w-px h-8 bg-white/10"></div>
+                  <div class="w-px h-8 bg-[var(--bridge-border)]"></div>
                   <div class="text-center">
                     <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider">
                       Remise
@@ -317,7 +362,7 @@ import { User } from '../../../core/models/user.model';
                 <div class="text-right flex-shrink-0">
                   <p class="text-[10px] text-[var(--bridge-text-muted)] uppercase">Total</p>
                   <p
-                    class="text-xs text-white/40 line-through font-mono"
+                    class="text-xs text-[var(--bridge-text-muted)] line-through font-mono"
                     *ngIf="currentDiscount > 0"
                   >
                     {{ totalPriceRaw | number: '1.0-0' }} TND
@@ -354,21 +399,21 @@ import { User } from '../../../core/models/user.model';
                   >Bravo ! Remise de <strong>{{ currentDiscount }}%</strong> appliquée sur votre
                   combo.</span
                 >
-                <span *ngIf="currentDiscount < 40" class="text-white/40 ml-1">
+                <span *ngIf="currentDiscount < 40" class="text-[var(--bridge-text-muted)] ml-1">
                   (Ajoutez {{ formationNeededForNextTier }} formation(s) pour atteindre
                   {{ nextDiscount }}%)
                 </span>
-                <span *ngIf="currentDiscount === 40" class="text-emerald-400 ml-1">
+                <span *ngIf="currentDiscount === 40" class="text-emerald-500 font-bold ml-1">
                   ✓ Remise maximale atteinte !
                 </span>
               </div>
               <div
                 *ngIf="selectedIds.size < 2"
                 class="flex items-center gap-2 px-4 py-2.5 rounded-xl
-                       bg-white/5 border border-white/10 text-xs text-white/50"
+                       bg-[var(--bridge-surface)] border border-[var(--bridge-border)] text-xs text-[var(--bridge-text-muted)]"
               >
                 <svg
-                  class="w-4 h-4 text-white/40 shrink-0"
+                  class="w-4 h-4 text-[var(--bridge-text-muted)] shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -387,7 +432,7 @@ import { User } from '../../../core/models/user.model';
               <div *ngIf="loadingFormations" class="grid md:grid-cols-2 gap-4">
                 <div
                   *ngFor="let _ of [1, 2, 3, 4]"
-                  class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse h-32"
+                  class="glass-card border border-[var(--bridge-border)] p-5 animate-pulse h-32 bg-[var(--bridge-card)]"
                 ></div>
               </div>
 
@@ -395,7 +440,7 @@ import { User } from '../../../core/models/user.model';
                 <div
                   *ngFor="let f of availableFormations"
                   (click)="toggleFormation(f)"
-                  class="glass-card border p-4 cursor-pointer transition-all duration-200 relative group"
+                  class="glass-card border p-4 cursor-pointer transition-all duration-200 relative group bg-[var(--bridge-card)]"
                   [class]="getFormationCardClass(f)"
                 >
                   <!-- Badge sélectionné -->
@@ -412,7 +457,7 @@ import { User } from '../../../core/models/user.model';
                   <div
                     *ngIf="activeComboFormationIds.has(f.id)"
                     class="absolute top-3 right-3 text-[10px] px-2 py-0.5
-                           bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-full font-bold flex items-center gap-1"
+                           bg-amber-500/15 text-amber-500 border border-amber-500/30 rounded-full font-bold flex items-center gap-1"
                   >
                     <svg
                       class="w-3 h-3"
@@ -434,7 +479,7 @@ import { User } from '../../../core/models/user.model';
                   <div
                     *ngIf="enrolledIds.has(f.id) && !activeComboFormationIds.has(f.id)"
                     class="absolute top-3 right-3 text-[10px] px-2 py-0.5
-                           bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full font-bold flex items-center gap-1"
+                           bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 rounded-full font-bold flex items-center gap-1"
                   >
                     <svg
                       class="w-3 h-3"
@@ -458,7 +503,7 @@ import { User } from '../../../core/models/user.model';
                       [class]="
                         selectedIds.has(f.id)
                           ? 'bg-gradient-to-br from-[#C62761] to-[#F5A623] border-transparent'
-                          : 'border-white/20 bg-white/5'
+                          : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)]'
                       "
                     >
                       <svg
@@ -476,15 +521,15 @@ import { User } from '../../../core/models/user.model';
                     <div class="flex-1 min-w-0 pr-8">
                       <div class="flex items-center gap-2 mb-1">
                         <span
-                          class="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5
-                                     text-white/40 font-mono uppercase border border-white/8"
+                          class="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--bridge-surface)]
+                                 text-[var(--bridge-text-muted)] font-mono uppercase border border-[var(--bridge-border)]"
                         >
                           {{ f.category || 'Général' }}
                         </span>
                       </div>
                       <h4
-                        class="font-syne font-bold text-white text-sm leading-tight
-                                 group-hover:text-[#F5A623] transition-colors"
+                        class="font-syne font-bold text-[var(--bridge-text)] text-sm leading-tight
+                               group-hover:text-[#F5A623] transition-colors"
                       >
                         {{ f.nom }}
                       </h4>
@@ -517,17 +562,17 @@ import { User } from '../../../core/models/user.model';
               <!-- Zone reçu imprimable -->
               <div
                 id="combo-receipt-print"
-                class="glass-card border border-white/10 overflow-hidden"
+                class="glass-card border border-[var(--bridge-border)] overflow-hidden bg-[var(--bridge-card)] rounded-2xl shadow-lg"
               >
                 <!-- Receipt Header -->
                 <div class="bg-gradient-to-r from-[#C62761] to-[#F5A623] p-0.5">
-                  <div class="bg-[#0D0D22] p-6">
+                  <div class="combo-receipt-header bg-[var(--bridge-surface)] p-6">
                     <div class="flex items-center justify-between">
                       <div>
                         <div class="flex items-center gap-2 mb-1">
                           <div
                             class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C62761]/20 to-[#F5A623]/20
-                                       border border-[#F5A623]/30 flex items-center justify-center text-[var(--bridge-gold)]"
+                                       border border-[#F5A623]/30 flex items-center justify-center text-[var(--bridge-gold)] shadow-sm"
                           >
                             <svg
                               class="w-4 h-4"
@@ -545,7 +590,9 @@ import { User } from '../../../core/models/user.model';
                               <path d="M6 10h10" />
                             </svg>
                           </div>
-                          <span class="font-syne font-black text-white text-lg">The Bridge</span>
+                          <span class="font-syne font-black text-[var(--bridge-text)] text-lg"
+                            >The Bridge</span
+                          >
                         </div>
                         <p class="text-[10px] text-[var(--bridge-text-muted)]">
                           9antra — Plateforme de formation
@@ -569,13 +616,15 @@ import { User } from '../../../core/models/user.model';
                 </div>
 
                 <!-- Stagiaire info -->
-                <div class="px-6 py-4 border-b border-white/5">
+                <div class="px-6 py-4 border-b border-[var(--bridge-border)]">
                   <p
                     class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                   >
                     Bénéficiaire
                   </p>
-                  <p class="font-semibold text-white text-sm">{{ user?.prenom }} {{ user?.nom }}</p>
+                  <p class="font-semibold text-[var(--bridge-text)] text-sm">
+                    {{ user?.prenom }} {{ user?.nom }}
+                  </p>
                   <p class="text-xs text-[var(--bridge-text-muted)]">{{ user?.email }}</p>
                 </div>
 
@@ -589,7 +638,7 @@ import { User } from '../../../core/models/user.model';
                   <div class="space-y-2">
                     <div
                       *ngFor="let f of selectedFormations; let i = index"
-                      class="flex items-center justify-between py-3 border-b border-white/5"
+                      class="flex items-center justify-between py-3 border-b border-[var(--bridge-border)]"
                     >
                       <div class="flex items-center gap-3">
                         <span
@@ -599,7 +648,7 @@ import { User } from '../../../core/models/user.model';
                           {{ i + 1 }}
                         </span>
                         <div>
-                          <p class="text-sm font-semibold text-white">{{ f.nom }}</p>
+                          <p class="text-sm font-semibold text-[var(--bridge-text)]">{{ f.nom }}</p>
                           <p class="text-xs text-[var(--bridge-text-muted)]">
                             {{ f.category || 'Général' }}
                             <span *ngIf="f.defaultDurationWeeks">
@@ -608,7 +657,7 @@ import { User } from '../../../core/models/user.model';
                           </p>
                         </div>
                       </div>
-                      <span class="font-mono font-bold text-white text-sm">
+                      <span class="font-mono font-bold text-[var(--bridge-text)] text-sm">
                         {{ f.totalPrice || 0 | number: '1.0-0' }} TND
                       </span>
                     </div>
@@ -619,7 +668,9 @@ import { User } from '../../../core/models/user.model';
                 <div class="px-6 pb-6 space-y-2">
                   <div class="flex justify-between text-sm text-[var(--bridge-text-muted)]">
                     <span>Sous-total</span>
-                    <span class="font-mono">{{ totalPriceRaw | number: '1.0-0' }} TND</span>
+                    <span class="font-mono text-[var(--bridge-text)]"
+                      >{{ totalPriceRaw | number: '1.0-0' }} TND</span
+                    >
                   </div>
                   <div class="flex justify-between text-sm text-[#F5A623] font-semibold">
                     <span>Remise combo {{ currentDiscount }}%</span>
@@ -627,7 +678,9 @@ import { User } from '../../../core/models/user.model';
                   </div>
                   <div class="h-px bg-gradient-to-r from-[#C62761]/30 to-[#F5A623]/30 my-2"></div>
                   <div class="flex justify-between items-center">
-                    <span class="font-syne font-bold text-white text-base">Total à payer</span>
+                    <span class="font-syne font-bold text-[var(--bridge-text)] text-base"
+                      >Total à payer</span
+                    >
                     <span
                       class="font-mono font-black text-xl bg-gradient-to-r from-[#C62761] to-[#F5A623]
                                  bg-clip-text text-transparent"
@@ -646,9 +699,9 @@ import { User } from '../../../core/models/user.model';
               <div class="flex flex-col sm:flex-row items-center gap-3">
                 <button
                   (click)="printReceipt()"
-                  class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5
-                         border border-white/15 text-white text-xs font-semibold hover:bg-white/10
-                         transition-all cursor-pointer"
+                  class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bridge-surface)]
+                         border border-[var(--bridge-border)] text-[var(--bridge-text)] text-xs font-semibold hover:bg-[var(--bridge-card-hover)]
+                         transition-all cursor-pointer shadow-sm"
                 >
                   <svg
                     class="w-4 h-4"
@@ -696,16 +749,21 @@ import { User } from '../../../core/models/user.model';
                 </svg>
               </div>
               <div>
-                <h3 class="font-syne font-bold text-2xl text-white mb-2">Parcours activé !</h3>
+                <h3 class="font-syne font-bold text-2xl text-[var(--bridge-text)] mb-2">
+                  Parcours activé !
+                </h3>
                 <p class="text-[var(--bridge-text-muted)] text-sm max-w-md mx-auto">
                   Votre paiement a été confirmé. Vous êtes maintenant inscrit(e) à
-                  <strong class="text-white">{{ confirmedFormationCount }} formation(s)</strong>. Un
-                  email de confirmation a été envoyé à
+                  <strong class="text-[var(--bridge-text)]"
+                    >{{ confirmedFormationCount }} formation(s)</strong
+                  >. Un email de confirmation a été envoyé à
                   <strong class="text-[#F5A623]">{{ user?.email }}</strong
                   >.
                 </p>
               </div>
-              <div class="glass-card border border-emerald-500/20 p-4 max-w-sm mx-auto">
+              <div
+                class="glass-card border border-emerald-500/20 p-4 max-w-sm mx-auto bg-[var(--bridge-card)]"
+              >
                 <p
                   class="text-[10px] text-[var(--bridge-text-muted)] uppercase tracking-wider mb-1"
                 >
@@ -727,15 +785,15 @@ import { User } from '../../../core/models/user.model';
           <!-- ─── Footer Actions ─── -->
           <div
             *ngIf="currentStep < 3"
-            class="flex items-center justify-between gap-3 px-6 py-4 border-t border-white/5 flex-shrink-0
-                   bg-[rgba(8,8,26,0.8)]"
+            class="flex items-center justify-between gap-3 px-6 py-4 border-t border-[var(--bridge-border)] flex-shrink-0
+                   bg-[var(--bridge-surface)] shadow-lg"
           >
             <button
               *ngIf="currentStep > 0"
               (click)="prevStep()"
               [disabled]="submitting"
-              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10
-                     text-white text-sm font-semibold hover:bg-white/10 transition-all cursor-pointer
+              class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bridge-card)] hover:bg-[var(--bridge-card-hover)] border border-[var(--bridge-border)]
+                     text-[var(--bridge-text)] text-sm font-semibold transition-all cursor-pointer
                      disabled:opacity-50"
             >
               ← Retour
@@ -898,9 +956,8 @@ export class ComboParcoursComponent implements OnInit {
   loadData(): void {
     this.loadingFormations = true;
     this.formationService.getFormations().subscribe({
-      next: (formations) => {
-        // Map Formation → ComboFormationItem
-        this.availableFormations = formations
+      next: (list: Formation[]) => {
+        this.availableFormations = list
           .filter((f) => !f.archived)
           .map((f) => ({
             id: f.id.toString(),
@@ -908,53 +965,66 @@ export class ComboParcoursComponent implements OnInit {
             description: f.description,
             category: f.category,
             totalPrice: f.totalPrice,
-            formateurNom: f.formateurNom,
             defaultDurationWeeks: f.defaultDurationWeeks,
-            phases: f.phases,
+            formateurNom: f.formateurNom,
           }));
         this.loadingFormations = false;
+        this.checkExistingEnrollments();
       },
       error: () => {
         this.loadingFormations = false;
+        this.toastService.error('Impossible de charger les formations.', 'Erreur');
       },
     });
-
-    if (this.user) {
-      const uid = parseInt(this.user.id);
-      // Formations déjà inscrites individuellement
-      this.enrollmentService.getEnrollmentsByStudent(uid).subscribe({
-        next: (enrollments) => {
-          enrollments.forEach((e) => {
-            if (e.status === 'APPROVED') {
-              this.enrolledIds.add(e.formationId?.toString() || '');
-            }
-          });
-        },
-        error: () => {},
-      });
-
-      // Formations déjà dans un combo actif
-      this.comboService.getCombosByStudent(uid).subscribe({
-        next: (combos) => {
-          combos
-            .filter((c) => c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE')
-            .forEach((c) => {
-              c.formations.forEach((f) => this.activeComboFormationIds.add(f.id.toString()));
-            });
-        },
-        error: () => {},
-      });
-    }
   }
 
-  // ─── Computed values ─────────────────────────────────────────────────────
+  checkExistingEnrollments(): void {
+    if (!this.user?.id) return;
+    const studentId = Number(this.user.id);
+    this.enrollmentService.getEnrollmentsByStudent(studentId).subscribe({
+      next: (enrollments) => {
+        this.enrolledIds.clear();
+        (enrollments || []).forEach((e) => {
+          if (e.formationId) {
+            this.enrolledIds.add(e.formationId.toString());
+          }
+        });
+      },
+      error: () => {},
+    });
+
+    this.comboService.getCombosByStudent(studentId).subscribe({
+      next: (combos: ComboEnrollment[]) => {
+        this.activeComboFormationIds.clear();
+        (combos || []).forEach((c) => {
+          if (c.status === 'ACTIVE' || c.status === 'PENDING_PAYMENT') {
+            (c.formations || []).forEach((f: any) => {
+              this.activeComboFormationIds.add(f.id.toString());
+            });
+          }
+        });
+      },
+      error: () => {},
+    });
+  }
+
+  generateReceiptPreviewRef(): void {
+    const rand = Math.floor(10000 + Math.random() * 90000);
+    this.receiptPreviewRef = `BRG-COMBO-${rand}`;
+  }
+
+  // ─── Computed properties ─────────────────────────────────────────────────
 
   get selectedFormations(): ComboFormationItem[] {
-    return this.availableFormations.filter((f) => this.selectedIds.has(f.id.toString()));
+    return this.availableFormations.filter((f) => this.selectedIds.has(f.id));
   }
 
   get totalPriceRaw(): number {
     return this.selectedFormations.reduce((sum, f) => sum + (f.totalPrice || 0), 0);
+  }
+
+  get totalWeeks(): number {
+    return this.selectedFormations.reduce((sum, f) => sum + (f.defaultDurationWeeks || 0), 0);
   }
 
   get currentDiscount(): number {
@@ -962,31 +1032,31 @@ export class ComboParcoursComponent implements OnInit {
   }
 
   get discountAmount(): number {
-    return this.totalPriceRaw * (this.currentDiscount / 100);
+    return (this.totalPriceRaw * this.currentDiscount) / 100;
   }
 
   get finalPrice(): number {
     return this.totalPriceRaw - this.discountAmount;
   }
 
-  get totalWeeks(): number {
-    return this.selectedFormations.reduce((sum, f) => sum + (f.defaultDurationWeeks || 4), 0);
-  }
-
   get nextDiscount(): number {
-    return Math.min(this.currentDiscount + 5, 40);
+    const n = this.selectedIds.size;
+    if (n === 0) return 10;
+    if (n === 1) return 10;
+    if (n === 2) return 15;
+    if (n === 3) return 20;
+    return 40;
   }
 
   get formationNeededForNextTier(): number {
     if (this.selectedIds.size < 2) return 2 - this.selectedIds.size;
-    return 1; // une de plus à chaque fois
+    return 1;
   }
 
   // ─── Selection logic ─────────────────────────────────────────────────────
 
   toggleFormation(f: ComboFormationItem): void {
     const id = f.id.toString();
-    // Bloquer si déjà dans un combo actif
     if (this.activeComboFormationIds.has(id)) {
       this.toastService.warning(
         `Cette formation est déjà dans un combo actif.`,
@@ -1007,9 +1077,9 @@ export class ComboParcoursComponent implements OnInit {
       return 'border-amber-500/20 opacity-50 cursor-not-allowed';
     }
     if (this.selectedIds.has(id)) {
-      return 'border-[#C62761]/60 shadow-[0_0_20px_rgba(198,39,97,0.15)] bg-gradient-to-br from-[#C62761]/5 to-[#F5A623]/5';
+      return 'border-[#C62761]/70 shadow-[0_0_20px_rgba(198,39,97,0.15)] bg-gradient-to-br from-[#C62761]/5 to-[#F5A623]/5';
     }
-    return 'border-[var(--bridge-border)] hover:border-white/30 hover:-translate-y-0.5';
+    return 'border-[var(--bridge-border)] hover:border-[var(--bridge-gold)]/50 hover:-translate-y-0.5';
   }
 
   // ─── Navigation ──────────────────────────────────────────────────────────
@@ -1029,190 +1099,56 @@ export class ComboParcoursComponent implements OnInit {
   // ─── Stripe payment ──────────────────────────────────────────────────────
 
   proceedToStripe(): void {
-    if (!this.user || this.selectedIds.size < 2 || this.submitting) return;
+    if (this.selectedIds.size < 2) {
+      this.toastService.warning('Sélectionnez au moins 2 formations.', '⚠️ Combo invalide');
+      return;
+    }
+    if (!this.user?.id) {
+      this.toastService.error('Utilisateur non connecté.', 'Erreur');
+      return;
+    }
+
     this.submitting = true;
+    const formationIds = Array.from(this.selectedIds).map((id) => Number(id));
 
-    const studentId = parseInt(this.user.id);
-    const formationIds = Array.from(this.selectedIds).map((id) => parseInt(id));
-
-    this.comboService.createCombo(studentId, formationIds).subscribe({
-      next: (combo) => {
-        this.submitting = false;
-        if (combo.stripeCheckoutUrl) {
-          // Sauvegarder comboId dans sessionStorage pour la page de retour Stripe
-          sessionStorage.setItem('pendingComboId', combo.id.toString());
-          sessionStorage.setItem('pendingComboReceiptRef', combo.receiptRef || '');
-          window.location.href = combo.stripeCheckoutUrl;
-        } else {
-          // Mode développement sans Stripe réel → simuler succès
-          this.confirmedFormationCount = this.selectedIds.size;
-          this.confirmedReceiptRef = combo.receiptRef || 'BRG-COMBO-DEV';
-          this.currentStep = 3;
-          this.comboCompleted.emit(combo);
-        }
-      },
-      error: (err) => {
-        this.submitting = false;
-        const msg = err?.error?.message || 'Erreur lors de la création du combo.';
-        this.toastService.error(msg, '❌ Erreur');
-      },
-    });
+    this.comboService
+      .createCombo(
+        Number(this.user.id),
+        formationIds,
+        `Combo de ${formationIds.length} formations personnalisé`,
+      )
+      .subscribe({
+        next: (res: ComboEnrollment) => {
+          this.submitting = false;
+          if (res.stripeCheckoutUrl) {
+            this.toastService.info('Redirection vers Stripe Checkout...', 'Paiement');
+            window.location.href = res.stripeCheckoutUrl;
+          } else {
+            this.confirmedFormationCount = formationIds.length;
+            this.confirmedReceiptRef = res.receiptRef || this.receiptPreviewRef;
+            this.currentStep = 3;
+            this.comboCompleted.emit(res);
+          }
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.toastService.error(
+            err.error?.message || 'Erreur lors de la création du combo.',
+            'Erreur',
+          );
+        },
+      });
   }
-
-  // ─── Print receipt ───────────────────────────────────────────────────────
 
   printReceipt(): void {
-    const receiptEl = document.getElementById('combo-receipt-print');
-    if (!receiptEl) return;
-
-    const printWin = window.open('', '_blank', 'width=800,height=900');
-    if (!printWin) return;
-
-    printWin.document.write(`
-      <!DOCTYPE html>
-      <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <title>Reçu Parcours Personnalisé — The Bridge</title>
-        <style>
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-            font-family: 'Inter', Arial, sans-serif;
-            background: #ffffff;
-            color: #1a1a2e;
-            padding: 32px;
-          }
-          .receipt-wrapper {
-            max-width: 700px;
-            margin: 0 auto;
-            border: 2px solid #C62761;
-            border-radius: 16px;
-            overflow: hidden;
-          }
-          .receipt-gradient-bar {
-            height: 6px;
-            background: linear-gradient(90deg, #C62761, #F5A623);
-          }
-          .receipt-header {
-            padding: 24px 32px;
-            background: #f9f9ff;
-            border-bottom: 1px solid #e0e0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-          }
-          .brand { font-size: 20px; font-weight: 900; color: #1a1a2e; }
-          .brand-sub { font-size: 11px; color: #666688; margin-top: 2px; }
-          .ref { font-size: 11px; color: #888899; text-align: right; }
-          .ref-num { font-size: 16px; font-weight: 800; color: #C62761; font-family: monospace; }
-          .section { padding: 16px 32px; border-bottom: 1px solid #eeeeff; }
-          .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-                           color: #888899; margin-bottom: 8px; }
-          .student-name { font-weight: 700; font-size: 15px; }
-          .student-email { font-size: 12px; color: #666688; }
-          table { width: 100%; border-collapse: collapse; }
-          th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-               color: #888899; padding: 8px 0; border-bottom: 1px solid #eeeeff; }
-          td { padding: 10px 0; border-bottom: 1px solid #f0f0fa; font-size: 13px; }
-          td:last-child { text-align: right; font-weight: 700; }
-          .pricing { padding: 16px 32px 24px; }
-          .price-row { display: flex; justify-content: space-between; padding: 6px 0;
-                       font-size: 13px; color: #444466; }
-          .price-total { display: flex; justify-content: space-between; padding: 12px 0;
-                         font-size: 17px; font-weight: 900; border-top: 2px solid #C62761;
-                         margin-top: 8px; color: #1a1a2e; }
-          .price-total span:last-child { color: #C62761; }
-          .discount-row { color: #C62761; font-weight: 700; }
-          .footer-note { padding: 12px 32px; font-size: 10px; color: #888899;
-                         background: #f9f9ff; border-top: 1px solid #eeeeff; }
-        </style>
-      </head>
-      <body>
-        <div class="receipt-wrapper">
-          <div class="receipt-gradient-bar"></div>
-          <div class="receipt-header">
-            <div>
-              <div class="brand">🌉 The Bridge</div>
-              <div class="brand-sub">9antra — Plateforme de formation professionnelle</div>
-            </div>
-            <div class="ref">
-              <div>Devis Parcours Personnalisé</div>
-              <div class="ref-num">${this.receiptPreviewRef}</div>
-              <div>${new Date().toLocaleDateString('fr-FR')}</div>
-            </div>
-          </div>
-          <div class="section">
-            <div class="section-label">Bénéficiaire</div>
-            <div class="student-name">${this.user?.prenom || ''} ${this.user?.nom || ''}</div>
-            <div class="student-email">${this.user?.email || ''}</div>
-          </div>
-          <div class="section">
-            <div class="section-label">Formations sélectionnées</div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Formation</th>
-                  <th>Durée</th>
-                  <th style="text-align:right">Prix</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.selectedFormations
-                  .map(
-                    (f) =>
-                      `<tr>
-                        <td>${f.nom}<br><small style="color:#888899">${f.category || 'Général'}</small></td>
-                        <td>${f.defaultDurationWeeks || '-'} sem.</td>
-                        <td>${(f.totalPrice || 0).toFixed(0)} TND</td>
-                      </tr>`,
-                  )
-                  .join('')}
-              </tbody>
-            </table>
-          </div>
-          <div class="pricing">
-            <div class="price-row"><span>Sous-total</span><span>${this.totalPriceRaw.toFixed(0)} TND</span></div>
-            <div class="price-row discount-row">
-              <span>Remise combo (${this.currentDiscount}%)</span>
-              <span>- ${this.discountAmount.toFixed(0)} TND</span>
-            </div>
-            <div class="price-total">
-              <span>TOTAL À PAYER</span>
-              <span>${this.finalPrice.toFixed(0)} TND</span>
-            </div>
-          </div>
-          <div class="footer-note">
-            * Ce devis est valable 48 heures. Paiement sécurisé via Stripe.
-            The Bridge — 9antra | contact@thebridge.tn
-          </div>
-        </div>
-      </body>
-      </html>
-    `);
-    printWin.document.close();
-    printWin.focus();
-    setTimeout(() => {
-      printWin.print();
-      printWin.close();
-    }, 500);
-  }
-
-  // ─── Misc ─────────────────────────────────────────────────────────────────
-
-  generateReceiptPreviewRef(): void {
-    const d = new Date();
-    const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-    const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
-    this.receiptPreviewRef = `BRG-COMBO-${dateStr}-${rand}`;
-  }
-
-  onBackdropClick(event: Event): void {
-    if ((event.target as HTMLElement).classList.contains('fixed')) {
-      this.close();
-    }
+    window.print();
   }
 
   close(): void {
     this.closed.emit();
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    this.close();
   }
 }

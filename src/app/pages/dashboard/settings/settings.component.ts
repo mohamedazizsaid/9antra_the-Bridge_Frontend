@@ -380,6 +380,18 @@ interface TabItem {
                     class="bridge-input w-full text-sm text-white bg-[#10102A]"
                   />
                 </div>
+                <div>
+                  <label
+                    class="block text-xs text-white/60 font-semibold uppercase tracking-wider mb-1.5"
+                    >N° CIN</label
+                  >
+                  <input
+                    [(ngModel)]="profileForm.cin"
+                    maxlength="8"
+                    placeholder="08123456"
+                    class="bridge-input w-full text-sm text-white bg-[#10102A]"
+                  />
+                </div>
               </div>
               <div class="flex justify-end pt-2">
                 <button
@@ -1099,6 +1111,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         telephone: this.user.telephone,
         age: this.user.age,
         avatar: this.user.avatar,
+        cin: this.user.cin,
       };
     }
 
@@ -1210,6 +1223,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         telephone: this.profileForm.telephone,
         age: this.profileForm.age,
         avatar: this.profileForm.avatar,
+        cin: this.profileForm.cin,
       })
       .subscribe({
         next: (updated) => {

@@ -24,6 +24,8 @@ export class UserService {
       age: u.age,
       status: u.status,
       authProvider: u.authProvider,
+      cin: u.cin,
+      onboardingCompleted: u.onboardingCompleted,
     };
   }
 
@@ -44,6 +46,7 @@ export class UserService {
       phone: profile.telephone,
       age: profile.age,
       avatar: profile.avatar,
+      cin: profile.cin,
     };
     return this.http.put<any>(`${this.apiUrl}/me`, payload).pipe(map((u) => this.mapUserDTO(u)));
   }

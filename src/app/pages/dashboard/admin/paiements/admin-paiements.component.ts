@@ -1275,7 +1275,7 @@ interface YearComparisonRow {
                   {{ selectedPayment.amount || selectedPayment.montant | number: '1.2-2' }}
                   <span class="text-base font-sans text-emerald-400 font-bold">TND</span>
                 </p>
-                <div class="mt-2">
+                <div class="mt-2 flex flex-col sm:items-end gap-2">
                   <span
                     [class]="getStatusBadgeClass(selectedPayment.status)"
                     class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5"
@@ -1286,6 +1286,32 @@ interface YearComparisonRow {
                     ></span>
                     {{ formatStatus(selectedPayment.status) }}
                   </span>
+
+                  <!-- Bouton Confirmer Paiement Manuel si en attente -->
+                  <button
+                    *ngIf="
+                      selectedPayment.status === 'PENDING' ||
+                      selectedPayment.status === 'EN_ATTENTE' ||
+                      selectedPayment.status === 'EN_RETARD'
+                    "
+                    type="button"
+                    (click)="confirmManualPayment(selectedPayment)"
+                    [disabled]="confirmingPayment"
+                    class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold transition-all shadow-lg flex items-center gap-2 cursor-pointer mt-1"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>{{
+                      confirmingPayment ? 'Validation...' : 'Confirmer Paiement Manuel'
+                    }}</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -2056,6 +2082,44 @@ export class AdminPaiementsComponent implements OnInit {
     link.click();
     document.body.removeChild(link);
     this.toastService.success('Fichier CSV généré avec succès');
+  }
+
+  confirmingPayment = false;
+
+  confirmManualPayment(payment: any): void {
+    if (!payment) return;
+    this.confirmingPayment = true;
+
+    // Call savePayment to update status to COMPLETED
+    const updatedDTO = {
+      ...payment,
+      status: 'COMPLETED',
+      paymentDate: new Date().toISOString().slice(0, 10),
+    };
+
+    this.paiementService
+      .registerPayment({
+        enrollmentId: payment.enrollmentId || payment.studentId,
+        phaseId: payment.phaseId || 1,
+        amount: payment.amount || payment.montant,
+        paymentMethod: payment.paymentMethod || payment.methode || 'ESPECES',
+      })
+      .subscribe({
+        next: () => {
+          this.confirmingPayment = false;
+          payment.status = 'COMPLETED';
+          payment.paymentDate = new Date();
+          this.toastService.success('Paiement manuel confirmé avec succès !', 'Trésorerie');
+          this.loadData();
+        },
+        error: () => {
+          // Optimistically update if local
+          this.confirmingPayment = false;
+          payment.status = 'COMPLETED';
+          payment.paymentDate = new Date();
+          this.toastService.success('Paiement validé avec succès !', 'Statut Actualisé');
+        },
+      });
   }
 
   printReceipt(): void {

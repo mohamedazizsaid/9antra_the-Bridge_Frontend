@@ -14,17 +14,9 @@ import { User } from '../../../core/models/user.model';
   animations: [
     trigger('routeAnimations', [
       transition('* => *', [
-        query(
-          ':enter',
-          [
-            style({ opacity: 0, transform: 'translateX(28px)' }),
-            animate(
-              '320ms cubic-bezier(0.4, 0, 0.2, 1)',
-              style({ opacity: 1, transform: 'translateX(0)' }),
-            ),
-          ],
-          { optional: true },
-        ),
+        query(':enter', [style({ opacity: 0 }), animate('200ms ease-out', style({ opacity: 1 }))], {
+          optional: true,
+        }),
       ]),
     ]),
   ],
@@ -134,6 +126,20 @@ import { User } from '../../../core/models/user.model';
                   >
                     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <!-- briefcase -->
+                  <svg
+                    *ngSwitchCase="'briefcase'"
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                   </svg>
                   <!-- formations / book -->
                   <svg
@@ -847,7 +853,9 @@ import { User } from '../../../core/models/user.model';
         >
           <div
             *ngFor="let toast of toasts"
-            class="bridge-toast pointer-events-auto flex items-start gap-4 p-4 rounded-2xl border backdrop-blur-xl shadow-2xl transition-all duration-300 relative overflow-hidden"
+            class="bridge-toast pointer-events-auto flex items-start gap-3.5 p-4 rounded-2xl border backdrop-blur-xl shadow-2xl relative overflow-hidden transition-all duration-300"
+            [class.bridge-toast-enter]="!toast.isLeaving"
+            [class.bridge-toast-leave]="toast.isLeaving"
             [class]="
               toast.type === 'success'
                 ? 'bridge-toast-success'
@@ -857,7 +865,6 @@ import { User } from '../../../core/models/user.model';
                     ? 'bridge-toast-warning'
                     : 'bridge-toast-info'
             "
-            style="animation: slideInRight 0.3s cubic-bezier(0.34,1.15,0.64,1) both"
           >
             <!-- Type Icon -->
             <div
@@ -946,6 +953,7 @@ import { User } from '../../../core/models/user.model';
             <!-- Close Button -->
             <button
               (click)="removeToast(toast.id)"
+              aria-label="Fermer la notification"
               class="toast-close absolute top-3 right-3 transition-colors text-xs p-1 cursor-pointer"
             >
               ✕
@@ -1020,7 +1028,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   removeToast(id: string): void {
-    this.toastService.remove(id);
+    this.toastService.dismiss(id);
   }
 
   private buildMenu(): void {
@@ -1029,6 +1037,7 @@ export class DashboardLayoutComponent implements OnInit {
       this.menuItems = [
         { section: 'Principal' },
         { label: "Vue d'ensemble", route: '/dashboard/stagiaire', icon: 'home', exact: true },
+        { label: 'Mon Stage Facultatif', route: '/dashboard/stagiaire/stage', icon: 'briefcase' },
         { label: 'Agenda & Planning', route: '/dashboard/stagiaire/agenda', icon: 'calendar' },
         { label: 'Formations', route: '/dashboard/stagiaire/formations', icon: 'book' },
         { section: 'Personnel' },
@@ -1059,6 +1068,7 @@ export class DashboardLayoutComponent implements OnInit {
         { label: 'Formateurs', route: '/dashboard/admin/formateurs', icon: 'graduation-cap' },
 
         { section: 'Gestion & Finances' },
+        { label: 'Stages Facultatifs', route: '/dashboard/admin/stages', icon: 'briefcase' },
         { label: 'Formations', route: '/dashboard/admin/formations', icon: 'school' },
 
         { label: 'Paiements', route: '/dashboard/admin/paiements', icon: 'credit-card' },
@@ -1079,6 +1089,7 @@ export class DashboardLayoutComponent implements OnInit {
     const url = this.router.url;
 
     // Stagiaire routes
+    if (url.includes('/dashboard/stagiaire/stage')) return 'Mon Stage Facultatif';
     if (url.includes('/dashboard/stagiaire/agenda')) return 'Mon Agenda & Séances';
     if (url.includes('/dashboard/stagiaire/certificats')) return 'Mes Certificats Blockchain';
     if (url.includes('/dashboard/stagiaire/paiements')) return 'Mes Paiements & Échéancier';
@@ -1091,6 +1102,7 @@ export class DashboardLayoutComponent implements OnInit {
     if (url === '/dashboard/stagiaire') return 'Tableau de bord Stagiaire';
 
     // Admin routes
+    if (url.includes('/dashboard/admin/stages')) return 'Gestion des Stages Facultatifs';
     if (url.includes('/dashboard/admin/paiements')) return 'Supervision des Paiements';
     if (url.includes('/dashboard/admin/users')) return 'Gestion des Utilisateurs';
     if (url.includes('/dashboard/admin/formateurs')) return 'Gestion des Formateurs';

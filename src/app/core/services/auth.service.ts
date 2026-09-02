@@ -51,6 +51,8 @@ export class AuthService {
       age: res.age,
       status: res.status,
       authProvider: res.authProvider,
+      cin: res.cin,
+      onboardingCompleted: res.onboardingCompleted,
     };
   }
 
@@ -83,6 +85,7 @@ export class AuthService {
       password: data.password || data.motDePasse,
       phone: data.telephone,
       age: data.age,
+      cin: data.cin,
     };
     formData.append(
       'data',

@@ -12,6 +12,8 @@ export interface User {
   age?: number;
   status?: string;
   authProvider?: string;
+  cin?: string;
+  onboardingCompleted?: boolean;
 }
 
 export interface LoginRequest {
@@ -26,6 +28,7 @@ export interface RegisterRequest {
   email: string;
   telephone?: string;
   age?: number;
+  cin?: string;
   password?: string;
   motDePasse?: string; // Keep for compatibility if needed
 }
@@ -68,4 +71,6 @@ export interface AuthResponse {
   status: string;
   createdAt: string;
   authProvider: string;
+  cin?: string;
+  onboardingCompleted?: boolean;
 }

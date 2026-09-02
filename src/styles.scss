@@ -1170,3 +1170,82 @@ body.a11y-highlight-links button:not(.btn-no-a11y) {
 .a11y-mask-bottom {
   bottom: 0;
 }
+
+/* ─── Toast Slide-In & Slide-Out Keyframe Animations ─── */
+@keyframes toastSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(110%) scale(0.92);
+  }
+  65% {
+    opacity: 1;
+    transform: translateX(-6px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOutRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 160px;
+    margin-bottom: 0.75rem;
+  }
+  25% {
+    opacity: 0.9;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%) scale(0.9);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+}
+
+.bridge-toast-enter {
+  animation: toastSlideInRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.bridge-toast-leave {
+  animation: toastSlideOutRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: transform, opacity, max-height, margin;
+  pointer-events: none !important;
+}
+
+.bridge-toast {
+  background: color-mix(in srgb, var(--bridge-card) 94%, #000 6%);
+  color: var(--bridge-text);
+  border: 1px solid var(--bridge-border);
+}
+
+:root[data-theme="light"] .bridge-toast {
+  background: #ffffff !important;
+  color: #1d2433 !important;
+  border-color: #e2d9c8 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12) !important;
+}
+
+:root[data-theme="light"] .bridge-toast h4 {
+  color: #1d2433 !important;
+}
+
+:root[data-theme="light"] .bridge-toast p {
+  color: #5f6878 !important;
+}
+
+:root[data-theme="light"] .bridge-toast button {
+  color: #a0aec0 !important;
+}
+
+:root[data-theme="light"] .bridge-toast button:hover {
+  color: #1d2433 !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
