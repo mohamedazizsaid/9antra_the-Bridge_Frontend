@@ -1162,7 +1162,7 @@ export class StagiaireHistoriqueComponent implements OnInit {
   }
 
   get averageGrade(): number {
-    if (!this.evaluations || this.evaluations.length === 0) return 16.5;
+    if (!this.evaluations || this.evaluations.length === 0) return 0;
     const sum = this.evaluations.reduce((acc, e) => acc + (Number(e.grade) || 0), 0);
     return Math.round((sum / this.evaluations.length) * 10) / 10;
   }
@@ -1207,9 +1207,8 @@ export class StagiaireHistoriqueComponent implements OnInit {
   get chartDataPoints(): { x: number; y: number; grade: number }[] {
     if (!this.evaluations || this.evaluations.length === 0) {
       return [
-        { x: 50, y: 35, grade: 16.5 },
-        { x: 250, y: 25, grade: 18.0 },
-        { x: 450, y: 30, grade: 17.5 },
+        { x: 0, y: 0, grade: 0 },
+        { x: 0, y: 0, grade: 0 },
       ];
     }
 

@@ -9,6 +9,8 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { Paiement } from '../../../../core/models/paiement.model';
 import { Formation } from '../../../../core/models/formation.model';
 import { User } from '../../../../core/models/user.model';
+import { ComboEnrollmentService } from '../../../../core/services/combo-enrollment.service';
+import { ComboEnrollment } from '../../../../core/models/combo-enrollment.model';
 
 @Component({
   selector: 'app-stagiaire-paiements',
@@ -338,16 +340,150 @@ import { User } from '../../../../core/models/user.model';
                   <tr
                     class="text-[var(--bridge-text-muted)] uppercase tracking-wider font-semibold"
                   >
-                    <th class="py-3.5 px-4">Échéance / Tranche</th>
-                    <th class="py-3.5 px-4">Formation</th>
-                    <th class="py-3.5 px-4">Montant</th>
-                    <th class="py-3.5 px-4">Date de Règlement</th>
-                    <th class="py-3.5 px-4">Méthode</th>
-                    <th class="py-3.5 px-4">Statut</th>
-                    <th class="py-3.5 px-4 text-right">Actions</th>
+                    <th class="py-3.5 px-4 text-center">Échéance / Tranche</th>
+                    <th class="py-3.5 px-4 text-center">Formation</th>
+                    <th class="py-3.5 px-4 text-center">Montant</th>
+                    <th class="py-3.5 px-4 text-center">Date de Règlement</th>
+                    <th class="py-3.5 px-4 text-center">Méthode</th>
+                    <th class="py-3.5 px-4 text-center">Statut</th>
+                    <th class="py-3.5 px-4 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
+                  <!-- ─── Parcours Combos (Multi-Formations) ─── -->
+                  <tr
+                    *ngFor="let combo of filteredCombos"
+                    class="hover:bg-white/[0.04] transition-colors group bg-purple-500/[0.02]"
+                  >
+                    <!-- Tranche & Phase -->
+                    <td class="py-3.5 px-4 text-center">
+                      <div class="flex items-center justify-center gap-2.5">
+                        <div
+                          class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0"
+                          [class]="
+                            combo.status === 'ACTIVE' || combo.paidAt
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          "
+                        >
+                          🎁
+                        </div>
+                        <div class="text-left">
+                          <p
+                            class="font-bold text-white group-hover:text-[var(--bridge-gold)] transition-colors"
+                          >
+                            Parcours Combo
+                          </p>
+                          <p class="text-[10px] text-purple-300 font-mono">
+                            {{ combo.formations.length }} formations ({{
+                              combo.receiptRef || '#' + combo.id
+                            }})
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Formation(s) -->
+                    <td class="py-3.5 px-4 text-center">
+                      <p
+                        class="font-semibold text-white truncate max-w-[240px] mx-auto"
+                        [title]="getComboFormationsTitles(combo)"
+                      >
+                        {{ getComboFormationsTitles(combo) }}
+                      </p>
+                      <span class="text-[10px] text-[#F5A623] font-semibold">
+                        Remise -{{ combo.discountPercent }}% appliquée
+                      </span>
+                    </td>
+
+                    <!-- Montant -->
+                    <td class="py-3.5 px-4 text-center">
+                      <p class="font-mono font-bold text-sm text-[#F5A623]">
+                        {{ combo.finalPrice | number: '1.2-2' }}
+                        <span class="text-[10px] text-white/50">TND</span>
+                      </p>
+                      <p class="text-[10px] text-white/40 line-through">
+                        {{ combo.totalPrice | number: '1.2-2' }} TND
+                      </p>
+                    </td>
+
+                    <!-- Date -->
+                    <td class="py-3.5 px-4 text-center text-[var(--bridge-text-muted)]">
+                      <span *ngIf="combo.paidAt" class="text-white font-mono">
+                        {{ combo.paidAt | date: 'dd/MM/yyyy' }}
+                      </span>
+                      <span *ngIf="!combo.paidAt" class="text-amber-400 font-mono text-[11px]">
+                        {{ combo.createdAt ? 'Créé le ' + combo.createdAt : 'En attente' }}
+                      </span>
+                    </td>
+
+                    <!-- Méthode -->
+                    <td class="py-3.5 px-4 text-center">
+                      <span
+                        class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] font-semibold text-white/80"
+                      >
+                        Stripe / Carte
+                      </span>
+                    </td>
+
+                    <!-- Statut -->
+                    <td class="py-3.5 px-4 text-center">
+                      <span
+                        *ngIf="combo.status === 'ACTIVE' || combo.paidAt"
+                        class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        Payé
+                      </span>
+                      <span
+                        *ngIf="combo.status !== 'ACTIVE' && !combo.paidAt"
+                        class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        En attente
+                      </span>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-3.5 px-4 text-center">
+                      <div class="flex items-center justify-center gap-2">
+                        <button
+                          *ngIf="combo.status !== 'ACTIVE' && !combo.paidAt"
+                          (click)="payComboOnline(combo)"
+                          [disabled]="payingComboId === combo.id"
+                          class="px-3 py-1 bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:opacity-90 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-md disabled:opacity-50 flex items-center gap-1 mx-auto"
+                        >
+                          <svg
+                            *ngIf="payingComboId === combo.id"
+                            class="w-3.5 h-3.5 animate-spin text-white"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke-dasharray="32"
+                              stroke-linecap="round"
+                            />
+                          </svg>
+                          <span>{{
+                            payingComboId === combo.id ? 'Redirection...' : 'Payer via Stripe'
+                          }}</span>
+                        </button>
+                        <span
+                          *ngIf="combo.status === 'ACTIVE' || combo.paidAt"
+                          class="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1"
+                        >
+                          <span>✓ Réglé</span>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- ─── Formations Simples (Paiements individuels par phase) ─── -->
                   <tr
                     *ngFor="let p of filteredPaiements"
                     class="hover:bg-white/[0.04] transition-colors group cursor-pointer"
@@ -454,7 +590,7 @@ import { User } from '../../../../core/models/user.model';
                     </td>
                   </tr>
 
-                  <tr *ngIf="filteredPaiements.length === 0">
+                  <tr *ngIf="filteredPaiements.length === 0 && filteredCombos.length === 0">
                     <td colspan="7" class="text-center py-12 text-[var(--bridge-text-muted)]">
                       Aucun paiement trouvé
                     </td>
@@ -856,16 +992,22 @@ export class StagiairePaiementsComponent implements OnInit {
   filterStatus = '';
   selectedPaiement: Paiement | null = null;
 
+  myCombos: ComboEnrollment[] = [];
+  loadingCombos = false;
+  payingComboId: number | null = null;
+
   constructor(
     private authService: AuthService,
     private paiementService: PaiementService,
     private formationService: FormationService,
+    private comboEnrollmentService: ComboEnrollmentService,
     private toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadFormations();
+    this.loadCombos();
     this.loadPaiements();
   }
 
@@ -873,6 +1015,31 @@ export class StagiairePaiementsComponent implements OnInit {
     this.formationService.getFormations().subscribe({
       next: (forms) => (this.formations = forms || []),
     });
+  }
+
+  loadCombos(): void {
+    if (!this.user?.id) return;
+    this.loadingCombos = true;
+    this.comboEnrollmentService.getCombosByStudent(parseInt(this.user.id)).subscribe({
+      next: (combos: ComboEnrollment[]) => {
+        this.loadingCombos = false;
+        this.myCombos = combos || [];
+        this.applyFilters();
+      },
+      error: () => {
+        this.loadingCombos = false;
+      },
+    });
+  }
+
+  get comboFormationIds(): Set<string> {
+    const set = new Set<string>();
+    this.myCombos.forEach((c) => {
+      c.formations?.forEach((f) => {
+        if (f.id !== null && f.id !== undefined) set.add(f.id.toString());
+      });
+    });
+    return set;
   }
 
   loadPaiements(): void {
@@ -894,7 +1061,14 @@ export class StagiairePaiementsComponent implements OnInit {
 
   applyFilters(): void {
     const q = this.searchQuery.toLowerCase().trim();
+    const comboIds = this.comboFormationIds;
+
+    // Exclure toutes les phases des formations qui font partie d'un parcours combo
     this.filteredPaiements = this.paiements.filter((p) => {
+      if (p.formationId && comboIds.has(p.formationId.toString())) {
+        return false;
+      }
+
       const matchQ =
         !q ||
         p.id?.includes(q) ||
@@ -907,33 +1081,102 @@ export class StagiairePaiementsComponent implements OnInit {
     });
   }
 
+  get filteredCombos(): ComboEnrollment[] {
+    const q = this.searchQuery.toLowerCase().trim();
+    return this.myCombos.filter((c) => {
+      const titles = this.getComboFormationsTitles(c).toLowerCase();
+      const matchQ = !q || c.receiptRef?.toLowerCase().includes(q) || titles.includes(q);
+      const isPaid = c.status === 'ACTIVE' || !!c.paidAt;
+      const matchStatus =
+        !this.filterStatus ||
+        (this.filterStatus === 'PAYE' && isPaid) ||
+        (this.filterStatus === 'EN_ATTENTE' && !isPaid);
+      return matchQ && matchStatus;
+    });
+  }
+
+  getComboFormationsTitles(combo: ComboEnrollment): string {
+    if (!combo.formations || combo.formations.length === 0) return 'Parcours Personnalisé';
+    return combo.formations.map((f) => f.nom).join(' + ');
+  }
+
+  payComboOnline(combo: ComboEnrollment): void {
+    if (!this.user?.id) return;
+    this.payingComboId = combo.id;
+    this.toastService.info('Redirection vers Stripe Checkout...', 'Paiement Sécurisé');
+    this.comboEnrollmentService.retryCheckout(combo.id, parseInt(this.user.id)).subscribe({
+      next: (updated) => {
+        if (updated.stripeCheckoutUrl) {
+          window.location.href = updated.stripeCheckoutUrl;
+        } else {
+          this.payingComboId = null;
+          this.toastService.info('Session Stripe initialisée.', 'Paiement');
+        }
+      },
+      error: (err) => {
+        this.payingComboId = null;
+        this.toastService.error(
+          err?.error?.message || 'Erreur lors de la préparation du paiement.',
+          'Paiement Stripe',
+        );
+      },
+    });
+  }
+
   get totalPaid(): number {
-    return this.paiements
-      .filter((p) => p.status === 'PAYE')
+    const standalonePaid = this.paiements
+      .filter(
+        (p) => p.status === 'PAYE' && !this.comboFormationIds.has(p.formationId?.toString() || ''),
+      )
       .reduce((acc, p) => acc + (p.montant || 0), 0);
+
+    const comboPaid = this.myCombos
+      .filter((c) => c.status === 'ACTIVE' || !!c.paidAt)
+      .reduce((acc, c) => acc + (c.finalPrice || 0), 0);
+
+    return standalonePaid + comboPaid;
   }
 
   get totalRemaining(): number {
-    return this.paiements
-      .filter((p) => p.status !== 'PAYE')
+    const standaloneRemaining = this.paiements
+      .filter(
+        (p) => p.status !== 'PAYE' && !this.comboFormationIds.has(p.formationId?.toString() || ''),
+      )
       .reduce((acc, p) => acc + (p.montant || 0), 0);
+
+    const comboRemaining = this.myCombos
+      .filter((c) => c.status !== 'ACTIVE' && !c.paidAt)
+      .reduce((acc, c) => acc + (c.finalPrice || 0), 0);
+
+    return standaloneRemaining + comboRemaining;
   }
 
   get completedCount(): number {
-    return this.paiements.filter((p) => p.status === 'PAYE').length;
+    const standalone = this.paiements.filter(
+      (p) => p.status === 'PAYE' && !this.comboFormationIds.has(p.formationId?.toString() || ''),
+    ).length;
+    const combos = this.myCombos.filter((c) => c.status === 'ACTIVE' || !!c.paidAt).length;
+    return standalone + combos;
   }
 
   get pendingCount(): number {
-    return this.paiements.filter((p) => p.status !== 'PAYE').length;
+    const standalone = this.paiements.filter(
+      (p) => p.status !== 'PAYE' && !this.comboFormationIds.has(p.formationId?.toString() || ''),
+    ).length;
+    const combos = this.myCombos.filter((c) => c.status !== 'ACTIVE' && !c.paidAt).length;
+    return standalone + combos;
   }
 
   get pendingPaiements(): Paiement[] {
-    return this.paiements.filter((p) => p.status !== 'PAYE');
+    return this.paiements.filter(
+      (p) => p.status !== 'PAYE' && !this.comboFormationIds.has(p.formationId?.toString() || ''),
+    );
   }
 
   get paymentRate(): number {
-    if (this.paiements.length === 0) return 100;
-    return Math.round((this.completedCount / this.paiements.length) * 100);
+    const totalItems = this.completedCount + this.pendingCount;
+    if (totalItems === 0) return 100;
+    return Math.round((this.completedCount / totalItems) * 100);
   }
 
   formatStatus(status: string): string {

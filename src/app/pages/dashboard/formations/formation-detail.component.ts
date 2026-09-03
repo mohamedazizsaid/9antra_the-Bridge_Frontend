@@ -856,8 +856,8 @@ interface EnrollmentInfo {
           </div>
         </div>
 
-        <!-- Tab: Paiement (Stagiaire) -->
-        <div *ngIf="activeTab === 'paiement'" class="space-y-5">
+        <!-- Tab: Paiement (Stagiaire) — Masqué si la formation fait partie d'un combo -->
+        <div *ngIf="activeTab === 'paiement' && !isComboFormation" class="space-y-5">
           <!-- Loading skeleton -->
           <div *ngIf="loadingPaiements" class="space-y-3">
             <div
@@ -2921,12 +2921,16 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
   private parsedCustomPlans: Map<string, CustomPlanData> = new Map();
 
   private get _stagiaireTabsDef() {
-    return [
+    const tabs = [
       { id: 'my-progress', label: 'Ma Progression', icon: '📈', count: undefined },
       { id: 'my-presence', label: 'Mes Présences', icon: '📅', count: this.getMyPresenceCount() },
       { id: 'my-eval', label: 'Mon Évaluation', icon: '⭐', count: this.getMyEvalCount() },
-      { id: 'paiement', label: 'Paiement', icon: '💳', count: undefined },
     ];
+    // Masquer l'onglet Paiement si la formation fait partie d'un combo
+    if (!this.isComboFormation) {
+      tabs.push({ id: 'paiement', label: 'Paiement', icon: '💳', count: undefined });
+    }
+    return tabs;
   }
 
   private get _formateurTabsDef() {
@@ -3120,6 +3124,9 @@ export class FormationDetailComponent implements OnInit, OnDestroy {
           if (found) {
             this.isComboFormation = true;
             this.comboStatus = found.status;
+            if (this.activeTab === 'paiement') {
+              this.activeTab = 'my-progress';
+            }
           } else {
             this.isComboFormation = false;
             this.comboStatus = null;

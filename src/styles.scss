@@ -1249,3 +1249,116 @@ body.a11y-highlight-links button:not(.btn-no-a11y) {
   color: #1d2433 !important;
   background-color: rgba(0, 0, 0, 0.05) !important;
 }
+
+/* ─── Country Picker & Phone Input Theme Styles (Global) ─── */
+.country-inline-picker {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.country-inline-picker:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.country-code-badge {
+  color: #ffffff;
+}
+.country-chevron {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.country-dropdown-panel {
+  background: #10102a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f0f0ff;
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.country-search-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.country-search-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.country-search-box::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.country-option-item {
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.15s ease;
+}
+.country-option-item:hover {
+  background: rgba(198, 39, 97, 0.15);
+  color: #ffffff;
+}
+.country-option-item.selected {
+  background: rgba(198, 39, 97, 0.22);
+  color: var(--bridge-gold);
+  font-weight: 600;
+}
+.country-dial-code {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ─── Mode Lumineux : Country Picker & Dropdown ─── */
+:root[data-theme="light"] .country-inline-picker {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+:root[data-theme="light"] .country-inline-picker:hover {
+  background: #e2e8f0 !important;
+}
+:root[data-theme="light"] .country-code-badge {
+  color: #0f172a !important; /* Noir profond très lisible */
+  font-weight: 800 !important;
+}
+:root[data-theme="light"] .country-chevron {
+  color: #475569 !important; /* Gris foncé contrasté */
+}
+
+:root[data-theme="light"] .country-dropdown-panel {
+  background: #ffffff !important; /* Fond blanc immaculé */
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1a202c !important;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root[data-theme="light"] .country-search-header {
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+}
+
+:root[data-theme="light"] .country-search-box {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+:root[data-theme="light"] .country-search-box::placeholder {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="light"] .country-option-item {
+  color: #1e293b !important; /* Texte pays foncé très lisible */
+  font-weight: 500 !important;
+}
+:root[data-theme="light"] .country-option-item:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+:root[data-theme="light"] .country-option-item.selected {
+  background: #fdf2f6 !important;
+  color: #c62761 !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme="light"] .country-dial-code {
+  color: #64748b !important; /* Indicatif bien visible */
+  font-weight: 700 !important;
+}

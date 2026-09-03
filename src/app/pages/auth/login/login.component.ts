@@ -600,7 +600,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           this.loading = false;
-          const redirectUrl = this.authService.getRedirectUrl(res.role);
+          const redirectUrl = this.authService.getRedirectUrl(res.role, res.onboardingCompleted);
           this.router.navigateByUrl(redirectUrl);
         },
         error: (err: any) => {
@@ -712,7 +712,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.authService.oauthLogin(provider, accessToken).subscribe({
       next: (res) => {
         this.loading = false;
-        const redirectUrl = this.authService.getRedirectUrl(res.role);
+        const redirectUrl = this.authService.getRedirectUrl(res.role, res.onboardingCompleted);
         this.router.navigateByUrl(redirectUrl);
       },
       error: (err: any) => {

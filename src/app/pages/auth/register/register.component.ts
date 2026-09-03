@@ -1,7 +1,21 @@
-import { Component, OnInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChildren,
+  QueryList,
+  ElementRef,
+  HostListener,
+} from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -11,7 +25,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AnimatedBgComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, AnimatedBgComponent],
   template: `
     <app-animated-bg></app-animated-bg>
     <div class="min-h-screen flex flex-col md:flex-row-reverse relative z-10 text-white font-inter">
@@ -77,7 +91,9 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
       <div
         class="animate-slide-left w-full md:w-[58%] flex items-center justify-center p-6 md:p-12"
       >
-        <div class="w-full max-w-lg glass-card p-8 md:p-10 relative overflow-hidden transition-all">
+        <div
+          class="w-full max-w-lg glass-card p-8 md:p-10 relative overflow-visible transition-all"
+        >
           <!-- Success Animation Overlay -->
           <div
             *ngIf="showSuccessAnimation"
@@ -303,7 +319,7 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                 </div>
               </div>
 
-              <div class="grid grid-cols-3 gap-4">
+              <div class="grid grid-cols-3 gap-4 relative z-30">
                 <div class="col-span-1">
                   <label
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
@@ -347,31 +363,102 @@ import { AnimatedBgComponent } from '../../../shared/components/animated-bg/anim
                     class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                     >Téléphone</label
                   >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 flex items-center"
-                      aria-hidden="true"
+                  <!-- Country Picker intégré dans l'input (comme les autres champs) -->
+                  <div class="relative w-full" data-country-picker>
+                    <!-- Badge sélecteur pays (à l'intérieur gauche) -->
+                    <button
+                      type="button"
+                      (click)="toggleCountryDropdown($event)"
+                      class="country-inline-picker absolute left-2 top-1/2 -translate-y-1/2 z-10 flex items-center gap-1.5 py-1.5 px-2 rounded-lg cursor-pointer transition-all"
                     >
+                      <img
+                        [src]="getFlagUrl(selectedCountry.code)"
+                        [alt]="selectedCountry.name"
+                        width="20"
+                        height="15"
+                        class="w-5 h-3.5 object-cover rounded-[2px] shadow-sm shrink-0"
+                      />
+                      <span class="country-code-badge text-xs font-mono font-bold">{{
+                        selectedCountry.dialCode
+                      }}</span>
                       <svg
-                        class="w-4 h-4"
+                        class="w-3 h-3 country-chevron shrink-0"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        stroke-width="2.5"
                       >
-                        <path
-                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
-                        />
+                        <polyline points="6 9 12 15 18 9" />
                       </svg>
-                    </span>
+                    </button>
+
+                    <!-- Input identique aux autres champs (w-full, même style, pl-[110px]) -->
                     <input
-                      type="text"
-                      formControlName="telephone"
-                      placeholder="+216 55 555 555"
-                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none transition-all"
+                      type="tel"
+                      [(ngModel)]="phoneLocalNumber"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="55 555 555"
+                      class="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--bridge-crimson)] rounded-xl py-3 pl-[110px] pr-4 text-sm text-white focus:outline-none transition-all"
                     />
+
+                    <!-- Dropdown pays -->
+                    <div
+                      *ngIf="showCountryDropdown"
+                      class="country-dropdown-panel absolute top-full left-0 mt-1.5 z-50 w-72 md:w-80 rounded-2xl shadow-2xl animate-fadeIn overflow-hidden"
+                    >
+                      <!-- Barre de recherche -->
+                      <div class="p-2.5 country-search-header">
+                        <div class="relative">
+                          <input
+                            type="text"
+                            [(ngModel)]="countrySearchQuery"
+                            [ngModelOptions]="{ standalone: true }"
+                            placeholder="Rechercher un pays..."
+                            (click)="$event.stopPropagation()"
+                            class="country-search-box w-full rounded-xl py-2 pl-8 pr-3 text-xs focus:outline-none transition-all"
+                          />
+                          <svg
+                            class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 opacity-50"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                          </svg>
+                        </div>
+                      </div>
+                      <!-- Liste des pays -->
+                      <div class="overflow-y-auto" style="max-height: 220px">
+                        <button
+                          *ngFor="let country of filteredCountries"
+                          type="button"
+                          (click)="selectCountry(country); $event.stopPropagation()"
+                          class="country-option-item w-full flex items-center gap-3 px-4 py-2.5 text-left cursor-pointer transition-all"
+                          [class.selected]="country.code === selectedCountry.code"
+                        >
+                          <img
+                            [src]="getFlagUrl(country.code)"
+                            [alt]="country.name"
+                            width="20"
+                            height="15"
+                            class="w-5 h-3.5 object-cover rounded-[2px] shadow-sm shrink-0"
+                            loading="lazy"
+                          />
+                          <span class="flex-1 text-xs truncate">{{ country.name }}</span>
+                          <span class="country-dial-code text-xs font-mono font-medium">{{
+                            country.dialCode
+                          }}</span>
+                        </button>
+                        <div
+                          *ngIf="filteredCountries.length === 0"
+                          class="px-4 py-4 text-xs text-center opacity-60"
+                        >
+                          Aucun pays trouvé
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1201,6 +1288,64 @@ export class RegisterComponent implements OnInit, OnDestroy {
   showPassword = false;
   showConfirmPassword = false;
 
+  // ── Téléphone avec sélecteur de pays ────────────────────────────────────────
+  readonly countries: { code: string; dialCode: string; name: string }[] = [
+    { code: 'TN', dialCode: '+216', name: 'Tunisie' },
+    { code: 'DZ', dialCode: '+213', name: 'Algérie' },
+    { code: 'MA', dialCode: '+212', name: 'Maroc' },
+    { code: 'FR', dialCode: '+33', name: 'France' },
+    { code: 'LY', dialCode: '+218', name: 'Libye' },
+    { code: 'EG', dialCode: '+20', name: 'Égypte' },
+    { code: 'SA', dialCode: '+966', name: 'Arabie Saoudite' },
+    { code: 'AE', dialCode: '+971', name: 'Émirats Arabes Unis' },
+    { code: 'QA', dialCode: '+974', name: 'Qatar' },
+    { code: 'KW', dialCode: '+965', name: 'Kowït' },
+    { code: 'BH', dialCode: '+973', name: 'Bahrïn' },
+    { code: 'OM', dialCode: '+968', name: 'Oman' },
+    { code: 'JO', dialCode: '+962', name: 'Jordanie' },
+    { code: 'LB', dialCode: '+961', name: 'Liban' },
+    { code: 'IQ', dialCode: '+964', name: 'Irak' },
+    { code: 'DE', dialCode: '+49', name: 'Allemagne' },
+    { code: 'GB', dialCode: '+44', name: 'Royaume-Uni' },
+    { code: 'IT', dialCode: '+39', name: 'Italie' },
+    { code: 'ES', dialCode: '+34', name: 'Espagne' },
+    { code: 'BE', dialCode: '+32', name: 'Belgique' },
+    { code: 'CH', dialCode: '+41', name: 'Suisse' },
+    { code: 'CA', dialCode: '+1', name: 'Canada' },
+    { code: 'US', dialCode: '+1', name: 'États-Unis' },
+    { code: 'TR', dialCode: '+90', name: 'Turquie' },
+    { code: 'SN', dialCode: '+221', name: 'Sénégal' },
+    { code: 'CI', dialCode: '+225', name: "Côte d'Ivoire" },
+    { code: 'CM', dialCode: '+237', name: 'Cameroun' },
+    { code: 'MR', dialCode: '+222', name: 'Mauritanie' },
+    { code: 'LU', dialCode: '+352', name: 'Luxembourg' },
+    { code: 'NL', dialCode: '+31', name: 'Pays-Bas' },
+    { code: 'PT', dialCode: '+351', name: 'Portugal' },
+    { code: 'SE', dialCode: '+46', name: 'Suède' },
+    { code: 'NO', dialCode: '+47', name: 'Norvège' },
+    { code: 'DK', dialCode: '+45', name: 'Danemark' },
+    { code: 'FI', dialCode: '+358', name: 'Finlande' },
+    { code: 'PL', dialCode: '+48', name: 'Pologne' },
+    { code: 'AU', dialCode: '+61', name: 'Australie' },
+    { code: 'JP', dialCode: '+81', name: 'Japon' },
+    { code: 'CN', dialCode: '+86', name: 'Chine' },
+    { code: 'IN', dialCode: '+91', name: 'Inde' },
+    { code: 'BR', dialCode: '+55', name: 'Brésil' },
+    { code: 'MX', dialCode: '+52', name: 'Mexique' },
+    { code: 'RU', dialCode: '+7', name: 'Russie' },
+    { code: 'NG', dialCode: '+234', name: 'Nigéria' },
+    { code: 'GH', dialCode: '+233', name: 'Ghana' },
+    { code: 'KE', dialCode: '+254', name: 'Kenya' },
+    { code: 'ZA', dialCode: '+27', name: 'Afrique du Sud' },
+    { code: 'AT', dialCode: '+43', name: 'Autriche' },
+    { code: 'GR', dialCode: '+30', name: 'Grèce' },
+  ];
+
+  selectedCountry = this.countries[0]; // Tunisie par défaut
+  phoneLocalNumber = '';
+  showCountryDropdown = false;
+  countrySearchQuery = '';
+
   otpCode: string[] = ['', '', '', '', '', ''];
   otpTimer = 60;
   otpTimerSub: Subscription | undefined;
@@ -1248,6 +1393,56 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     if (this.otpTimerSub) {
       this.otpTimerSub.unsubscribe();
+    }
+  }
+
+  /** Retourne l'URL de l'image officielle du drapeau (FlagCDN). */
+  getFlagUrl(code: string): string {
+    return `https://flagcdn.com/24x18/${code.toLowerCase()}.png`;
+  }
+
+  /** Convertit un code pays ISO 3166-1 alpha-2 en emoji drapeau Unicode (fallback). */
+  getFlag(code: string): string {
+    return code
+      .toUpperCase()
+      .split('')
+      .map((c) => String.fromCodePoint(0x1f1e6 - 65 + c.charCodeAt(0)))
+      .join('');
+  }
+
+  /** Filtre la liste des pays selon la recherche. */
+  get filteredCountries(): { code: string; dialCode: string; name: string }[] {
+    if (!this.countrySearchQuery) return this.countries;
+    const q = this.countrySearchQuery.toLowerCase();
+    return this.countries.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.dialCode.includes(q) ||
+        c.code.toLowerCase().includes(q),
+    );
+  }
+
+  /** Sélectionne un pays et ferme le dropdown. */
+  selectCountry(country: { code: string; dialCode: string; name: string }): void {
+    this.selectedCountry = country;
+    this.showCountryDropdown = false;
+    this.countrySearchQuery = '';
+  }
+
+  toggleCountryDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showCountryDropdown = !this.showCountryDropdown;
+    this.countrySearchQuery = '';
+  }
+
+  /** Ferme le dropdown si le clic est en dehors du sélecteur de pays. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showCountryDropdown) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest('[data-country-picker]')) {
+      this.showCountryDropdown = false;
+      this.countrySearchQuery = '';
     }
   }
 
@@ -1408,10 +1603,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
         // Auto-login after 2.5s success animation, then redirect to /onboarding
         setTimeout(() => {
           this.authService
-            .login({
-              email: this.f['email'].value,
-              password: this.f['password'].value,
-            })
+            .login(
+              {
+                email: this.f['email'].value,
+                password: this.f['password'].value,
+              },
+              true,
+            )
             .subscribe({
               next: () => {
                 // New stagiaires always go to /onboarding first
@@ -1446,7 +1644,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
           prenom: this.registerForm.value.prenom,
           nom: this.registerForm.value.nom,
           email: this.registerForm.value.email,
-          telephone: this.registerForm.value.telephone,
+          telephone: this.phoneLocalNumber
+            ? this.selectedCountry.dialCode +
+              this.phoneLocalNumber.replace(/\s/g, '').replace(/^0+/, '')
+            : '',
           age: this.registerForm.value.age,
           cin: this.registerForm.value.cin,
           password: this.registerForm.value.password,

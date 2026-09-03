@@ -172,7 +172,11 @@ export class AuthService {
     }
   }
 
-  getRedirectUrl(role: Role): string {
+  getRedirectUrl(role: Role, onboardingCompleted?: boolean): string {
+    // Si le stagiaire n'a pas encore complété l'onboarding, le rediriger d'abord
+    if (role === 'STAGIAIRE' && onboardingCompleted === false) {
+      return '/onboarding';
+    }
     switch (role) {
       case 'ADMIN':
         return '/dashboard/admin';

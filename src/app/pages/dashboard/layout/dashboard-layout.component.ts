@@ -19,6 +19,38 @@ import { User } from '../../../core/models/user.model';
         }),
       ]),
     ]),
+    trigger('notifDropdownAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-16px) scale(0.97)' }),
+        animate(
+          '240ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateY(0) scale(1)' }),
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '150ms cubic-bezier(0.4, 0, 1, 1)',
+          style({ opacity: 0, transform: 'translateY(-10px) scale(0.98)' }),
+        ),
+      ]),
+    ]),
+  ],
+  styles: [
+    `
+      @keyframes notifSlideDown {
+        0% {
+          opacity: 0;
+          transform: translateY(-16px) scale(0.97);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .notif-modal-animate {
+        animation: notifSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+    `,
   ],
   template: `
     <div class="h-screen w-screen bg-[#08081A] text-white font-inter flex overflow-hidden">
@@ -478,13 +510,14 @@ import { User } from '../../../core/models/user.model';
           </div>
         </header>
 
-        <!-- ─── Notification Dropdown ─── -->
+        <!-- ─── Notification Dropdown Modal ─── -->
         <div
           *ngIf="showNotifications"
-          class="absolute right-4 top-[64px] w-[380px] max-w-[calc(100vw-2rem)] z-50 bridge-card overflow-hidden bg-[#10102A] backdrop-blur-xl border border-white/10"
-          style="animation: dropdownIn 0.2s cubic-bezier(0.34,1.15,0.64,1) both; box-shadow: 0 20px 60px rgba(0,0,0,0.85)"
+          @notifDropdownAnimation
+          class="notif-modal-animate absolute right-4 top-[64px] w-[380px] max-w-[calc(100vw-2rem)] z-50 rounded-2xl overflow-hidden bg-[#10102A] backdrop-blur-xl border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)]"
+          style="transform-origin: top right;"
         >
-          <div class="h-0.5 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
+          <div class="h-1 bg-gradient-to-r from-[#C62761] via-[#E0452F] to-[#F5A623]"></div>
           <!-- Header -->
           <div
             class="flex items-center justify-between px-4 py-3 border-b border-[var(--bridge-border)]"

@@ -806,13 +806,15 @@ import { Paiement } from '../../../core/models/paiement.model';
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap">
-                  <!-- Action for Pending Payment: Finalize Stripe payment -->
+                  <!-- Action for Unpaid / Pending Payment: Finalize Stripe payment -->
                   <button
-                    *ngIf="combo.status === 'PENDING_PAYMENT' || combo.status === 'CANCELLED'"
+                    *ngIf="combo.status !== 'ACTIVE' || !combo.paidAt"
                     (click)="resumeComboPayment(combo)"
-                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold shadow-lg hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer"
+                    [disabled]="payingComboId === combo.id"
+                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white text-xs font-bold shadow-lg hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <svg
+                      *ngIf="payingComboId !== combo.id"
                       class="w-4 h-4 text-white"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -824,7 +826,21 @@ import { Paiement } from '../../../core/models/paiement.model';
                       <rect width="20" height="14" x="2" y="5" rx="2" />
                       <line x1="2" x2="22" y1="10" y2="10" />
                     </svg>
-                    <span>Payer via Stripe ({{ combo.finalPrice | number: '1.0-0' }} TND) →</span>
+                    <svg
+                      *ngIf="payingComboId === combo.id"
+                      class="w-4 h-4 text-white animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round" />
+                    </svg>
+                    <span>{{
+                      payingComboId === combo.id
+                        ? 'Redirection Stripe...'
+                        : 'Payer via Stripe (' + (combo.finalPrice | number: '1.0-0') + ' TND) →'
+                    }}</span>
                   </button>
 
                   <!-- Action for Pending: Cancel without browser alert -->
@@ -1653,6 +1669,7 @@ export class FormationsListComponent implements OnInit {
   myCombos: ComboEnrollment[] = [];
   loadingCombos = false;
   expandedComboIds = new Set<number>();
+  payingComboId: number | null = null;
 
   // Enrollment stepper
   showStepper = false;
@@ -2060,6 +2077,7 @@ export class FormationsListComponent implements OnInit {
 
   resumeComboPayment(combo: ComboEnrollment): void {
     const studentId = this.user ? parseInt(this.user.id) : combo.studentId;
+    this.payingComboId = combo.id;
     this.toastService.info(
       'Préparation de votre session de paiement sécurisée...',
       'Paiement Stripe',
@@ -2069,10 +2087,12 @@ export class FormationsListComponent implements OnInit {
         if (updated.stripeCheckoutUrl) {
           window.location.href = updated.stripeCheckoutUrl;
         } else {
+          this.payingComboId = null;
           this.toastService.info('Session Stripe initialisée.', 'Paiement');
         }
       },
       error: (err) => {
+        this.payingComboId = null;
         this.toastService.error(
           err?.error?.message || 'Erreur lors de la préparation du paiement.',
           'Paiement',

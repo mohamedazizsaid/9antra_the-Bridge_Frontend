@@ -26,8 +26,15 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
     >
       <!-- Top Header / Brand -->
       <header
-        class="max-w-5xl w-full mx-auto flex items-center justify-between py-2 pb-4 mb-4"
-        style="border-bottom: 1px solid var(--bridge-border)"
+        class="max-w-5xl w-full mx-auto flex items-center justify-between py-2 pb-4 mb-4 "
+        style="
+    border-bottom: 1px solid var(--bridge-border);
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+"
       >
         <div class="flex items-center gap-3">
           <svg class="w-8 h-10" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1051,6 +1058,43 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
               </div>
             </div>
 
+            <!-- Info: Stage facultatif — approbation admin requise -->
+            <div
+              *ngIf="wantsInternship"
+              class="p-4 rounded-2xl flex items-start gap-3 animate-fadeIn"
+              style="background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.25)"
+            >
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                style="background: rgba(245,166,35,0.2); color: var(--bridge-gold)"
+              >
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <div>
+                <p
+                  class="text-xs font-bold uppercase tracking-wider mb-1"
+                  style="color: var(--bridge-gold)"
+                >
+                  Approbation Administrative Requise
+                </p>
+                <p class="text-xs leading-relaxed" style="color: var(--bridge-text-muted)">
+                  Votre dossier de stage sera examiné par l'équipe 9antra. Le paiement ne sera
+                  activé qu'après la validation officielle de votre convention de stage par
+                  l'administration.
+                </p>
+              </div>
+            </div>
+
             <!-- Agreement Checkboxes -->
             <div
               class="p-5 rounded-2xl bg-[rgba(198,39,97,0.05)] space-y-3"
@@ -1133,10 +1177,11 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
               </svg>
             </button>
 
+            <!-- Stage Facultatif : soumettre le dossier (admin approuve avant paiement) -->
             <button
-              *ngIf="currentStepIndex === activeSteps.length - 1"
+              *ngIf="currentStepIndex === activeSteps.length - 1 && wantsInternship"
               type="button"
-              (click)="submitOnboarding()"
+              (click)="submitOnboarding(false)"
               [disabled]="submitting || !agreeTerms || !agreeCharter"
               class="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] disabled:opacity-50 text-white font-syne font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
             >
@@ -1155,18 +1200,89 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <span>{{ submitting ? 'Validation en cours...' : 'Confirmer mon inscription' }}</span>
               <svg
                 *ngIf="!submitting"
                 class="w-4 h-4"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2.5"
+                stroke-width="2"
               >
-                <polyline points="20 6 9 17 4 12" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
               </svg>
+              <span>{{ submitting ? 'Envoi en cours...' : 'Soumettre le dossier' }}</span>
             </button>
+
+            <!-- Formations Certifiantes : choix payer maintenant ou plus tard -->
+            <div
+              *ngIf="currentStepIndex === activeSteps.length - 1 && !wantsInternship"
+              class="flex items-center gap-3"
+            >
+              <!-- Payer plus tard -->
+              <button
+                type="button"
+                (click)="submitOnboarding(false)"
+                [disabled]="submitting || !agreeTerms || !agreeCharter"
+                class="px-5 py-3 rounded-xl font-syne font-bold text-xs flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                style="border: 1px solid var(--bridge-border); background: var(--bridge-card); color: var(--bridge-text-muted)"
+              >
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>Payer plus tard</span>
+              </button>
+              <!-- Payer maintenant -->
+              <button
+                type="button"
+                (click)="submitOnboarding(true)"
+                [disabled]="submitting || !agreeTerms || !agreeCharter"
+                class="px-8 py-3 rounded-xl bg-gradient-to-r from-[#C62761] to-[#F5A623] hover:shadow-[0_0_20px_rgba(198,39,97,0.4)] disabled:opacity-50 text-white font-syne font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <svg
+                  *ngIf="submitting"
+                  class="animate-spin w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <svg
+                  *ngIf="!submitting"
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <line x1="2" x2="22" y1="10" y2="10" />
+                </svg>
+                <span>{{ submitting ? 'En cours...' : 'Payer maintenant' }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1449,13 +1565,21 @@ export class OnboardingComponent implements OnInit {
   }
 
   // ── Submission ──
-  submitOnboarding(): void {
+  /**
+   * @param payNow true = payer maintenant via Stripe (Formations seules uniquement)
+   *               false = soumettre sans paiement immédiat
+   * Stage Facultatif : toujours false — l'admin doit approuver avant tout paiement.
+   */
+  submitOnboarding(payNow = false): void {
     if (!this.agreeTerms || !this.agreeCharter) {
       this.toastService.error('Veuillez accepter les CGU et le règlement intérieur.', 'Engagement');
       return;
     }
 
     this.submitting = true;
+
+    // Stage facultatif : ne jamais activer payNow (admin doit approuver en premier)
+    const effectivePayNow = this.wantsInternship ? false : payNow;
 
     const payload: OnboardingPayload = {
       wantsInternship: this.wantsInternship,
@@ -1464,7 +1588,7 @@ export class OnboardingComponent implements OnInit {
       selectedFormationIds: this.selectedFormationIds,
       referralEmail: this.referralEmail ? this.referralEmail.trim() : undefined,
       paymentMode: this.paymentMethod as InternshipPaymentMode,
-      payNow: this.paymentPlan === 'COMPTANT',
+      payNow: effectivePayNow,
       heardFrom: this.selectedSources.join(','),
       heardFromOther: this.selectedSources.includes('AUTRE') ? this.heardFromOther : undefined,
       termsAccepted: true,
@@ -1475,43 +1599,36 @@ export class OnboardingComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.submitting = false;
-          this.toastService.success(
-            'Votre inscription a été enregistrée avec succès !',
-            'Félicitations',
-          );
 
           if (this.currentUser) {
             this.currentUser.onboardingCompleted = true;
             this.authService.updateCurrentUser(this.currentUser);
           }
 
-          // Pour un stage facultatif, l'approbation administrative est requise avant le paiement
           if (this.wantsInternship) {
+            // Stage facultatif : approbation admin requise avant paiement
             this.toastService.success(
-              "Votre demande de stage facultatif a été enregistrée avec succès ! Votre dossier sera examiné et approuvé par l'administration avant le règlement.",
-              'Dossier Soumis',
+              "Votre dossier de stage facultatif a été soumis avec succès ! L'administration examinera votre demande et vous notifiera dès l'approbation pour procéder au règlement.",
+              'Dossier Soumis ✓',
             );
             this.router.navigate(['/dashboard/stagiaire/stage']);
           } else {
-            // Formations certifiantes seules (sans convention de stage)
-            if (this.paymentMethod === 'STRIPE') {
-              if (res.stripePaymentUrl) {
-                this.toastService.info(
-                  'Redirection vers le portail sécurisé Stripe...',
-                  'Paiement',
-                );
-                setTimeout(() => {
-                  window.location.href = res.stripePaymentUrl!;
-                }, 400);
-              } else {
-                this.toastService.success(
-                  'Inscription enregistrée. Vous pouvez finaliser votre paiement sur votre espace.',
-                  'Paiement',
-                );
-                this.router.navigate(['/dashboard/stagiaire/stage']);
-              }
+            // Formations Certifiantes seules
+            if (effectivePayNow && this.paymentMethod === 'STRIPE' && res.stripePaymentUrl) {
+              // Paiement immédiat via Stripe
+              this.toastService.info('Redirection vers le portail sécurisé Stripe...', 'Paiement');
+              setTimeout(() => {
+                window.location.href = res.stripePaymentUrl!;
+              }, 400);
             } else {
-              this.router.navigate(['/dashboard/stagiaire/stage']);
+              // Payer plus tard ou méthode non-Stripe
+              this.toastService.success(
+                effectivePayNow
+                  ? 'Inscription enregistrée. Rendez-vous sur votre espace pour finaliser le paiement.'
+                  : 'Inscription enregistrée. Vous pourrez régler votre formation quand vous le souhaitez.',
+                'Inscription Confirmée ✓',
+              );
+              this.router.navigate(['/dashboard/stagiaire']);
             }
           }
         },

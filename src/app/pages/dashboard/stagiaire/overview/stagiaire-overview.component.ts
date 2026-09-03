@@ -401,53 +401,6 @@ Chart.register(...registerables);
         </div>
       </div>
 
-      <!-- ═══════════════════════════════ PAYMENT REMINDER BANNER ═══════════════════════════════ -->
-      <div
-        *ngIf="urgentPayments.length > 0"
-        class="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-red-500/5 to-orange-500/10 p-4"
-      >
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"
-        ></div>
-        <div class="flex items-center gap-4">
-          <div
-            class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-xl flex-shrink-0 animate-pulse"
-          >
-            <svg
-              class="w-5 h-5 inline-block"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 3 2.5 20h19L12 3z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <circle cx="12" cy="16.5" r=".8" fill="currentColor" stroke="none" />
-            </svg>
-          </div>
-          <div class="flex-1">
-            <p class="font-semibold text-orange-300 text-sm">Rappel de paiement</p>
-            <p class="text-orange-200/70 text-xs mt-0.5">
-              Vous avez <strong>{{ urgentPayments.length }}</strong> paiement(s) à effectuer
-              bientôt.
-              <span *ngFor="let p of urgentPayments; let last = last">
-                Phase {{ p.phaseNumero }} ({{ p.montant }} TND —
-                {{ getDaysUntilDue(p.dateEcheance) }} jrs)<span *ngIf="!last">, </span>
-              </span>
-            </p>
-          </div>
-          <button
-            (click)="setActiveTab('paiements'); scrollToSection('payments-section')"
-            class="flex-shrink-0 px-4 py-2 bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold rounded-xl transition-all"
-          >
-            Payer →
-          </button>
-        </div>
-      </div>
-
       <!-- ═══════════════════════════════ TAB NAV ═══════════════════════════════ -->
       <div
         class="flex items-center gap-3 p-1.5 glass-card border border-[var(--bridge-border)] rounded-2xl overflow-x-auto w-fit"
