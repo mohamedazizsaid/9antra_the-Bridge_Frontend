@@ -150,7 +150,7 @@ interface StagiaireCard {
             >
           </h1>
           <p class="text-[var(--bridge-text-muted)] text-xs md:text-sm mt-1">
-            Suivi académique, gestion des conventions de stage facultatif et saisie des évaluations
+            Suivi académique, gestion des conventions de stage et saisie des évaluations
           </p>
         </div>
 
@@ -215,7 +215,7 @@ interface StagiaireCard {
           </span>
         </button>
 
-        <!-- Tab 2: Stages Facultatifs -->
+        <!-- Tab 2: Stages -->
         <button
           type="button"
           (click)="activeTab = 'STAGES'; showEvalForm = false"
@@ -236,7 +236,7 @@ interface StagiaireCard {
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
           </svg>
-          <span>Stages Facultatifs (Mon Encadrement)</span>
+          <span>Stages (Mon Encadrement)</span>
           <span
             class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold"
             [ngClass]="
@@ -540,7 +540,7 @@ interface StagiaireCard {
               </div>
             </div>
 
-            <!-- ─── VUE 2 : STAGIAIRES DE STAGE FACULTATIF (ENCADREMENT) ─── -->
+            <!-- ─── VUE 2 : STAGIAIRES DE STAGE (ENCADREMENT) ─── -->
             <div *ngIf="activeTab === 'STAGES'" class="space-y-6 animate-fadein">
               <!-- Stage Header Alert Banner -->
               <div
@@ -567,7 +567,7 @@ interface StagiaireCard {
                     </h3>
                     <p class="text-xs text-[var(--bridge-text-muted)] mt-0.5">
                       Vous avez été désigné par l'administration comme encadrant référent pour ces
-                      conventions de stage facultatif.
+                      conventions de stage.
                     </p>
                   </div>
                 </div>
@@ -653,7 +653,7 @@ interface StagiaireCard {
                         >
                       </div>
                       <p class="text-xs font-bold text-[var(--bridge-text)] leading-snug">
-                        {{ stage.stageProjectTitle || 'Projet de stage facultatif' }}
+                        {{ stage.stageProjectTitle || 'Projet de stage' }}
                       </p>
                       <div
                         class="flex items-center gap-2 text-[11px] text-[var(--bridge-text-muted)]"
@@ -1672,7 +1672,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
             id: id.toString(),
             nom: title,
             description: '',
-            category: 'Stage Facultatif',
+            category: 'Stage',
             totalPrice: 0,
             status: 'PLANIFIEE',
             archived: false,
@@ -1729,7 +1729,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
               id: fid,
               nom: title,
               description: '',
-              category: 'Stage Facultatif',
+              category: 'Stage',
               totalPrice: 0,
               status: 'PLANIFIEE',
               archived: false,
@@ -1808,7 +1808,7 @@ export class FormateurStagiairesComponent implements OnInit, OnDestroy {
     }
 
     this.evalForm.studentId = targetStudentId;
-    this.evalForm.comment = `Évaluation du stage facultatif : « ${stage.stageProjectTitle || 'Projet de stage'} »`;
+    this.evalForm.comment = `Évaluation du stage : « ${stage.stageProjectTitle || 'Projet de stage'} »`;
   }
 
   closeEvalModal(): void {

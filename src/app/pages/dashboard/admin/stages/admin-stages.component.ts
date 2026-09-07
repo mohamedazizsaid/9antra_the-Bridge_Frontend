@@ -7,6 +7,7 @@ import {
   InternshipStatus,
 } from '../../../../core/models/stage-inscription.model';
 import { ToastService } from '../../../../core/services/toast.service';
+import { generateAttestationHtml } from './attestation-template';
 
 @Component({
   selector: 'app-admin-stages',
@@ -195,35 +196,84 @@ import { ToastService } from '../../../../core/services/toast.service';
             </div>
             <div>
               <h1 class="font-syne font-bold text-2xl md:text-3xl text-[var(--bridge-text)]">
-                Gestion des Stages Facultatifs
+                Gestion des Stages
               </h1>
               <p class="text-xs md:text-sm text-[var(--bridge-text-muted)] mt-1">
-                Supervision des conventions, assignation des encadrants et synchronisation
-                financière
+                Supervision des conventions, validation administrative et traçabilité financière
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            (click)="loadInscriptions()"
-            class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--bridge-text)] text-xs font-bold transition-all border border-[var(--bridge-border)] flex items-center gap-2 cursor-pointer self-start md:self-auto"
-          >
-            <svg
-              class="w-4 h-4"
-              [class.animate-spin]="loading"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div class="flex items-center gap-2 self-start md:self-auto">
+            <!-- Export PDF Global Button -->
+            <button
+              type="button"
+              (click)="exportAllStagesPDF()"
+              title="Télécharger le registre de traçabilité complet (PDF)"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600/20 to-amber-600/20 hover:from-rose-600/30 hover:to-amber-600/30 text-rose-300 hover:text-white text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-2 cursor-pointer shadow-sm"
             >
-              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-            <span>Actualiser</span>
-          </button>
+              <svg
+                class="w-4 h-4 text-[#F5A623]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="M12 18v-6" />
+                <path d="M9 15l3 3 3-3" />
+              </svg>
+              <span>Exporter PDF</span>
+            </button>
+
+            <!-- Export CSV Button -->
+            <button
+              type="button"
+              (click)="exportCSV()"
+              title="Télécharger tous les dossiers de stages (CSV)"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600/20 to-teal-600/20 hover:from-emerald-600/30 hover:to-teal-600/30 text-emerald-400 hover:text-emerald-300 text-xs font-bold transition-all border border-emerald-500/30 flex items-center gap-2 cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Exporter CSV</span>
+            </button>
+
+            <!-- Refresh Button -->
+            <button
+              type="button"
+              (click)="loadInscriptions()"
+              class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--bridge-text)] text-xs font-bold transition-all border border-[var(--bridge-border)] flex items-center gap-2 cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4"
+                [class.animate-spin]="loading"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              <span>Actualiser</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -403,7 +453,6 @@ import { ToastService } from '../../../../core/services/toast.service';
                 <th class="py-3.5 px-4 text-center">Stagiaire</th>
                 <th class="py-3.5 px-4 text-center">CIN</th>
                 <th class="py-3.5 px-4 text-center">Projet / Sujet</th>
-                <th class="py-3.5 px-4 text-center">Encadrant Assigné</th>
                 <th class="py-3.5 px-4 text-center">Montant</th>
                 <th class="py-3.5 px-4 text-center">Paiement</th>
                 <th class="py-3.5 px-4 text-center">Statut</th>
@@ -470,30 +519,6 @@ import { ToastService } from '../../../../core/services/toast.service';
                   </span>
                 </td>
 
-                <!-- Encadrant -->
-                <td class="py-3.5 px-4">
-                  <div *ngIf="item.supervisorFirstName" class="flex items-center gap-2">
-                    <div
-                      class="w-6 h-6 rounded-full bg-[var(--bridge-gold)]/20 text-[var(--bridge-gold)] flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                    >
-                      {{
-                        (item.supervisorFirstName[0] || '') + (item.supervisorLastName?.[0] || '')
-                      }}
-                    </div>
-                    <span
-                      class="text-xs font-semibold text-[var(--bridge-text)] truncate max-w-[130px]"
-                    >
-                      {{ item.supervisorFirstName }} {{ item.supervisorLastName }}
-                    </span>
-                  </div>
-                  <span
-                    *ngIf="!item.supervisorFirstName"
-                    class="text-[11px] text-[var(--bridge-text-muted)] italic"
-                  >
-                    Non assigné
-                  </span>
-                </td>
-
                 <!-- Montant -->
                 <td class="py-3.5 px-4 font-mono font-bold text-[var(--bridge-gold)]">
                   {{ item.totalPrice || 0 }} TND
@@ -551,14 +576,35 @@ import { ToastService } from '../../../../core/services/toast.service';
                 <!-- Actions -->
                 <td class="py-3.5 px-4 text-right">
                   <div class="flex items-center justify-end gap-1.5">
+                    <!-- Bouton Télécharger PDF Traçabilité pour ce stagiaire -->
+                    <button
+                      type="button"
+                      (click)="$event.stopPropagation(); downloadStagePdf(item)"
+                      title="Télécharger la fiche de traçabilité PDF complète (Stage, Paiement...)"
+                      class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-[#C62761]/20 to-[#F5A623]/20 hover:from-[#C62761]/35 hover:to-[#F5A623]/35 text-rose-300 hover:text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1 border border-[#C62761]/40 shadow-sm"
+                    >
+                      <svg
+                        class="w-3.5 h-3.5 text-[#F5A623]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M12 18v-6" />
+                        <path d="M9 15l3 3 3-3" />
+                      </svg>
+                      <span class="hidden md:inline">PDF</span>
+                    </button>
+
                     <!-- Quick Attestation link if completed -->
-                    <a
-                      *ngIf="item.status === 'COMPLETED' && item.attestationPdfUrl"
-                      [href]="item.attestationPdfUrl"
-                      target="_blank"
-                      (click)="$event.stopPropagation()"
-                      title="Télécharger l'Attestation de stage PDF"
-                      class="px-2.5 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-500 text-xs font-bold transition-all inline-flex items-center gap-1 border border-blue-500/30"
+                    <button
+                      *ngIf="item.status === 'COMPLETED'"
+                      type="button"
+                      (click)="$event.stopPropagation(); downloadAttestationPdf(item)"
+                      title="Télécharger l'Attestation de stage PDF (modèle officiel)"
+                      class="px-2.5 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-500 text-xs font-bold transition-all inline-flex items-center gap-1 border border-blue-500/30 cursor-pointer"
                     >
                       <svg
                         class="w-3.5 h-3.5"
@@ -572,7 +618,7 @@ import { ToastService } from '../../../../core/services/toast.service';
                         <line x1="12" y1="15" x2="12" y2="3" />
                       </svg>
                       <span class="hidden md:inline">Attestation</span>
-                    </a>
+                    </button>
 
                     <!-- Quick Clôturer button if APPROVED or ACTIVE -->
                     <button
@@ -715,98 +761,6 @@ import { ToastService } from '../../../../core/services/toast.service';
               </span>
             </div>
 
-            <!-- SECTION: ASSIGNATION D'UN ENCADRANT / FORMATEUR -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <h4
-                  class="font-syne font-bold text-xs text-[var(--bridge-gold)] uppercase tracking-wider flex items-center gap-2"
-                >
-                  <svg
-                    class="w-4 h-4 text-[var(--bridge-gold)]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  Encadrant / Formateur Référent
-                </h4>
-                <span
-                  class="text-[10px] text-amber-500 font-semibold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"
-                >
-                  Requis pour l'approbation
-                </span>
-              </div>
-
-              <div
-                class="drawer-section-card p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3"
-              >
-                <label class="block text-[11px] text-[var(--bridge-text-muted)]">
-                  Sélectionnez le formateur qui assurera le suivi et l'encadrement de ce stage :
-                </label>
-
-                <!-- Select Box Formateurs -->
-                <div class="relative">
-                  <select
-                    [(ngModel)]="selectedSupervisorId"
-                    class="drawer-select-input w-full bg-[#171738] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[var(--bridge-text)] focus:outline-none focus:border-[var(--bridge-gold)] transition-all cursor-pointer appearance-none"
-                  >
-                    <option [ngValue]="null">-- Sélectionner un formateur encadrant --</option>
-                    <option *ngFor="let f of formateurs" [ngValue]="f.id">
-                      {{ f.firstName }} {{ f.lastName }} ({{ f.email }})
-                    </option>
-                  </select>
-                  <span
-                    class="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--bridge-text-muted)]"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </span>
-                </div>
-
-                <!-- Preview Selected Formateur Card -->
-                <div
-                  *ngIf="selectedSupervisor"
-                  class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3 animate-fadeIn"
-                >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    >
-                      {{
-                        (selectedSupervisor.firstName?.[0] || '') +
-                          (selectedSupervisor.lastName?.[0] || '')
-                      }}
-                    </div>
-                    <div>
-                      <p class="font-bold text-[var(--bridge-text)] text-xs">
-                        {{ selectedSupervisor.firstName }} {{ selectedSupervisor.lastName }}
-                      </p>
-                      <span class="text-[10px] text-[var(--bridge-text-muted)]">{{
-                        selectedSupervisor.email
-                      }}</span>
-                    </div>
-                  </div>
-                  <span
-                    class="text-[10px] font-bold text-emerald-500 bg-emerald-500/20 px-2 py-0.5 rounded"
-                  >
-                    Encadrant assigné
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <!-- Section: Infos Stage -->
             <div class="space-y-3">
               <h4
@@ -822,7 +776,7 @@ import { ToastService } from '../../../../core/services/toast.service';
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                 </svg>
-                Projet de Stage Facultatif
+                Projet de Stage
               </h4>
               <div
                 class="drawer-section-card p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5"
@@ -1147,12 +1101,18 @@ import { ToastService } from '../../../../core/services/toast.service';
               </div>
             </div>
 
-            <!-- Download Attestation (if COMPLETED and attestation URL exists) -->
-            <div *ngIf="selectedItem.status === 'COMPLETED' && selectedItem.attestationPdfUrl">
-              <a
-                [href]="selectedItem.attestationPdfUrl"
-                target="_blank"
-                class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-400 font-syne font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-500/30 transition-all"
+            <!-- Download Attestation (if COMPLETED or preview) -->
+            <div
+              *ngIf="
+                selectedItem.status === 'COMPLETED' ||
+                selectedItem.status === 'APPROVED' ||
+                selectedItem.status === 'ACTIVE'
+              "
+            >
+              <button
+                type="button"
+                (click)="downloadAttestationPdf(selectedItem)"
+                class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-400 font-syne font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-500/30 transition-all cursor-pointer shadow-sm"
               >
                 <svg
                   class="w-4 h-4"
@@ -1165,8 +1125,31 @@ import { ToastService } from '../../../../core/services/toast.service';
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                <span>Télécharger l'Attestation PDF</span>
-              </a>
+                <span>Télécharger l'Attestation de Stage PDF</span>
+              </button>
+            </div>
+
+            <!-- Télécharger Fiche de Traçabilité PDF -->
+            <div>
+              <button
+                type="button"
+                (click)="downloadStagePdf(selectedItem)"
+                class="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C62761]/20 to-[#F5A623]/20 hover:from-[#C62761]/30 hover:to-[#F5A623]/30 border border-[#C62761]/30 text-[var(--bridge-text)] font-syne font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+              >
+                <svg
+                  class="w-4 h-4 text-[#F5A623]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <path d="M12 18v-6" />
+                  <path d="M9 15l3 3 3-3" />
+                </svg>
+                <span>Télécharger la Fiche de Traçabilité (PDF)</span>
+              </button>
             </div>
 
             <!-- Action Row: Rejeter + Approuver -->
@@ -1262,12 +1245,10 @@ import { ToastService } from '../../../../core/services/toast.service';
 })
 export class AdminStagesComponent implements OnInit {
   inscriptions: StageInscription[] = [];
-  formateurs: any[] = [];
   loading = true;
   actionLoading = false;
 
   selectedItem: StageInscription | null = null;
-  selectedSupervisorId: number | null = null;
   adminNotes = '';
   isClosing = false;
 
@@ -1292,7 +1273,6 @@ export class AdminStagesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInscriptions();
-    this.loadFormateurs();
   }
 
   private parseDate(val: any): number {
@@ -1330,17 +1310,6 @@ export class AdminStagesComponent implements OnInit {
     });
   }
 
-  loadFormateurs(): void {
-    this.onboardingService.getFormateurs().subscribe({
-      next: (list) => {
-        this.formateurs = list || [];
-      },
-      error: () => {
-        this.formateurs = [];
-      },
-    });
-  }
-
   get totalCount(): number {
     return this.inscriptions.length;
   }
@@ -1355,11 +1324,6 @@ export class AdminStagesComponent implements OnInit {
 
   get totalRevenue(): number {
     return this.inscriptions.reduce((sum, i) => sum + (i.totalPrice || 0), 0);
-  }
-
-  get selectedSupervisor(): any | null {
-    if (!this.selectedSupervisorId) return null;
-    return this.formateurs.find((f) => f.id === this.selectedSupervisorId) || null;
   }
 
   getFilterCount(key: string): number {
@@ -1381,15 +1345,7 @@ export class AdminStagesComponent implements OnInit {
           const cin = (item.studentCin || '').toLowerCase();
           const email = (item.studentEmail || '').toLowerCase();
           const title = (item.stageProjectTitle || '').toLowerCase();
-          const supervisor =
-            `${item.supervisorFirstName || ''} ${item.supervisorLastName || ''}`.toLowerCase();
-          return (
-            fullName.includes(q) ||
-            cin.includes(q) ||
-            email.includes(q) ||
-            title.includes(q) ||
-            supervisor.includes(q)
-          );
+          return fullName.includes(q) || cin.includes(q) || email.includes(q) || title.includes(q);
         }
         return true;
       })
@@ -1402,7 +1358,6 @@ export class AdminStagesComponent implements OnInit {
 
   openDetail(item: StageInscription): void {
     this.selectedItem = item;
-    this.selectedSupervisorId = item.supervisorId || null;
     this.adminNotes = item.adminNotes || '';
     this.isClosing = false;
     this.showCloturerConfirm = false;
@@ -1414,7 +1369,6 @@ export class AdminStagesComponent implements OnInit {
     this.showCloturerConfirm = false;
     setTimeout(() => {
       this.selectedItem = null;
-      this.selectedSupervisorId = null;
       this.adminNotes = '';
       this.isClosing = false;
     }, 220);
@@ -1436,10 +1390,8 @@ export class AdminStagesComponent implements OnInit {
           "Stage clôturé avec succès ! L'attestation PDF a été générée.",
           'Clôture Validée',
         );
-        // Auto-open attestation PDF
-        if (updated.attestationPdfUrl) {
-          window.open(updated.attestationPdfUrl, '_blank');
-        }
+        // Auto-open attestation PDF with official template
+        this.downloadAttestationPdf(updated);
       },
       error: (err) => {
         this.clotureLoading = false;
@@ -1495,41 +1447,657 @@ export class AdminStagesComponent implements OnInit {
     });
   }
 
+  exportCSV(): void {
+    const data = this.inscriptions;
+    if (!data.length) {
+      this.toastService.error('Aucune inscription à exporter.', 'Export CSV');
+      return;
+    }
+
+    const formatDate = (val: any): string => {
+      if (!val) return '';
+      if (Array.isArray(val)) {
+        const [y, m, d] = val;
+        return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+      }
+      const dt = new Date(val);
+      if (isNaN(dt.getTime())) return String(val);
+      return `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
+    };
+
+    const headers = [
+      'ID',
+      'Prénom',
+      'Nom',
+      'Email',
+      'CIN',
+      'Source (Entendu via)',
+      'Titre du Projet',
+      'Durée (semaines)',
+      'Formations',
+      'Mode de Paiement',
+      'Montant Total (TND)',
+      'Remise (TND)',
+      'Motif Remise',
+      'Paiement Encaissé',
+      'Date Paiement Admin',
+      'Statut',
+      'Notes Admin',
+      'Date de Création',
+    ];
+
+    const escape = (v: any): string => {
+      const s = v === null || v === undefined ? '' : String(v);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    };
+
+    const rows = data.map((i) =>
+      [
+        escape(i.id),
+        escape(i.studentFirstName),
+        escape(i.studentLastName),
+        escape(i.studentEmail),
+        escape(i.studentCin),
+        escape(i.heardFrom),
+        escape(i.stageProjectTitle),
+        escape(i.stageDurationWeeks),
+        escape((i.selectedFormationTitles || []).join(' | ')),
+        escape(i.paymentMode),
+        escape(i.totalPrice),
+        escape(i.discountAmount),
+        escape(i.discountReason),
+        escape(this.isPaymentPaid(i) ? 'OUI' : 'NON'),
+        escape(formatDate(i.adminPaymentDate)),
+        escape(this.getStatusLabel(i.status)),
+        escape(i.adminNotes),
+        escape(formatDate(i.createdAt)),
+      ].join(','),
+    );
+
+    const bom = '\uFEFF'; // UTF-8 BOM pour Excel
+    const csv = bom + headers.join(',') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    link.href = url;
+    link.download = `bridge_stages_${dateStr}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.toastService.success('Export CSV téléchargé avec succès.', 'Export');
+  }
+
   updateStatus(id: number, status: InternshipStatus): void {
-    if (status === 'APPROVED' && !this.selectedSupervisorId) {
+    this.actionLoading = true;
+    this.onboardingService.updateStatus(id, status, this.adminNotes).subscribe({
+      next: (updated) => {
+        this.actionLoading = false;
+        this.toastService.success(
+          status === 'APPROVED'
+            ? 'Convention de stage approuvée avec succès !'
+            : 'Demande de stage rejetée.',
+          'Validation',
+        );
+        const idx = this.inscriptions.findIndex((i) => i.id === id);
+        if (idx > -1) {
+          this.inscriptions[idx] = updated;
+        }
+        this.closeDetail();
+      },
+      error: (err) => {
+        this.actionLoading = false;
+        this.toastService.error(err?.error?.message || 'Erreur lors de la mise à jour.', 'Erreur');
+      },
+    });
+  }
+
+  downloadAttestationPdf(item: StageInscription): void {
+    if (!item) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
       this.toastService.error(
-        "Veuillez sélectionner un formateur encadrant avant d'approuver la convention de stage.",
-        'Encadrement requis',
+        'Veuillez autoriser les fenêtres popups dans votre navigateur.',
+        'Erreur',
       );
       return;
     }
 
-    this.actionLoading = true;
-    this.onboardingService
-      .updateStatus(id, status, this.adminNotes, this.selectedSupervisorId)
-      .subscribe({
-        next: (updated) => {
-          this.actionLoading = false;
-          this.toastService.success(
-            status === 'APPROVED'
-              ? 'Convention de stage approuvée et encadrant assigné !'
-              : 'Demande de stage rejetée.',
-            'Supervision',
-          );
-          const idx = this.inscriptions.findIndex((i) => i.id === id);
-          if (idx > -1) {
-            this.inscriptions[idx] = updated;
-          }
-          this.closeDetail();
-        },
-        error: (err) => {
-          this.actionLoading = false;
-          this.toastService.error(
-            err?.error?.message || 'Erreur lors de la mise à jour.',
-            'Erreur',
-          );
-        },
-      });
+    const html = generateAttestationHtml(item);
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    this.toastService.success(
+      `Génération de l'attestation PDF pour ${item.studentFirstName || ''} ${item.studentLastName || ''}`,
+      'Attestation de Stage',
+    );
+  }
+
+  downloadStagePdf(item: StageInscription): void {
+    if (!item) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      this.toastService.error(
+        'Veuillez autoriser les fenêtres popups dans votre navigateur.',
+        'Erreur',
+      );
+      return;
+    }
+
+    const formatDate = (val: any) => {
+      if (!val) return '—';
+      try {
+        const d = new Date(val);
+        return isNaN(d.getTime())
+          ? String(val)
+          : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      } catch {
+        return String(val);
+      }
+    };
+
+    const isPaid = this.isPaymentPaid(item);
+    const statusLabel = this.getStatusLabel(item.status);
+    const formations =
+      item.selectedFormationTitles && item.selectedFormationTitles.length > 0
+        ? item.selectedFormationTitles.join(', ')
+        : 'Aucune formation spécifique';
+
+    const durationWeeks = item.stageDurationWeeks || 12;
+    const durationMonths = (durationWeeks / 4).toFixed(1);
+    const generatedDate = new Date().toLocaleString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const refNumber = `STG-${String(item.id).padStart(5, '0')}`;
+
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Fiche de Traçabilité Stage #${refNumber} - ${item.studentFirstName} ${item.studentLastName}</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.45;
+      font-size: 11.5px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .no-print {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .header-table {
+      width: 100%;
+      border-bottom: 2.5px solid #C62761;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 20px;
+      color: #0F1029;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: #C62761;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .doc-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #0F1029;
+      color: #F5A623;
+      font-weight: 700;
+      font-size: 10.5px;
+      border-radius: 6px;
+      text-align: right;
+    }
+    .meta-text {
+      font-size: 9.5px;
+      color: #64748b;
+      margin-top: 3px;
+      text-align: right;
+    }
+    .section-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0F1029;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px 14px;
+    }
+    .data-row {
+      display: flex;
+      flex-direction: column;
+    }
+    .data-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+    .data-value {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .badge-paid {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .badge-pending {
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10.5px;
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+    }
+    .highlight-price {
+      font-weight: 800;
+      font-size: 15px;
+      color: #C62761;
+    }
+    .footer-stamp {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1.5px dashed #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      page-break-inside: avoid;
+    }
+    .stamp-box {
+      border: 1.5px dashed #94a3b8;
+      border-radius: 8px;
+      width: 190px;
+      height: 70px;
+      padding: 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: #64748b;
+      font-size: 9px;
+    }
+    .stamp-box strong {
+      color: #0F1029;
+      font-size: 9.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .legal-notice {
+      font-size: 8.5px;
+      color: #94a3b8;
+      max-width: 370px;
+      line-height: 1.35;
+    }
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <span>Aperçu de la fiche de traçabilité avant enregistrement</span>
+    <button onclick="window.print()" style="background:#C62761; color:white; border:none; padding:6px 16px; border-radius:6px; font-weight:700; cursor:pointer;">
+      🖨️ Enregistrer en PDF / Imprimer
+    </button>
+  </div>
+
+  <table class="header-table">
+    <tr>
+      <td style="vertical-align: middle;">
+        <div class="brand-title">THE BRIDGE <span style="color:#C62761;">•</span> 9ANTRA</div>
+        <div class="brand-subtitle">Plateforme d'Insertion & Formation Professionnelle</div>
+      </td>
+      <td style="text-align: right; vertical-align: middle;">
+        <div class="doc-badge">FICHE OFFICIELLE DE TRAÇABILITÉ</div>
+        <div class="meta-text">Réf Dossier: <strong>#${refNumber}</strong></div>
+        <div class="meta-text">Édité le : ${generatedDate}</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- SECTION 1 : STAGIAIRE -->
+  <div class="section-card">
+    <div class="section-title">
+      <span>1. Identification du Stagiaire</span>
+      <span class="badge-status">${statusLabel}</span>
+    </div>
+    <div class="grid-2">
+      <div class="data-row">
+        <span class="data-label">Nom & Prénom</span>
+        <span class="data-value">${item.studentFirstName || ''} ${item.studentLastName || ''}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Numéro CIN</span>
+        <span class="data-value">${item.studentCin || 'Non renseigné'}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Adresse Email</span>
+        <span class="data-value">${item.studentEmail || 'Non renseigné'}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Canal de Recrutement / Source</span>
+        <span class="data-value">${item.heardFrom || 'Plateforme web'}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 : STAGE -->
+  <div class="section-card">
+    <div class="section-title">
+      <span>2. Informations du Projet de Stage</span>
+      <span style="font-size:10px; color:#64748b;">Durée: ${durationWeeks} semaines (${durationMonths} mois)</span>
+    </div>
+    <div class="data-row" style="margin-bottom: 8px;">
+      <span class="data-label">Sujet / Projet de Stage</span>
+      <span class="data-value" style="font-size: 12.5px; color: #0F1029;">${item.stageProjectTitle || 'Stage de formation professionnelle'}</span>
+    </div>
+    <div class="grid-2">
+      <div class="data-row">
+        <span class="data-label">Formations Associées</span>
+        <span class="data-value">${formations}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Date de Soumission / Inscription</span>
+        <span class="data-value">${formatDate(item.createdAt)}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 : FINANCIER -->
+  <div class="section-card" style="border-left: 4px solid #F5A623;">
+    <div class="section-title">
+      <span>3. Traçabilité Financière & Modalités de Paiement</span>
+      <span class="${isPaid ? 'badge-paid' : 'badge-pending'}">
+        ${isPaid ? '✓ RÈGLEMENT EFFECTUÉ / PAYÉ' : '⏳ EN ATTENTE DE RÈGLEMENT'}
+      </span>
+    </div>
+    <div class="grid-3">
+      <div class="data-row">
+        <span class="data-label">Montant Total Convenu</span>
+        <span class="highlight-price">${item.totalPrice || 0} TND</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Mode de Règlement</span>
+        <span class="data-value">${item.paymentMode || 'MAIN_A_MAIN'}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Date d'Encaissement</span>
+        <span class="data-value">${item.adminPaymentDate ? formatDate(item.adminPaymentDate) : isPaid ? 'Validé' : 'Non encaissé'}</span>
+      </div>
+    </div>
+    ${
+      item.discountAmount && item.discountAmount > 0
+        ? `
+      <div style="margin-top:8px; padding-top:6px; border-top:1px dashed #e2e8f0; font-size:11px; color:#15803d;">
+        <strong>Remise accordée :</strong> -${item.discountAmount} TND &nbsp;|&nbsp; <strong>Motif :</strong> ${item.discountReason || 'Non spécifié'}
+      </div>
+    `
+        : ''
+    }
+  </div>
+
+  <!-- SECTION 4 : CONFORMITÉ & DOCUMENTS -->
+  <div class="section-card">
+    <div class="section-title">
+      <span>4. Pièces Justificatives & Dossier Administratif</span>
+    </div>
+    <div class="grid-3">
+      <div class="data-row">
+        <span class="data-label">Demande de Stage</span>
+        <span class="data-value">${item.demandeStageUrl ? '✓ Déposée (PDF)' : '✗ Non fournie'}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Lettre d'Affectation</span>
+        <span class="data-value">${item.lettreAffectationUrl ? '✓ Déposée (PDF)' : '✗ Non fournie'}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Attestation Finale</span>
+        <span class="data-value">${item.attestationPdfUrl ? '✓ Délivrée & Archivée' : 'En attente de clôture'}</span>
+      </div>
+    </div>
+    ${
+      item.adminNotes
+        ? `
+      <div style="margin-top:8px; padding-top:6px; border-top:1px dashed #cbd5e1;">
+        <span class="data-label">Observations & Remarques Administratives :</span>
+        <p style="font-size:11px; color:#334155; margin-top:2px;">${item.adminNotes}</p>
+      </div>
+    `
+        : ''
+    }
+  </div>
+
+  <!-- FOOTER / SIGNATURE -->
+  <div class="footer-stamp">
+    <div class="legal-notice">
+      Document officiel certifié conforme issu de la plateforme 9antra Academy.<br>
+      Émis pour traçabilité pédagogique, administrative et comptable.<br>
+      Contact : administration@thebridge.tn | www.thebridge.tn
+    </div>
+    <div class="stamp-box">
+      <strong>DIRECTION ACADÉMIQUE 9ANTRA</strong>
+      <span>Signature & Cachet Officiel</span>
+      <span style="font-size:8px; margin-top:2px; color:#94a3b8;">Visa de conformité</span>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 300);
+    };
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    this.toastService.success(
+      `Génération de la fiche PDF pour ${item.studentFirstName} ${item.studentLastName}`,
+      'Traçabilité PDF',
+    );
+  }
+
+  exportAllStagesPDF(): void {
+    const data = this.filteredInscriptions;
+    if (!data.length) {
+      this.toastService.warning('Aucune inscription à exporter.', 'Export');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      this.toastService.error('Veuillez autoriser les fenêtres popups.', 'Erreur');
+      return;
+    }
+
+    const formatDate = (val: any) => {
+      if (!val) return '—';
+      try {
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? String(val) : d.toLocaleDateString('fr-FR');
+      } catch {
+        return String(val);
+      }
+    };
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const totalRev = data.reduce((sum, i) => sum + (i.totalPrice || 0), 0);
+    const totalPaid = data.filter((i) => this.isPaymentPaid(i)).length;
+
+    const rowsHtml = data
+      .map(
+        (i, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0; font-size: 10px;">
+        <td style="padding: 6px 8px; text-align: center; color: #64748b;">${idx + 1}</td>
+        <td style="padding: 6px 8px; font-weight: 600; color: #0F1029;">${i.studentFirstName || ''} ${i.studentLastName || ''}<br><span style="font-size: 9px; color: #64748b;">${i.studentEmail || ''}</span></td>
+        <td style="padding: 6px 8px; text-align: center;">${i.studentCin || '—'}</td>
+        <td style="padding: 6px 8px;">${i.stageProjectTitle || 'Stage'}<br><span style="font-size: 9px; color: #64748b;">${i.stageDurationWeeks || 12} sem.</span></td>
+        <td style="padding: 6px 8px; text-align: right; font-weight: 700; color: #C62761;">${i.totalPrice || 0} TND</td>
+        <td style="padding: 6px 8px; text-align: center;">
+          <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; ${this.isPaymentPaid(i) ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#b45309;'}">
+            ${this.isPaymentPaid(i) ? 'PAYÉ' : 'EN ATTENTE'}
+          </span>
+        </td>
+        <td style="padding: 6px 8px; text-align: center;">
+          <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; background: #f1f5f9; color: #334155;">
+            ${this.getStatusLabel(i.status)}
+          </span>
+        </td>
+        <td style="padding: 6px 8px; text-align: center; color: #64748b;">${formatDate(i.createdAt)}</td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Registre de Traçabilité des Stages - 9antra</title>
+  <style>
+    @page { size: A4 landscape; margin: 10mm; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #C62761; padding-bottom: 10px; margin-bottom: 12px; }
+    .stats { display: flex; gap: 20px; margin-bottom: 12px; font-size: 11px; }
+    .stat-pill { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #0F1029; color: #ffffff; padding: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="background:#0F1029; color:white; padding:10px 16px; margin-bottom:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+    <span>Registre de traçabilité globale (${data.length} inscriptions)</span>
+    <button onclick="window.print()" style="background:#C62761; color:white; border:none; padding:6px 14px; border-radius:4px; font-weight:700; cursor:pointer;">🖨️ Enregistrer en PDF / Imprimer</button>
+  </div>
+  <div class="header">
+    <div>
+      <h2 style="margin:0; font-size:18px; color:#0F1029;">THE BRIDGE • 9ANTRA FORMATION</h2>
+      <div style="color:#C62761; font-weight:700; font-size:11px;">REGISTRE GLOBAL DE TRAÇABILITÉ DES CONVENTIONS DE STAGE</div>
+    </div>
+    <div style="text-align:right; font-size:10px; color:#64748b;">
+      Édité le : <strong>${dateStr}</strong><br>
+      Total dossiers : <strong>${data.length}</strong>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat-pill">Total Inscrits : <span style="color:#0F1029; font-weight:700;">${data.length}</span></div>
+    <div class="stat-pill">Paiements Réglés : <span style="color:#15803d; font-weight:700;">${totalPaid} / ${data.length}</span></div>
+    <div class="stat-pill">Volume Financier : <span style="color:#C62761; font-weight:700;">${totalRev} TND</span></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:center;">#</th>
+        <th>Stagiaire</th>
+        <th style="text-align:center;">CIN</th>
+        <th>Projet & Durée</th>
+        <th style="text-align:right;">Montant</th>
+        <th style="text-align:center;">Paiement</th>
+        <th style="text-align:center;">Statut</th>
+        <th style="text-align:center;">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+  <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+    <span>9antra Academy - Système d'Information & Traçabilité des Stages</span>
+    <span>Document d'archive officiel</span>
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 300);
+    };
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    this.toastService.success('Export PDF généré avec succès.', 'Export Global PDF');
   }
 
   getStatusBadgeClass(status?: string): string {

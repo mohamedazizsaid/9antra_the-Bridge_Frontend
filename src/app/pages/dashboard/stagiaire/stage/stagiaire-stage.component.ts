@@ -11,6 +11,7 @@ import {
   InternshipPaymentMode,
 } from '../../../../core/models/stage-inscription.model';
 import { Formation } from '../../../../core/models/formation.model';
+import { generateAttestationHtml } from '../../admin/stages/attestation-template';
 
 @Component({
   selector: 'app-stagiaire-stage',
@@ -230,7 +231,7 @@ import { Formation } from '../../../../core/models/formation.model';
             <div>
               <div class="flex items-center gap-3 flex-wrap">
                 <h1 class="font-syne font-bold text-2xl md:text-3xl text-[var(--bridge-text)]">
-                  Mon Stage Facultatif
+                  Mon Stage
                 </h1>
                 <!-- Status Badge -->
                 <span
@@ -414,8 +415,7 @@ import { Formation } from '../../../../core/models/formation.model';
             Aucun stage ou onboarding en cours
           </h3>
           <p class="text-xs text-[var(--bridge-text-muted)] leading-relaxed mt-1.5">
-            Vous n'avez pas encore finalisé votre demande de stage facultatif ou votre parcours
-            d'onboarding.
+            Vous n'avez pas encore finalisé votre demande de stage ou votre parcours d'onboarding.
           </p>
         </div>
         <div class="flex items-center justify-center gap-3 pt-2">
@@ -434,7 +434,7 @@ import { Formation } from '../../../../core/models/formation.model';
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <span>Demander mon Stage Facultatif</span>
+            <span>Demander mon Stage</span>
           </button>
         </div>
       </div>
@@ -576,11 +576,10 @@ import { Formation } from '../../../../core/models/formation.model';
             </div>
 
             <div class="flex items-center gap-3 w-full sm:w-auto">
-              <a
-                *ngIf="inscription.attestationPdfUrl"
-                [href]="inscription.attestationPdfUrl"
-                target="_blank"
-                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-syne font-bold text-xs shadow-lg hover:shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              <button
+                type="button"
+                (click)="downloadAttestationPdf(inscription)"
+                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-syne font-bold text-xs shadow-lg hover:shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
               >
                 <svg
                   class="w-4 h-4"
@@ -594,7 +593,7 @@ import { Formation } from '../../../../core/models/formation.model';
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
                 <span>Télécharger l'Attestation (PDF)</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -703,7 +702,7 @@ import { Formation } from '../../../../core/models/formation.model';
                   <p class="text-emerald-500 font-semibold">
                     {{
                       inscription.wantsInternship
-                        ? 'Convention de stage facultatif'
+                        ? 'Convention de stage'
                         : 'Formations certifiantes'
                     }}
                   </p>
@@ -1204,7 +1203,7 @@ import { Formation } from '../../../../core/models/formation.model';
                 Étape {{ currentStepIndex + 1 }} / {{ wizardSteps.length }} : {{ currentStepTitle }}
               </span>
               <h3 class="font-syne font-bold text-lg text-[var(--bridge-text)]">
-                Demande d'un Nouveau Stage Facultatif
+                Demande d'un Nouveau Stage
               </h3>
             </div>
             <button
@@ -1990,7 +1989,7 @@ import { Formation } from '../../../../core/models/formation.model';
       </div>
 
       <!-- ════════════════════════════════════════════════════════════════════ -->
-      <!-- SLIDE-OVER DRAWER: HISTORIQUE DES STAGES FACULTATIFS                 -->
+      <!-- SLIDE-OVER DRAWER: HISTORIQUE DES STAGES                 -->
       <!-- ════════════════════════════════════════════════════════════════════ -->
       <div *ngIf="showHistoryModal" class="drawer-overlay">
         <!-- Backdrop -->
@@ -2075,7 +2074,7 @@ import { Formation } from '../../../../core/models/formation.model';
                       >#{{ item.id }}</span
                     >
                     <h4 class="font-syne font-bold text-sm text-[var(--bridge-text)] truncate">
-                      {{ item.stageProjectTitle || 'Stage Facultatif' }}
+                      {{ item.stageProjectTitle || 'Stage' }}
                     </h4>
                   </div>
                   <span class="text-[10px] text-[var(--bridge-text-muted)] mt-0.5 block">
@@ -2110,10 +2109,10 @@ import { Formation } from '../../../../core/models/formation.model';
               </div>
 
               <!-- Attestation Download Button if completed -->
-              <div *ngIf="item.status === 'COMPLETED' && item.attestationPdfUrl" class="pt-2">
-                <a
-                  [href]="item.attestationPdfUrl"
-                  target="_blank"
+              <div *ngIf="item.status === 'COMPLETED'" class="pt-2">
+                <button
+                  type="button"
+                  (click)="downloadAttestationPdf(item)"
                   class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 hover:from-blue-600/30 hover:to-indigo-600/30 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <svg
@@ -2128,7 +2127,7 @@ import { Formation } from '../../../../core/models/formation.model';
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                   <span>Télécharger l'Attestation PDF</span>
-                </a>
+                </button>
               </div>
 
               <!-- Documents links -->
@@ -2576,7 +2575,7 @@ export class StagiaireStageComponent implements OnInit {
           this.submitting = false;
           this.showNewStageModal = false;
           this.toastService.success(
-            "Votre demande de stage facultatif a été soumise avec succès ! Votre convention est en attente de validation par l'administration.",
+            "Votre demande de stage a été soumise avec succès ! Votre convention est en attente de validation par l'administration.",
             'Demande Envoyée',
           );
           this.loadMyInscription();
@@ -2645,5 +2644,27 @@ export class StagiaireStageComponent implements OnInit {
       default:
         return 'En Examen';
     }
+  }
+
+  downloadAttestationPdf(item?: StageInscription | null): void {
+    const target = item || this.inscription;
+    if (!target) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      this.toastService.error(
+        'Veuillez autoriser les fenêtres popups dans votre navigateur.',
+        'Erreur',
+      );
+      return;
+    }
+
+    const html = generateAttestationHtml(target);
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    this.toastService.success(
+      'Génération de votre attestation officielle de stage...',
+      'Attestation de Stage',
+    );
   }
 }

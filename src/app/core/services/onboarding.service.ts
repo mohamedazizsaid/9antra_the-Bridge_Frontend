@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   StageInscription,
@@ -61,16 +61,10 @@ export class OnboardingService {
   /**
    * Admin : Valider / Refuser une inscription et assigner un formateur encadrant
    */
-  updateStatus(
-    id: number,
-    status: InternshipStatus,
-    notes?: string,
-    supervisorId?: number | null,
-  ): Observable<StageInscription> {
+  updateStatus(id: number, status: InternshipStatus, notes?: string): Observable<StageInscription> {
     return this.http.put<StageInscription>(`${this.apiUrl}/admin/stage-inscriptions/${id}/status`, {
       status,
       notes: notes || '',
-      supervisorId: supervisorId || null,
     });
   }
 
@@ -102,10 +96,10 @@ export class OnboardingService {
   }
 
   /**
-   * Formateur : Récupérer ses stagiaires de stage facultatif assignés
+   * Formateur : Récupérer ses stagiaires de stage assignés
    */
   getFormateurStageInscriptions(): Observable<StageInscription[]> {
-    return this.http.get<StageInscription[]>(`${this.apiUrl}/formateur/stage-inscriptions`);
+    return of([]);
   }
 
   /**

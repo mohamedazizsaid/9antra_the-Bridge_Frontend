@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -154,7 +154,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
           style="border: 1px solid var(--bridge-border)"
         >
           <!-- ════════════════════════════════════════════════════════════════ -->
-          <!-- STEP 1: CHOIX DU TYPE (Stage Facultatif VS Formations)          -->
+          <!-- STEP 1: CHOIX DU TYPE (Stage VS Formations)          -->
           <!-- ════════════════════════════════════════════════════════════════ -->
           <div *ngIf="currentStepId === 'type'" class="space-y-6 animate-fadeIn">
             <div class="text-center max-w-lg mx-auto">
@@ -170,13 +170,13 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                 Quel est votre objectif principal ?
               </h2>
               <p class="text-xs md:text-sm text-[var(--bridge-text-muted)] mt-2">
-                Choisissez si vous souhaitez conventionner un stage facultatif avec convention
-                officielle ou suivre uniquement des formations certifiantes.
+                Choisissez si vous souhaitez conventionner un stage avec convention officielle ou
+                suivre uniquement des formations certifiantes.
               </p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-6 pt-4">
-              <!-- Option 1: Stage Facultatif -->
+              <!-- Option 1: Stage -->
               <div
                 (click)="wantsInternship = true"
                 class="p-6 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between"
@@ -220,7 +220,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                     class="font-syne font-bold text-lg group-hover:text-[var(--bridge-gold)] transition-colors"
                     style="color: var(--bridge-text)"
                   >
-                    Stage Facultatif + Formations
+                    Stage + Formations
                   </h3>
                   <p class="text-xs text-[var(--bridge-text-muted)] mt-2 leading-relaxed">
                     Obtenez une convention de stage officielle 9antra, un encadrement personnalisé
@@ -323,7 +323,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
           </div>
 
           <!-- ════════════════════════════════════════════════════════════════ -->
-          <!-- STEP 2: DETAILS DU STAGE FACULTATIF (Si choisi)                -->
+          <!-- STEP 2: DETAILS DU STAGE (Si choisi)                -->
           <!-- ════════════════════════════════════════════════════════════════ -->
           <div *ngIf="currentStepId === 'stage_details'" class="space-y-6 animate-fadeIn">
             <div>
@@ -331,7 +331,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                 >Convention de Stage</span
               >
               <h2 class="font-syne font-bold text-2xl mt-1" style="color: var(--bridge-text)">
-                Détails de votre stage facultatif
+                Détails de votre stage
               </h2>
               <p class="text-xs text-[var(--bridge-text-muted)] mt-1">
                 Renseignez le sujet envisagé et joignez vos documents académiques (PDF).
@@ -377,28 +377,210 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                 </p>
               </div>
 
-              <!-- Durée en semaines -->
-              <div>
-                <label
-                  class="block text-xs font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
-                >
-                  Durée estimée du stage (en semaines) <span class="text-rose-400">*</span>
-                </label>
-                <div class="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="4"
-                    max="24"
-                    step="1"
-                    [(ngModel)]="stageDurationWeeks"
-                    class="flex-1 accent-[var(--bridge-crimson)] cursor-pointer"
-                  />
+              <!-- ─── Sélecteur Pro de Calendrier & Durée de Stage ─── -->
+              <div
+                class="p-5 rounded-2xl space-y-4"
+                style="background: var(--bridge-surface); border: 1px solid var(--bridge-border)"
+              >
+                <!-- En-tête de section -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div class="flex items-center gap-2.5">
+                    <div
+                      class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#C62761]/20 to-[#F5A623]/20 flex items-center justify-center text-[#F5A623] border border-[#F5A623]/30"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-[var(--bridge-gold)] uppercase tracking-wider"
+                      >
+                        Période & Durée Estimée du Stage <span class="text-rose-400">*</span>
+                      </label>
+                      <p class="text-[11px] text-[var(--bridge-text-muted)]">
+                        Définissez vos dates de stage ou cliquez sur un raccourci de durée.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Badge Durée Live -->
+                  <div class="flex items-center gap-1.5 self-start sm:self-auto">
+                    <span
+                      class="px-3 py-1 rounded-xl text-xs font-mono font-bold bg-white/5 border border-[var(--bridge-border)] text-[var(--bridge-gold)]"
+                    >
+                      {{ stageDurationWeeks }} sem. ({{ (stageDurationWeeks / 4).toFixed(1) }} mois)
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Raccourcis de durée (Pill Buttons) -->
+                <div>
                   <span
-                    class="px-4 py-2 rounded-xl font-mono font-bold text-sm min-w-[100px] text-center"
-                    style="background: var(--bridge-card); color: var(--bridge-text); border: 1px solid var(--bridge-border)"
+                    class="block text-[10px] font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider mb-2"
                   >
-                    {{ stageDurationWeeks }} sem. ({{ (stageDurationWeeks / 4).toFixed(1) }} mois)
+                    Raccourcis de durée recommandés :
                   </span>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button
+                      *ngFor="let preset of durationPresets"
+                      type="button"
+                      (click)="applyDurationWeeks(preset.weeks)"
+                      class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border flex items-center gap-1.5"
+                      [ngClass]="
+                        stageDurationWeeks === preset.weeks
+                          ? 'bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white border-transparent shadow-md shadow-[#C62761]/20'
+                          : 'hover:opacity-90'
+                      "
+                      [style]="
+                        stageDurationWeeks !== preset.weeks
+                          ? 'background: var(--bridge-card); border-color: var(--bridge-border); color: var(--bridge-text-muted)'
+                          : ''
+                      "
+                    >
+                      <span>{{ preset.label }}</span>
+                      <span
+                        *ngIf="preset.badge"
+                        class="text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold"
+                        [ngClass]="
+                          stageDurationWeeks === preset.weeks
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[#F5A623]/20 text-[#F5A623]'
+                        "
+                      >
+                        {{ preset.badge }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Grille Date Picker Pro (Début / Fin) -->
+                <div class="grid sm:grid-cols-2 gap-4 pt-1">
+                  <!-- Date de début -->
+                  <div class="space-y-1.5">
+                    <label
+                      class="block text-[11px] font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                    >
+                      Date de début souhaitée <span class="text-rose-400">*</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        type="date"
+                        [(ngModel)]="stageStartDate"
+                        (change)="onStartDateChange()"
+                        [min]="minStartDate"
+                        class="bridge-date-input w-full rounded-xl py-2.5 px-3.5 text-xs transition-all cursor-pointer font-medium focus:outline-none"
+                      />
+                    </div>
+                    <p class="text-[10px] text-[var(--bridge-text-muted)]">
+                      Lancement officiel prévu :
+                      <strong class="text-[var(--bridge-text)]">{{
+                        formatDisplayDate(stageStartDate)
+                      }}</strong>
+                    </p>
+                  </div>
+
+                  <!-- Date de fin -->
+                  <div class="space-y-1.5">
+                    <label
+                      class="block text-[11px] font-semibold text-[var(--bridge-text-muted)] uppercase tracking-wider"
+                    >
+                      Date de fin prévisionnelle <span class="text-rose-400">*</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        type="date"
+                        [(ngModel)]="stageEndDate"
+                        (change)="onEndDateChange()"
+                        [min]="stageStartDate"
+                        class="bridge-date-input w-full rounded-xl py-2.5 px-3.5 text-xs transition-all cursor-pointer font-medium focus:outline-none"
+                      />
+                    </div>
+                    <p class="text-[10px] text-[var(--bridge-text-muted)]">
+                      Clôture estimée :
+                      <strong class="text-[var(--bridge-text)]">{{
+                        formatDisplayDate(stageEndDate)
+                      }}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Cartouche récapitulatif & Micro-ajustements ("ne pas perdre les détails") -->
+                <div
+                  class="p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  style="background: var(--bridge-card); border-color: var(--bridge-border)"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold" style="color: var(--bridge-text)">
+                        Période : Du {{ formatDisplayDate(stageStartDate) }} au
+                        {{ formatDisplayDate(stageEndDate) }}
+                      </p>
+                      <p class="text-[11px] text-[var(--bridge-text-muted)]">
+                        Durée totale :
+                        <span class="text-emerald-400 font-semibold"
+                          >{{ stageDurationWeeks }} semaines</span
+                        >
+                        ({{ (stageDurationWeeks / 4).toFixed(1) }} mois &bull; ~{{
+                          getStageDurationDays()
+                        }}
+                        jours)
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Contrôle d'ajustement fin (+ / - 1 semaine) -->
+                  <div class="flex items-center gap-1.5 self-end sm:self-center">
+                    <span class="text-[10px] text-[var(--bridge-text-muted)] mr-1 hidden sm:inline">
+                      Ajuster :
+                    </span>
+                    <button
+                      type="button"
+                      (click)="adjustWeeks(-1)"
+                      [disabled]="stageDurationWeeks <= 4"
+                      class="w-7 h-7 rounded-lg hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-sm transition-all cursor-pointer"
+                      [style]="'background: var(--bridge-surface); border: 1px solid var(--bridge-border); color: var(--bridge-text)'"
+                      title="Diminuer d'une semaine"
+                    >
+                      -
+                    </button>
+                    <span class="font-mono text-xs font-bold px-2 text-[var(--bridge-gold)]">
+                      {{ stageDurationWeeks }}s
+                    </span>
+                    <button
+                      type="button"
+                      (click)="adjustWeeks(1)"
+                      [disabled]="stageDurationWeeks >= 26"
+                      class="w-7 h-7 rounded-lg hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-sm transition-all cursor-pointer"
+                      [style]="'background: var(--bridge-surface); border: 1px solid var(--bridge-border); color: var(--bridge-text)'"
+                      title="Augmenter d'une semaine"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1025,7 +1207,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                   >Type d'Inscription</span
                 >
                 <p class="text-sm font-bold text-white">
-                  {{ wantsInternship ? 'Stage Facultatif + Formations' : 'Formations Uniquement' }}
+                  {{ wantsInternship ? 'Stage + Formations' : 'Formations Uniquement' }}
                 </p>
                 <div
                   *ngIf="wantsInternship"
@@ -1037,8 +1219,10 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                     {{ stageProjectTitle }}
                   </p>
                   <p>
-                    <span style="color: var(--bridge-text-sub)">Durée:</span>
-                    {{ stageDurationWeeks }} semaines
+                    <span style="color: var(--bridge-text-sub)">Période:</span>
+                    Du {{ formatDisplayDate(stageStartDate) }} au
+                    {{ formatDisplayDate(stageEndDate) }} ({{ stageDurationWeeks }} sem. &bull;
+                    {{ (stageDurationWeeks / 4).toFixed(1) }} mois)
                   </p>
                   <p class="text-emerald-400">✓ Documents PDF attachés</p>
                 </div>
@@ -1199,7 +1383,7 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
               </svg>
             </button>
 
-            <!-- Stage Facultatif : soumettre le dossier (admin approuve avant paiement) -->
+            <!-- Stage : soumettre le dossier (admin approuve avant paiement) -->
             <button
               *ngIf="currentStepIndex === activeSteps.length - 1 && wantsInternship"
               type="button"
@@ -1347,7 +1531,7 @@ export class OnboardingComponent implements OnInit {
   // Step definition
   allSteps = [
     { id: 'type', label: 'Objectif' },
-    { id: 'stage_details', label: 'Stage Facultatif' },
+    { id: 'stage_details', label: 'Stage' },
     { id: 'formations', label: 'Formations' },
     { id: 'referral', label: 'Parrainage' },
     { id: 'payment', label: 'Paiement' },
@@ -1360,10 +1544,20 @@ export class OnboardingComponent implements OnInit {
   // Form State
   wantsInternship = true;
 
-  // Stage details
+  // Stage details & Date Picker PRO
   stageProjectTitle = '';
   stageTitleTouched = false;
   stageDurationWeeks = 12;
+  stageStartDate = '';
+  stageEndDate = '';
+  minStartDate = '';
+  durationPresets = [
+    { weeks: 4, label: '1 mois (4 sem.)' },
+    { weeks: 8, label: '2 mois (8 sem.)' },
+    { weeks: 12, label: '3 mois (12 sem.)', badge: 'Recommandé' },
+    { weeks: 16, label: '4 mois (16 sem.)' },
+    { weeks: 24, label: '6 mois (24 sem.)' },
+  ];
   demandeFile: File | null = null;
   lettreFile: File | null = null;
   isDragOverDemande = false;
@@ -1410,6 +1604,82 @@ export class OnboardingComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     this.loadFormations();
+    this.initStageDates();
+  }
+
+  initStageDates(): void {
+    const today = new Date();
+    this.minStartDate = this.formatDateForInput(today);
+    this.stageStartDate = this.minStartDate;
+    this.applyDurationWeeks(this.stageDurationWeeks || 12);
+  }
+
+  private formatDateForInput(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  applyDurationWeeks(weeks: number): void {
+    this.stageDurationWeeks = Math.max(1, weeks);
+    const start = this.stageStartDate ? new Date(this.stageStartDate) : new Date();
+    if (isNaN(start.getTime())) return;
+
+    const end = new Date(start);
+    end.setDate(end.getDate() + this.stageDurationWeeks * 7);
+    this.stageEndDate = this.formatDateForInput(end);
+  }
+
+  onStartDateChange(): void {
+    if (!this.stageStartDate) return;
+    this.applyDurationWeeks(this.stageDurationWeeks || 12);
+  }
+
+  onEndDateChange(): void {
+    if (!this.stageStartDate || !this.stageEndDate) return;
+    const start = new Date(this.stageStartDate);
+    const end = new Date(this.stageEndDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+
+    if (end <= start) {
+      end.setDate(start.getDate() + 7);
+      this.stageEndDate = this.formatDateForInput(end);
+    }
+
+    const diffMs = end.getTime() - start.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    this.stageDurationWeeks = Math.max(1, Math.round(diffDays / 7));
+  }
+
+  adjustWeeks(delta: number): void {
+    const current = this.stageDurationWeeks || 12;
+    const next = Math.max(4, Math.min(26, current + delta));
+    this.applyDurationWeeks(next);
+  }
+
+  getStageDurationDays(): number {
+    if (!this.stageStartDate || !this.stageEndDate) return (this.stageDurationWeeks || 12) * 7;
+    const start = new Date(this.stageStartDate);
+    const end = new Date(this.stageEndDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return (this.stageDurationWeeks || 12) * 7;
+    const diffMs = end.getTime() - start.getTime();
+    return Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+  }
+
+  formatDisplayDate(dateStr: string): string {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
   }
 
   get userInitials(): string {
@@ -1591,7 +1861,7 @@ export class OnboardingComponent implements OnInit {
   /**
    * @param payNow true = payer maintenant via Stripe (Formations seules uniquement)
    *               false = soumettre sans paiement immédiat
-   * Stage Facultatif : toujours false — l'admin doit approuver avant tout paiement.
+   * Stage : toujours false — l'admin doit approuver avant tout paiement.
    */
   submitOnboarding(payNow = false): void {
     if (!this.agreeTerms || !this.agreeCharter) {
@@ -1631,7 +1901,7 @@ export class OnboardingComponent implements OnInit {
           if (this.wantsInternship) {
             // Stage facultatif : approbation admin requise avant paiement
             this.toastService.success(
-              "Votre dossier de stage facultatif a été soumis avec succès ! L'administration examinera votre demande et vous notifiera dès l'approbation pour procéder au règlement.",
+              "Votre dossier de stage a été soumis avec succès ! L'administration examinera votre demande et vous notifiera dès l'approbation pour procéder au règlement.",
               'Dossier Soumis ✓',
             );
             this.router.navigate(['/dashboard/stagiaire/stage']);

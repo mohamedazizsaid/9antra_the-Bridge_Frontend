@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PaiementService } from '../../core/services/paiement.service';
 import { ComboEnrollmentService } from '../../core/services/combo-enrollment.service';
 import { OnboardingService } from '../../core/services/onboarding.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-payment-callback',
@@ -118,7 +119,7 @@ import { OnboardingService } from '../../core/services/onboarding.service';
               (click)="goToDashboard()"
               class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#C62761] to-[#F5A623] text-white font-bold text-sm hover:opacity-95 transition-all shadow-lg cursor-pointer"
             >
-              {{ isStagePayment ? 'Voir mon Stage Facultatif →' : 'Retour au Tableau de Bord →' }}
+              {{ isStagePayment ? 'Voir mon Stage →' : 'Retour au Tableau de Bord →' }}
             </button>
           </div>
         </div>
@@ -180,7 +181,7 @@ export class PaymentCallbackComponent implements OnInit {
       localStorage.getItem('pending_stripe_phase_id');
 
     if (sessionId && stageInscriptionId) {
-      // Validation du paiement d'une convention de stage facultatif
+      // Validation du paiement d'une convention de stage
       this.isStagePayment = true;
       this.onboardingService.verifyStagePayment(sessionId, Number(stageInscriptionId)).subscribe({
         next: () => {
@@ -189,7 +190,7 @@ export class PaymentCallbackComponent implements OnInit {
           this.successMessage =
             'Votre règlement de convention de stage a été validé avec succès ! Votre dossier est maintenant actif.';
         },
-        error: (err: any) => {
+        error: (err: HttpErrorResponse) => {
           this.loading = false;
           this.success = false;
           this.errorMessage =
@@ -208,7 +209,7 @@ export class PaymentCallbackComponent implements OnInit {
           sessionStorage.removeItem('pendingComboId');
           sessionStorage.removeItem('pendingComboReceiptRef');
         },
-        error: (err: any) => {
+        error: (err: HttpErrorResponse) => {
           this.loading = false;
           this.success = false;
           this.errorMessage =
@@ -227,7 +228,7 @@ export class PaymentCallbackComponent implements OnInit {
             localStorage.removeItem('pending_stripe_enrollment_id');
             localStorage.removeItem('pending_stripe_phase_id');
           },
-          error: (err: any) => {
+          error: (err: HttpErrorResponse) => {
             this.loading = false;
             this.success = false;
             this.errorMessage =

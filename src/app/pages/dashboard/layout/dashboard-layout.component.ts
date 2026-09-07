@@ -1070,7 +1070,7 @@ export class DashboardLayoutComponent implements OnInit {
       this.menuItems = [
         { section: 'Principal' },
         { label: "Vue d'ensemble", route: '/dashboard/stagiaire', icon: 'home', exact: true },
-        { label: 'Mon Stage Facultatif', route: '/dashboard/stagiaire/stage', icon: 'briefcase' },
+        { label: 'Mon Stage', route: '/dashboard/stagiaire/stage', icon: 'briefcase' },
         { label: 'Agenda & Planning', route: '/dashboard/stagiaire/agenda', icon: 'calendar' },
         { label: 'Formations', route: '/dashboard/stagiaire/formations', icon: 'book' },
         { section: 'Personnel' },
@@ -1101,7 +1101,7 @@ export class DashboardLayoutComponent implements OnInit {
         { label: 'Formateurs', route: '/dashboard/admin/formateurs', icon: 'graduation-cap' },
 
         { section: 'Gestion & Finances' },
-        { label: 'Stages Facultatifs', route: '/dashboard/admin/stages', icon: 'briefcase' },
+        { label: 'Stages', route: '/dashboard/admin/stages', icon: 'briefcase' },
         { label: 'Formations', route: '/dashboard/admin/formations', icon: 'school' },
 
         { label: 'Paiements', route: '/dashboard/admin/paiements', icon: 'credit-card' },
@@ -1122,7 +1122,7 @@ export class DashboardLayoutComponent implements OnInit {
     const url = this.router.url;
 
     // Stagiaire routes
-    if (url.includes('/dashboard/stagiaire/stage')) return 'Mon Stage Facultatif';
+    if (url.includes('/dashboard/stagiaire/stage')) return 'Mon Stage';
     if (url.includes('/dashboard/stagiaire/agenda')) return 'Mon Agenda & Séances';
     if (url.includes('/dashboard/stagiaire/certificats')) return 'Mes Certificats Blockchain';
     if (url.includes('/dashboard/stagiaire/paiements')) return 'Mes Paiements & Échéancier';
@@ -1135,7 +1135,7 @@ export class DashboardLayoutComponent implements OnInit {
     if (url === '/dashboard/stagiaire') return 'Tableau de bord Stagiaire';
 
     // Admin routes
-    if (url.includes('/dashboard/admin/stages')) return 'Gestion des Stages Facultatifs';
+    if (url.includes('/dashboard/admin/stages')) return 'Gestion des Stages';
     if (url.includes('/dashboard/admin/paiements')) return 'Supervision des Paiements';
     if (url.includes('/dashboard/admin/users')) return 'Gestion des Utilisateurs';
     if (url.includes('/dashboard/admin/formateurs')) return 'Gestion des Formateurs';
