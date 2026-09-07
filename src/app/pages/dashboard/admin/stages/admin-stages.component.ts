@@ -1769,9 +1769,14 @@ export class AdminStagesComponent implements OnInit {
       padding-top: 12px;
       border-top: 1.5px dashed #cbd5e1;
       display: flex;
+      flex-direction: column;
+      gap: 14px;
+      page-break-inside: avoid;
+    }
+    .stamp-row {
+      display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      page-break-inside: avoid;
     }
     .stamp-box {
       border: 1.5px dashed #94a3b8;
@@ -1867,6 +1872,10 @@ export class AdminStagesComponent implements OnInit {
         <span class="data-label">Formations Associées</span>
         <span class="data-value">${formations}</span>
       </div>
+       <div class="data-row">
+        <span class="data-label">Durée du stage</span>
+        <span class="data-value">Durée: ${durationWeeks} semaines ( (${Math.round(Number(durationMonths))} mois mois)</span>
+      </div>
       <div class="data-row">
         <span class="data-label">Date de Soumission / Inscription</span>
         <span class="data-value">${formatDate(item.createdAt)}</span>
@@ -1939,16 +1948,23 @@ export class AdminStagesComponent implements OnInit {
   </div>
 
   <!-- FOOTER / SIGNATURE -->
+
   <div class="footer-stamp">
     <div class="legal-notice">
-      Document officiel certifié conforme issu de la plateforme 9antra Academy.<br>
-      Émis pour traçabilité pédagogique, administrative et comptable.<br>
+      <strong>J'ai lu et j'accepte les conditions d'utilisation de 9antra Academy et ses partenaires .</strong><br>
       Contact : administration@thebridge.tn | www.thebridge.tn
     </div>
-    <div class="stamp-box">
-      <strong>DIRECTION ACADÉMIQUE 9ANTRA</strong>
-      <span>Signature & Cachet Officiel</span>
-      <span style="font-size:8px; margin-top:2px; color:#94a3b8;">Visa de conformité</span>
+    <div class="stamp-row">
+      <div class="stamp-box">
+        <strong>STAGIAIRE</strong>
+        <span>Signature</span>
+        <span style="font-size:8px; margin-top:2px; color:#94a3b8;">Visa de conformité</span>
+      </div>
+      <div class="stamp-box">
+        <strong>DIRECTION ACADÉMIQUE 9ANTRA</strong>
+        <span>Signature &amp; Cachet Officiel</span>
+        <span style="font-size:8px; margin-top:2px; color:#94a3b8;">Visa de conformité</span>
+      </div>
     </div>
   </div>
 
