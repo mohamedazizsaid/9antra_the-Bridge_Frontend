@@ -349,10 +349,32 @@ import { AnimatedBgComponent } from '../../shared/components/animated-bg/animate
                 <input
                   type="text"
                   [(ngModel)]="stageProjectTitle"
+                  (ngModelChange)="stageTitleTouched = false"
                   placeholder="Ex: Développement d'une plateforme Fullstack Angular & Spring Boot"
                   class="w-full focus:border-[var(--bridge-crimson)] rounded-xl py-3 px-4 text-sm focus:outline-none transition-all"
-                  style="background: var(--bridge-surface); border: 1px solid var(--bridge-border); color: var(--bridge-text)"
+                  [style]="
+                    stageTitleTouched && !stageProjectTitle.trim()
+                      ? 'background: var(--bridge-surface); border: 1px solid #f43f5e; color: var(--bridge-text)'
+                      : 'background: var(--bridge-surface); border: 1px solid var(--bridge-border); color: var(--bridge-text)'
+                  "
                 />
+                <p
+                  *ngIf="stageTitleTouched && !stageProjectTitle.trim()"
+                  class="mt-1.5 text-xs font-medium text-rose-400 flex items-center gap-1"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  Veuillez remplir ce champ.
+                </p>
               </div>
 
               <!-- Durée en semaines -->
@@ -1340,6 +1362,7 @@ export class OnboardingComponent implements OnInit {
 
   // Stage details
   stageProjectTitle = '';
+  stageTitleTouched = false;
   stageDurationWeeks = 12;
   demandeFile: File | null = null;
   lettreFile: File | null = null;
@@ -1541,7 +1564,7 @@ export class OnboardingComponent implements OnInit {
   nextStep(): void {
     if (this.currentStepId === 'stage_details') {
       if (!this.stageProjectTitle.trim()) {
-        this.toastService.error('Veuillez renseigner le titre du projet de stage.', 'Stage');
+        this.stageTitleTouched = true;
         return;
       }
     }
